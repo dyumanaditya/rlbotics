@@ -3,7 +3,7 @@
 Reinforcement Learning Toolbox developed in Pytorch.
 
 ## Toolbox Structure
-All the algorithms are in the `rl_botics` directory. Each algorithm specified above has an individual directory.
+All the algorithms are in the `rlbotics` directory. Each algorithm specified above has an individual directory.
 
 ### Common
 The directory `common` contains common modular classes to easily build new algorithms.
