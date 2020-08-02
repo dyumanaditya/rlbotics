@@ -27,14 +27,15 @@ Some algorithm directories may have additional files specific to the algorithm.
 To contribute to this package, it is recommended to follow this structure:
 - The new algorithm directory should at least contain the 3 files mentioned above.
 - `main.py` should contain at least the following functions:
-  - `main`: Parses input argument, builds the environment and agent, and train the agent.
   - `argparse`: Parses input argument and loads default hyperparameters from `hyperparameter.py`.
+  - `main`: Parses input argument, builds the environment and agent, and train the agent.
+  - `train`: Main training loop called by main()
+
 - `<algo>.py` should contain at least the following methods:
   - `__init__`: Initializes the classes
   - `_build_policy`: Build policy
   - `_build_value_function`: Build value function
   - `_loss`: Build policy loss function
-  - `train`: Main training loop called by `main.py`
   - `update_policy`: Update the policy
   - `update_value`: Update the value function
   - `process_paths`: (optional) Process collected trajectories 
