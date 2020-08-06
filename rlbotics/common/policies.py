@@ -1,6 +1,6 @@
 import torch
 import random
-from RLbotics.common.approximators import MLP
+from rlbotics.rlbotics.common.approximators import MLP
 from torch.distributions import Categorical
 
 
