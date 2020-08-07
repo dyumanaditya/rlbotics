@@ -18,7 +18,12 @@ class Reinforce:
         logp = self.policy.get_log_prob(obs, acts)
         return -(logp * rews_tensor).mean()
 
-    def collect_experience(self, batch_size, render=False):
+
+    def update_policy(self, batch_obs, batch_acts, batch_rews):
+        loss = self.compute_loss(batch_obs, batch_acts, batch_rews)
+        self.policy.train(loss)
+
+    def train(self, batch_size, render=False):
         batch_obs = []
         batch_acts = []
         batch_rewards = []
@@ -57,12 +62,5 @@ class Reinforce:
                     break
 
         self.env.close()
-        return batch_obs, batch_acts, batch_rewards
 
-    def policy_update(self, batch_obs, batch_acts, batch_rews):
-        loss = self.compute_loss(batch_obs, batch_acts, batch_rews)
-        self.policy.train(loss)
-
-    def train(self, batch_size, render=False):
-        obs, acts, rews = self.collect_experience(batch_size, render=render)
-        self.policy_update(obs, acts, rews)
+        self.update_policy(batch_obs, batch_acts, batch_rewards)
