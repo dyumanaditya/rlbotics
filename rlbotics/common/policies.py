@@ -22,6 +22,7 @@ class MLPSoftmaxPolicy(MLP):
 		log_p = act_dist.log_prob(torch.as_tensor(act, dtype=torch.int32))
 		return log_p
 
+
 class MLPGaussian(MLP):
 	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types, optimizer='Adam', lr=0.01):
 		super().__init__(IO_sizes=IO_sizes, hidden_sizes=hidden_sizes, activations=activations, layer_types=layer_types, optimizer=optimizer, lr=lr)
@@ -34,6 +35,7 @@ class MLPGaussian(MLP):
 
 	def get_log_prob(self, obs, act):
 		pass
+
 
 class MLPEpsilonGreedy(MLP):
 	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types, optimizer='Adam', lr=0.01):

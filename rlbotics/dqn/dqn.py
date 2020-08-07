@@ -48,6 +48,7 @@ class DQN:
 
 	def _build_policy(self):
 		IO_sizes = [self.obs_dim, self.act_dim]
+
 		self.policy = MLPEpsilonGreedy(IO_sizes, self.hidden_sizes, self.activations,
 									   self.layer_types, self.optimizer, self.lr)
 		self.target_policy = MLP(IO_sizes, self.hidden_sizes, self.activations, self.layer_types)
@@ -113,7 +114,6 @@ class DQN:
 			target = reward
 			if done:
 				target += self.gamma * torch.max(self.target_policy.predict(next_state)).item()
-
 			target_new = self.policy.predict(state)
 			input = target_new[0]
 			target_new[0][action] = target
@@ -121,7 +121,7 @@ class DQN:
 			self.policy.train(loss)
 
 	def compute_loss(self, x, y):
-		loss = nn.MSELoss()(x,y)
+		loss = nn.MSELoss()(x, y)
 		return loss
 
 import torch

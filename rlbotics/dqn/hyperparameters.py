@@ -15,7 +15,7 @@ memory_limit  = 2000
 # Policy Network:
 start_learning = 500        # Start learning after some experience
 hidden_sizes   = [64, 64]	# Dimensions have to be 1 less than activations/layer_types
-activations    = ['relu', 'relu', 'softmax']
+activations    = ['relu', 'relu', 'none']
 layer_types    = ['linear', 'linear', 'linear']
 optimizer      = 'Adam'
 loss           = 'mse'
