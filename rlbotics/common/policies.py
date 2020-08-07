@@ -45,5 +45,5 @@ class MLPEpsilonGreedy(MLP):
 			action = random.randrange(self.action_size)
 		else:
 			output = self.predict(obs)
-			action = output.argmax()
-		return action.item()
+			action = output.argmax().item()
+		return action
