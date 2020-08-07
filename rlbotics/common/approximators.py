@@ -18,10 +18,13 @@ class MLP:
         :param lr: (float) learning rate
         """
         self.obs_dim = IO_sizes[0]
+
+        # TODO: Delete IO_sizes and get as input layer_sizes
         layer_sizes = [IO_sizes[0]] + hidden_sizes + [IO_sizes[1]]
+
         # Build NN
-        # self.model = Net(IO_sizes, hidden_sizes, activations, layer_types)
         self.model = MLPBase(layer_sizes, activations)
+
         # Set optimizer
         if optimizer == 'Adam':
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr)
