@@ -18,7 +18,7 @@ class MLP:
 		lr           -- (float) learning rate
 		"""
 		# Build NN
-		self.model = net(IO_sizes, hidden_sizes, activations, layer_types)
+		self.model = Net(IO_sizes, hidden_sizes, activations, layer_types)
 		# Set optimizer
 		if optimizer == 'Adam':
 			self.optimizer = torch.optim.Adam(self.model.parameters(), lr)
@@ -54,7 +54,7 @@ class MLP:
 
 
 
-class net(nn.Module):
+class Net(nn.Module):
 	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types):
 		super(net, self).__init__()
 		self.layers = nn.ModuleList()
