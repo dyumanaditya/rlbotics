@@ -56,7 +56,7 @@ class MLP:
 
 class Net(nn.Module):
 	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types):
-		super(net, self).__init__()
+		super(Net, self).__init__()
 		self.layers = nn.ModuleList()
 		self.activations = nn.ModuleList()
 
