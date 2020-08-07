@@ -8,15 +8,14 @@ class MLP:
 	"""
 	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types, optimizer='Adam', lr=0.01):
 		"""
-		Keyword arguments:
-		IO_sizes     -- (list) 2 elements: input size, output size
-		hidden_sizes -- (list) hidden layer sizes
-		activations  -- (list)(strings) activations corresponding to each layer
-						e.g. ['relu', 'relu', None]
-		layer_types  -- (list)(strings) e.g. ['conv', 'linear', 'linear']
-		optimizer    -- (str) e.g. 'RMSprop'
-		lr           -- (float) learning rate
+		:param IO_sizes: (list) 2 elements: input size, output size
+		:param hidden_sizes: (list) hidden layer sizes
+		:param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', None]
+		:param layer_types: (list)(strings) e.g. ['conv', 'linear', 'linear']
+		:param optimizer: (str) e.g. 'RMSprop'
+		:param lr: (float) learning rate
 		"""
+		self.obs_dim = IO_sizes[0]
 		# Build NN
 		self.model = Net(IO_sizes, hidden_sizes, activations, layer_types)
 		# Set optimizer
@@ -29,6 +28,7 @@ class MLP:
 
 	def predict(self, x):
 		x = Variable(torch.Tensor(x))
+		x = x.view(-1, self.obs_dim)
 		return self.model(x)
 
 	def train(self, loss):
