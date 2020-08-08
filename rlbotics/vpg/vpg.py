@@ -10,7 +10,7 @@ class VPG:
         self._build_policy()
 
     def _build_policy(self):
-        self.policy = MLPSoftmaxPolicy([self.obs_dim, self.act_dim], h.hidden_layers, h.activations, h.layer_types, lr=h.lr)
+        self.policy = MLPSoftmaxPolicy([self.obs_dim] + h.hidden_layers + [self.act_dim] , h.activations, lr=h.lr)
         self.policy.summary()
 
     def _loss(self, obs_batch, act_batch, rew_batch):
