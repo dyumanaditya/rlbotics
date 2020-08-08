@@ -110,15 +110,24 @@ class DQN:
 			return
 
 		mini_batch = self.memory.sample()
-		for state, action, reward, next_state, done in mini_batch:
-			target = reward
-			if done:
-				target += self.gamma * torch.max(self.target_policy.predict(next_state)).item()
-			target_new = self.policy.predict(state)
-			input = target_new[0]
-			target_new[0][action] = target
-			loss = self.compute_loss(input, target_new[0])
-			self.policy.train(loss)
+		mini_batch = np.array(mini_batch).T
+		states = np.vstack(mini_batch[0])		# States
+		actions = list(mini_batch[1])			# Actions
+		rewards = list(mini_batch[2])			# Rewards
+		next_states = np.vstack(mini_batch[3])	# Next States
+		done = list(mini_batch[4])				# Done
+
+		target = self.policy.predict(states)
+		q_val = self.policy.predict(states)
+		q_val_targetNet = self.target_policy.predict(next_states)
+		for i in range(self.batch_size):
+			if done[i]:
+				target[i][actions[i]] = rewards[i]
+			else:
+				target[i][actions[i]] = rewards[i] + self.gamma * torch.max(q_val_targetNet[i]).item()
+
+		loss = self.compute_loss(q_val, target)
+		self.policy.train(loss)
 
 	def compute_loss(self, x, y):
 		loss = nn.MSELoss()(x, y)
