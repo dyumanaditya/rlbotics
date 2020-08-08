@@ -1,5 +1,6 @@
 import numpy as np
 import torch.nn as nn
+from rlbotics.common.loss import loss
 import rlbotics.dqn.hyperparameters as h
 from rlbotics.dqn.replay_buffer import ReplayBuffer
 from rlbotics.common.policies import MLPEpsilonGreedy
@@ -13,45 +14,25 @@ class DQN:
 		:param args: ArgsParser that include hyperparameters
 		:param env: Gym environment
 		"""
+		self.loss = 'mse'	# Temp variable...will change later
 		# General Setup
 		self.env = env
 		self.obs_dim = self.env.observation_space.shape[0]
 		self.act_dim = self.env.action_space.n
-		self.render = h.render
-
-		# Hyperparameters
-		self.lr = h.lr
-		self.gamma = h.gamma
 		self.epsilon = h.epsilon
-		self.min_epsilon = h.min_epsilon
-		self.epsilon_decay = h.epsilon_decay
-		self.batch_size = h.batch_size
-		self.memory_limit = h.memory_limit
-		self.num_episodes = h.num_episodes
-
-		# Policy Network Hyperparameters
-		self.start_learning = h.start_learning
-		self.hidden_sizes = h.hidden_sizes
-		self.activations = h.activations
-		self.layer_types = h.layer_types
-		self.optimizer = h.optimizer
-		self.loss = h.loss
-
-		# Target Network Hyperparameters
-		self.update_target_net = h.update_target_net
+		self.criterion = loss(h.loss)
 
 		# Random Replay Memory
-		self.memory = ReplayBuffer(self.memory_limit, self.batch_size)
+		self.memory = ReplayBuffer(h.memory_limit, h.batch_size)
 
 		# Build Policy
 		self._build_policy()
+		self.update_target()
 
 	def _build_policy(self):
-		IO_sizes = [self.obs_dim, self.act_dim]
-
-		self.policy = MLPEpsilonGreedy(IO_sizes, self.hidden_sizes, self.activations,
-									   self.layer_types, self.optimizer, self.lr)
-		self.target_policy = MLP(IO_sizes, self.hidden_sizes, self.activations, self.layer_types)
+		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
+		self.policy = MLPEpsilonGreedy(layer_sizes, h.activations, h.optimizer, h.lr)
+		self.target_policy = MLP(layer_sizes, h.activations)
 		print(self.policy.summary())
 
 	def update_target(self):
@@ -59,23 +40,23 @@ class DQN:
 
 	def train(self):
 		scores, episodes = [], []
+		time_step = 1
 
-		for episode in range(self.num_episodes):
+		for episode in range(h.num_episodes):
 			done = False
 			score = 0
-			time_step = 0
 			state = self.env.reset()
 
 			while not done:
-				if self.render:
+				if h.render:
 					self.env.render()
 				# Take action
 				action = self.policy.get_action(state, self.epsilon)
 				next_state, reward, done, info = self.env.step(action)
 
 				# Decay epsilon
-				if self.epsilon > self.min_epsilon:
-					self.epsilon *= self.epsilon_decay
+				if self.epsilon > h.min_epsilon:
+					self.epsilon *= h.epsilon_decay
 
 				# Punish if episode ends for cartpole
 				if h.env_name == 'CartPole-v1':
@@ -85,8 +66,8 @@ class DQN:
 				self.memory.store_sample(state, action, reward, next_state, done)
 
 				# Update target model
-				if time_step % self.update_target_net == 0:
-					self.update_target()
+				# if time_step % h.update_target_net == 0:
+				# 	self.update_target()
 
 				# Learn:
 				self.learn()
@@ -94,19 +75,20 @@ class DQN:
 				score += reward
 
 			# Episode done
+			self.update_target()
 			if h.env_name == 'CartPole-v1':
 				score = score if score==500 else score +100
 			scores.append(score)
 			episodes.append(episode)
 			print("episode:", episode, "  score:", score, "  memory length:",
-				  len(self.memory), "  epsilon:", self.epsilon)
+				  len(self.memory), "  loss:", self.loss)
 		plt.xlabel('episodes')
 		plt.ylabel('score')
 		plt.plot(episodes, scores, 'b-')
 		plt.show()
 
 	def learn(self):
-		if len(self.memory) < self.start_learning:
+		if len(self.memory) < h.start_learning:
 			return
 
 		mini_batch = self.memory.sample()
@@ -120,18 +102,17 @@ class DQN:
 		target = self.policy.predict(states)
 		q_val = self.policy.predict(states)
 		q_val_targetNet = self.target_policy.predict(next_states)
-		for i in range(self.batch_size):
+		for i in range(h.batch_size):
 			if done[i]:
 				target[i][actions[i]] = rewards[i]
 			else:
-				target[i][actions[i]] = rewards[i] + self.gamma * torch.max(q_val_targetNet[i]).item()
+				target[i][actions[i]] = rewards[i] + h.gamma * torch.max(q_val_targetNet[i]).item()
 
-		loss = self.compute_loss(q_val, target)
-		self.policy.train(loss)
+		self.loss = self.criterion(q_val, target)
+		self.policy.train(self.loss)
 
-	def compute_loss(self, x, y):
-		loss = nn.MSELoss()(x, y)
-		return loss
+
+
 
 import torch
 torch.autograd.set_detect_anomaly(True)
