@@ -1,11 +1,10 @@
+import torch
 import numpy as np
-import torch.nn as nn
 from rlbotics.common.loss import loss
 import rlbotics.dqn.hyperparameters as h
 from rlbotics.dqn.replay_buffer import ReplayBuffer
 from rlbotics.common.policies import MLPEpsilonGreedy
 from rlbotics.common.approximators import MLP
-import matplotlib.pyplot as plt
 
 
 class DQN:
@@ -14,7 +13,6 @@ class DQN:
 		:param args: ArgsParser that include hyperparameters
 		:param env: Gym environment
 		"""
-		self.loss = 'mse'	# Temp variable...will change later
 		# General Setup
 		self.env = env
 		self.obs_dim = self.env.observation_space.shape[0]
@@ -38,56 +36,7 @@ class DQN:
 	def update_target(self):
 		self.target_policy.model.load_state_dict(self.policy.model.state_dict())
 
-	def train(self):
-		scores, episodes = [], []
-		time_step = 1
-
-		for episode in range(h.num_episodes):
-			done = False
-			score = 0
-			state = self.env.reset()
-
-			while not done:
-				if h.render:
-					self.env.render()
-				# Take action
-				action = self.policy.get_action(state, self.epsilon)
-				next_state, reward, done, info = self.env.step(action)
-
-				# Decay epsilon
-				if self.epsilon > h.min_epsilon:
-					self.epsilon *= h.epsilon_decay
-
-				# Punish if episode ends for cartpole
-				if h.env_name == 'CartPole-v1':
-					reward = reward if not done or score == 499 else -100
-
-				# Store experience
-				self.memory.store_sample(state, action, reward, next_state, done)
-
-				# Update target model
-				# if time_step % h.update_target_net == 0:
-				# 	self.update_target()
-
-				# Learn:
-				self.learn()
-				time_step += 1
-				score += reward
-
-			# Episode done
-			self.update_target()
-			if h.env_name == 'CartPole-v1':
-				score = score if score==500 else score +100
-			scores.append(score)
-			episodes.append(episode)
-			print("episode:", episode, "  score:", score, "  memory length:",
-				  len(self.memory), "  loss:", self.loss)
-		plt.xlabel('episodes')
-		plt.ylabel('score')
-		plt.plot(episodes, scores, 'b-')
-		plt.show()
-
-	def learn(self):
+	def update_policy(self):
 		if len(self.memory) < h.start_learning:
 			return
 
@@ -110,15 +59,3 @@ class DQN:
 
 		self.loss = self.criterion(q_val, target)
 		self.policy.train(self.loss)
-
-
-
-
-import torch
-torch.autograd.set_detect_anomaly(True)
-import gym
-env = gym.make(h.env_name)
-agent = DQN(0, env)
-agent.train()
-
-

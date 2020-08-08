@@ -20,5 +20,5 @@ optimizer      = 'Adam'
 loss           = 'mse'
 
 # Policy Target Network:
-update_target_net = 50	# Update target network per _ timesteps
+update_target_net = 150	# Update target network per _ timesteps
 
