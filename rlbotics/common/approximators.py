@@ -2,25 +2,21 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-
 class MLP:
     """
     Multi-Layered Perceptron
     """
 
-    def __init__(self, IO_sizes, hidden_sizes, activations, layer_types, optimizer='Adam', lr=0.01):
+    def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
         """
         :param IO_sizes: (list) 2 elements: input size, output size
         :param hidden_sizes: (list) hidden layer sizes
-        :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', None]
+        :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', 'none']
         :param layer_types: (list)(strings) e.g. ['conv', 'linear', 'linear']
         :param optimizer: (str) e.g. 'RMSprop'
         :param lr: (float) learning rate
         """
-        self.obs_dim = IO_sizes[0]
-
-        # TODO: Delete IO_sizes and get as input layer_sizes
-        layer_sizes = [IO_sizes[0]] + hidden_sizes + [IO_sizes[1]]
+        self.obs_dim = layer_sizes[0]
 
         # Build NN
         self.model = MLPBase(layer_sizes, activations)
@@ -34,7 +30,6 @@ class MLP:
             raise NameError(str(optimizer) + ' Optimizer not supported')
 
     def predict(self, x):
-        # x = Variable(torch.Tensor(x))
         x = torch.FloatTensor(x)
         x = x.view(-1, self.obs_dim)
         return self.model(x)
@@ -68,6 +63,7 @@ class MLPBase(nn.Module):
             "relu": nn.ReLU(),
             "tanh": nn.Tanh(),
             "sigmoid": nn.Sigmoid(),
+            "softmax": nn.LogSoftmax(),
             "selu": nn.SELU(),
             "elu": nn.ELU(),
             "none": nn.Identity(),
