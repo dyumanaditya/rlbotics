@@ -61,7 +61,6 @@ class MLP:
         print(self.model)
 
 
-
 class MLPBase(nn.Module):
     def __init__(self, layer_sizes, activations):
         super(MLPBase, self).__init__()
@@ -74,7 +73,7 @@ class MLPBase(nn.Module):
             "none": nn.Identity(),
         })
 
-        self.mlp = nn.Sequential(*[nn.Linear(in_features, out_features, activations_dict[activation])
+        self.mlp = nn.Sequential(*[nn.Sequential(nn.Linear(in_features, out_features), activations_dict[activation])
                                    for in_features, out_features, activation in
                                    zip(layer_sizes[:-1], layer_sizes[1:], activations)])
 
