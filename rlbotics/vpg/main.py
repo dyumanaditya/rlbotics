@@ -3,6 +3,7 @@ import gym
 import time
 import matplotlib.pyplot as plt
 
+
 def train(model, env, batch_size, render=False):
     obs_batch = []
     act_batch = []
@@ -23,6 +24,7 @@ def train(model, env, batch_size, render=False):
 
         action = model.get_action(new_obs)
         new_obs, rew, done, info = env.step(action)
+
 
         act_batch.append(action)
         episode_rewards.append(rew)
@@ -46,6 +48,7 @@ def train(model, env, batch_size, render=False):
 
     # for testing
     return max(rew_batch)
+
 
 def main():
     env = gym.make('CartPole-v1')

@@ -2,6 +2,7 @@ from rlbotics.common.policies import *
 import rlbotics.vpg.hyperparameters as h
 import time
 
+
 class VPG:
     def __init__(self, env):
         self.env = env

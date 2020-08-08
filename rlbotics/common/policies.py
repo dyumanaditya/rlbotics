@@ -1,7 +1,7 @@
 import torch
-import random
-from rlbotics.common.approximators import MLP
+import numpy as np
 from torch.distributions import Categorical
+from rlbotics.common.approximators import MLP
 
 
 class MLPSoftmaxPolicy(MLP):
@@ -38,14 +38,23 @@ class MLPGaussian(MLP):
 
 
 class MLPEpsilonGreedy(MLP):
+<<<<<<< Updated upstream
 	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
 		self.action_size = layer_sizes[-1]
+=======
+	def __init__(self, IO_sizes, hidden_sizes, activations, layer_types, optimizer='Adam', lr=0.01):
+		super().__init__(IO_sizes=IO_sizes, hidden_sizes=hidden_sizes, activations=activations, layer_types=layer_types, optimizer=optimizer, lr=lr)
+		self.act_dim = IO_sizes[1]
+>>>>>>> Stashed changes
 
 	def get_action(self, obs, epsilon):
-		if random.random() < epsilon:
-			action = random.randrange(self.action_size)
+		if np.random.rand() < epsilon:
+			action = np.random.randint(0, self.act_dim)
 		else:
-			output = self.predict(obs)
-			action = output.argmax().item()
+			with torch.no_grad():
+				act_logits = self.predict(obs)
+				action = act_logits.argmax().item()
 		return action
+
+
