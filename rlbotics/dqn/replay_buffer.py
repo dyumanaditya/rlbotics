@@ -1,22 +1,22 @@
-from collections import deque
+from collections import namedtuple, deque
 import random
 
 
 class ReplayBuffer:
-	def __init__(self, max_len, batch_size):
-		"""
-		Buffer Memory for a DQN agent with random sampling
-		"""
-		self.memory = deque(maxlen=max_len)
-		self.batch_size = batch_size
+	def __init__(self, buffer_size):
+		self.memory = deque(maxlen=buffer_size)
+		self.transition = namedtuple("transition", field_names=["obs", "act", "rew", "new_obs", "done"])
 
-	def store_sample(self, state, action, reward, next_state, done):
-		self.memory.append((state, action, reward, next_state, done))
+	def add(self, obs, act, rew, new_obs, done):
+		transition = self.transition(obs=obs, act=act, rew=rew, new_obs=new_obs, done=done)
+		self.memory.append(transition)
 
-	def sample(self):
-		mini_batch = random.sample(self.memory, self.batch_size)
-		return mini_batch
+	def sample(self, batch_size):
+		transition_batch = random.sample(self.memory, batch_size)
+
+		# Transpose transitions
+		transition_batch = self.transition(*zip(*transition_batch))
+		return transition_batch
 
 	def __len__(self):
 		return len(self.memory)
-

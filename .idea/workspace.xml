@@ -19,13 +19,16 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="corrected policies.py">
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/replay_buffer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/utils.py" beforeDir="false" />
+    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="restored old vpg version">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/common/approximators.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/common/approximators.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/replay_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/replay_buffer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn_new/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn_new/dqn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rlbotics/dqn_new/hyperparameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn_new/hyperparameters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,9 +79,85 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
+  </component>
+  <component name="RunManager" selected="Python.main (1)">
+    <configuration name="dqn" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="rlbotics" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rlbotics/dqn_new" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rlbotics/dqn_new/dqn.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="rlbotics" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rlbotics/dqn" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rlbotics/dqn/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="rlbotics" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rlbotics/dqn_new" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rlbotics/dqn_new/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main (1)" />
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.dqn" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
@@ -91,7 +170,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1596734922330</updated>
-      <workItem from="1596888438572" duration="1100000" />
+      <workItem from="1596888438572" duration="2514000" />
+      <workItem from="1596937471043" duration="3977000" />
+      <workItem from="1596942105172" duration="761000" />
     </task>
     <task id="LOCAL-00001" summary="Added MLPBase class, modified MLP class, modified dqn hyperparameters and build_policy">
       <created>1596821793207</created>
@@ -135,7 +216,21 @@
       <option name="project" value="LOCAL" />
       <updated>1596892165416</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="corrected old dqn version">
+      <created>1596892432766</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1596892432766</updated>
+    </task>
+    <task id="LOCAL-00008" summary="restored old vpg version">
+      <created>1596892529421</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1596892529421</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -151,6 +246,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added MLPBase class, modified MLP class, modified dqn hyperparameters and build_policy" />
@@ -159,20 +255,43 @@
     <MESSAGE value="Corrected MLPBase in approximators.py" />
     <MESSAGE value="corrected approximators.py" />
     <MESSAGE value="corrected policies.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected policies.py" />
+    <MESSAGE value="corrected old dqn version" />
+    <MESSAGE value="restored old vpg version" />
+    <option name="LAST_COMMIT_MESSAGE" value="restored old vpg version" />
   </component>
   <component name="WindowStateProjectService">
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1596892116557">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892116557" />
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom" timestamp="1596942755451">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
+    <state width="1920" height="277" key="GridCell.Tab.0.center" timestamp="1596942755451">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state width="1920" height="277" key="GridCell.Tab.0.center/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
+    <state width="1920" height="277" key="GridCell.Tab.0.left" timestamp="1596942755451">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state width="1920" height="277" key="GridCell.Tab.0.left/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
+    <state width="1920" height="277" key="GridCell.Tab.0.right" timestamp="1596942755451">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state width="1920" height="277" key="GridCell.Tab.0.right/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog" timestamp="1596892319357">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892319357" />
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596892169938">
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596892531103">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596892169938" />
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596892531103" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/rlbotics$main.coverage" NAME="main Coverage Results" MODIFIED="1596939275498" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
+    <SUITE FILE_PATH="coverage/rlbotics$dqn.coverage" NAME="dqn Coverage Results" MODIFIED="1596939267430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
+    <SUITE FILE_PATH="coverage/rlbotics$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1596942755433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn" />
   </component>
 </project>
