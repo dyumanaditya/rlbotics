@@ -13,7 +13,6 @@ def main():
 	max_rew = []
 	time_step = 1
 	ep_counter = 0
-	max_iterations = 100000
 
 	for e in range(h.num_episodes):
 		done = False
@@ -21,8 +20,6 @@ def main():
 		obs = env.reset()
 
 		while not done:
-			if time_step >= max_iterations:
-				break
 			if h.render:
 				env.render()
 

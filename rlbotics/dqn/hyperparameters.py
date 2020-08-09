@@ -9,8 +9,8 @@ render        = False
 epsilon 	  = 1.0
 min_epsilon   = 0.05
 epsilon_decay = 0.995
-batch_size    = 64
-memory_limit  = 2000
+batch_size    = 128
+buffer_size  = 2000
 
 # Policy Network:
 start_learning = 500            # Start learning after some experience

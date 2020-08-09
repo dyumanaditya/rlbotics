@@ -19,16 +19,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="restored old vpg version">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="updated DQN implementation. Works well with tuned hyperparameters.py">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/common/approximators.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/common/approximators.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rlbotics/dqn/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/replay_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/replay_buffer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn_new/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn_new/dqn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn_new/hyperparameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn_new/hyperparameters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,7 +167,7 @@
       <updated>1596734922330</updated>
       <workItem from="1596888438572" duration="2514000" />
       <workItem from="1596937471043" duration="3977000" />
-      <workItem from="1596942105172" duration="761000" />
+      <workItem from="1596942105172" duration="1554000" />
     </task>
     <task id="LOCAL-00001" summary="Added MLPBase class, modified MLP class, modified dqn hyperparameters and build_policy">
       <created>1596821793207</created>
@@ -230,7 +225,14 @@
       <option name="project" value="LOCAL" />
       <updated>1596892529421</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="updated DQN implementation. Works well with tuned hyperparameters.py">
+      <created>1596943035412</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1596943035412</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -257,41 +259,42 @@
     <MESSAGE value="corrected policies.py" />
     <MESSAGE value="corrected old dqn version" />
     <MESSAGE value="restored old vpg version" />
-    <option name="LAST_COMMIT_MESSAGE" value="restored old vpg version" />
+    <MESSAGE value="updated DQN implementation. Works well with tuned hyperparameters.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated DQN implementation. Works well with tuned hyperparameters.py" />
   </component>
   <component name="WindowStateProjectService">
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1596892116557">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892116557" />
-    <state width="1920" height="277" key="GridCell.Tab.0.bottom" timestamp="1596942755451">
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom" timestamp="1596943612547">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.bottom/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
-    <state width="1920" height="277" key="GridCell.Tab.0.center" timestamp="1596942755451">
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612547" />
+    <state width="1920" height="277" key="GridCell.Tab.0.center" timestamp="1596943612545">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.center/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
-    <state width="1920" height="277" key="GridCell.Tab.0.left" timestamp="1596942755451">
+    <state width="1920" height="277" key="GridCell.Tab.0.center/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612545" />
+    <state width="1920" height="277" key="GridCell.Tab.0.left" timestamp="1596943612544">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.left/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
-    <state width="1920" height="277" key="GridCell.Tab.0.right" timestamp="1596942755451">
+    <state width="1920" height="277" key="GridCell.Tab.0.left/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612544" />
+    <state width="1920" height="277" key="GridCell.Tab.0.right" timestamp="1596943612546">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.right/0.30.1920.1050@0.30.1920.1050" timestamp="1596942755451" />
+    <state width="1920" height="277" key="GridCell.Tab.0.right/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612546" />
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog" timestamp="1596892319357">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892319357" />
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596892531103">
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596943043579">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596892531103" />
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596943043579" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/rlbotics$main.coverage" NAME="main Coverage Results" MODIFIED="1596939275498" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
     <SUITE FILE_PATH="coverage/rlbotics$dqn.coverage" NAME="dqn Coverage Results" MODIFIED="1596939267430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
-    <SUITE FILE_PATH="coverage/rlbotics$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1596942755433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn" />
+    <SUITE FILE_PATH="coverage/rlbotics$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1596943196499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn" />
   </component>
 </project>
