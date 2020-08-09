@@ -19,11 +19,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="updated DQN implementation. Works well with tuned hyperparameters.py">
+    <list default="true" id="538c6c9b-e2c4-4af1-b2b5-7ea01201ef3d" name="Default Changelist" comment="updated DQN">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/dqn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/hyperparameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rlbotics/dqn/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/rlbotics/dqn/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +165,7 @@
       <updated>1596734922330</updated>
       <workItem from="1596888438572" duration="2514000" />
       <workItem from="1596937471043" duration="3977000" />
-      <workItem from="1596942105172" duration="1554000" />
+      <workItem from="1596942105172" duration="4176000" />
     </task>
     <task id="LOCAL-00001" summary="Added MLPBase class, modified MLP class, modified dqn hyperparameters and build_policy">
       <created>1596821793207</created>
@@ -232,7 +230,14 @@
       <option name="project" value="LOCAL" />
       <updated>1596943035412</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="updated DQN">
+      <created>1596943681136</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1596943681136</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -260,41 +265,50 @@
     <MESSAGE value="corrected old dqn version" />
     <MESSAGE value="restored old vpg version" />
     <MESSAGE value="updated DQN implementation. Works well with tuned hyperparameters.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated DQN implementation. Works well with tuned hyperparameters.py" />
+    <MESSAGE value="updated DQN" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated DQN" />
   </component>
   <component name="WindowStateProjectService">
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1596892116557">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="693" y="301" width="524" height="515" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892116557" />
-    <state width="1920" height="277" key="GridCell.Tab.0.bottom" timestamp="1596943612547">
+    <state x="100" y="130" width="1720" height="850" key="DiffContextDialog" timestamp="1596944123000">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.bottom/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612547" />
-    <state width="1920" height="277" key="GridCell.Tab.0.center" timestamp="1596943612545">
+    <state x="100" y="130" width="1720" height="850" key="DiffContextDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596944123000" />
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom" timestamp="1596946101222">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.center/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612545" />
-    <state width="1920" height="277" key="GridCell.Tab.0.left" timestamp="1596943612544">
+    <state width="1920" height="277" key="GridCell.Tab.0.bottom/0.30.1920.1050@0.30.1920.1050" timestamp="1596946101222" />
+    <state width="1920" height="277" key="GridCell.Tab.0.center" timestamp="1596946101221">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.left/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612544" />
-    <state width="1920" height="277" key="GridCell.Tab.0.right" timestamp="1596943612546">
+    <state width="1920" height="277" key="GridCell.Tab.0.center/0.30.1920.1050@0.30.1920.1050" timestamp="1596946101221" />
+    <state width="1920" height="277" key="GridCell.Tab.0.left" timestamp="1596946101221">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state width="1920" height="277" key="GridCell.Tab.0.right/0.30.1920.1050@0.30.1920.1050" timestamp="1596943612546" />
+    <state width="1920" height="277" key="GridCell.Tab.0.left/0.30.1920.1050@0.30.1920.1050" timestamp="1596946101221" />
+    <state width="1920" height="277" key="GridCell.Tab.0.right" timestamp="1596946101221">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state width="1920" height="277" key="GridCell.Tab.0.right/0.30.1920.1050@0.30.1920.1050" timestamp="1596946101221" />
+    <state x="462" y="288" width="985" height="541" key="IDE.errors.dialog" timestamp="1596946337564">
+      <screen x="0" y="30" width="1920" height="1050" />
+    </state>
+    <state x="462" y="288" width="985" height="541" key="IDE.errors.dialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596946337564" />
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog" timestamp="1596892319357">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
     <state x="651" y="193" width="607" height="731" key="RollbackChangesDialog/0.30.1920.1050@0.30.1920.1050" timestamp="1596892319357" />
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596943043579">
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2" timestamp="1596943682658">
       <screen x="0" y="30" width="1920" height="1050" />
     </state>
-    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596943043579" />
+    <state x="555" y="289" width="800" height="539" key="Vcs.Push.Dialog.v2/0.30.1920.1050@0.30.1920.1050" timestamp="1596943682658" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/rlbotics$main.coverage" NAME="main Coverage Results" MODIFIED="1596939275498" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
     <SUITE FILE_PATH="coverage/rlbotics$dqn.coverage" NAME="dqn Coverage Results" MODIFIED="1596939267430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn_new" />
-    <SUITE FILE_PATH="coverage/rlbotics$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1596943196499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn" />
+    <SUITE FILE_PATH="coverage/rlbotics$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1596946101211" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rlbotics/dqn" />
   </component>
 </project>
