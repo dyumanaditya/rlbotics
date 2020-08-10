@@ -9,6 +9,7 @@ class MLPSoftmaxPolicy(MLP):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
 
 	def get_policy(self, obs):
+		#with torch.no_grad():
 		act_logits = self.predict(obs)
 		act_dist = Categorical(logits=act_logits)
 		return act_dist
@@ -46,6 +47,7 @@ class MLPEpsilonGreedy(MLP):
 		if random.random() < epsilon:
 			action = random.randrange(self.action_size)
 		else:
-			output = self.predict(obs)
-			action = output.argmax().item()
+			with torch.no_grad():
+				output = self.predict(obs)
+				action = output.argmax().item()
 		return action

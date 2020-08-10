@@ -1,6 +1,6 @@
 from rlbotics.common.policies import *
 import rlbotics.vpg.hyperparameters as h
-import time
+
 
 class VPG:
     def __init__(self, env):
@@ -23,4 +23,4 @@ class VPG:
 
     def update_policy(self, obs_batch, act_batch, rew_batch):
         loss = self._loss(obs_batch, act_batch, rew_batch)
-        self.policy.train(loss)
+        self.policy.learn(loss)

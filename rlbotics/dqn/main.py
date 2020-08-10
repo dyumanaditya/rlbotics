@@ -1,5 +1,4 @@
 import gym
-import matplotlib.pyplot as plt
 from rlbotics.dqn.dqn import DQN
 import rlbotics.dqn.hyperparameters as h
 
@@ -8,55 +7,44 @@ def main():
 	# Build environment
 	env = gym.make(h.env_name)
 	agent = DQN(env)
+	obs = env.reset()
 
 	# Episode related information
-	max_rew = []
-	time_step = 1
 	ep_counter = 0
+	ep_rew = 0
 
-	for e in range(h.num_episodes):
-		done = False
-		ep_rew = 0
-		obs = env.reset()
+	for iteration in range(h.max_iterations):
+		if h.render:
+			env.render()
 
-		while not done:
-			if h.render:
-				env.render()
+		# Take action
+		act = agent.get_action(obs)
+		new_obs, rew, done, _ = env.step(act)
 
-			# Take action
-			act = agent.get_action(obs)
-			new_obs, rew, done, info = env.step(act)
+		# Store experience
+		agent.store_transition(obs, act, rew, new_obs, done)
 
-			# Decay epsilon
-			if agent.epsilon > h.min_epsilon:
-				agent.epsilon *= h.epsilon_decay
-
-			# Store experience
-			agent.store_transition(obs, act, rew, new_obs, done)
-
-			# Update target model
-			if time_step % h.update_target_freq == 0:
-				agent.update_target_policy()
-
-			# Learn:
-			agent.update_policy()
-
-			# Logging
-			obs = new_obs
-			time_step += 1
-			ep_rew += rew
+		obs = new_obs
+		ep_rew += rew
 
 		# Episode done
-		max_rew.append(ep_rew)
-		ep_counter += 1
+		if done:
+			obs = env.reset()
 
-		# Display results
-		print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+			# Display results
+			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
 
-	plt.xlabel('episodes')
-	plt.ylabel('max-rewards')
-	plt.plot(max_rew, 'b-')
-	plt.show()
+			# Logging
+			ep_counter += 1
+			ep_rew = 0
+			continue
+
+		# Update Policy
+		agent.update_policy()
+
+		# Update target policy
+		if iteration % h.update_target_freq == 0:
+			agent.update_target_policy()
 
 
 if __name__ == '__main__':

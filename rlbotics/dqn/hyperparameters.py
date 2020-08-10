@@ -1,9 +1,9 @@
 # General Parameters:
-env_name      = 'CartPole-v1'
-gamma         = 0.95
-lr            = 0.001
-num_episodes  = 1000
-render        = False
+env_name       = 'CartPole-v1'
+gamma          = 0.95
+lr             = 0.001
+max_iterations = 100000
+render         = False
 
 # DQN Specific:
 epsilon 	  = 1.0

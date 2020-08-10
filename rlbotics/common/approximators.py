@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
-class MLP:
+
+class MLP(nn.Module):
     """
     Multi-Layered Perceptron
     """
@@ -13,49 +15,10 @@ class MLP:
         :param optimizer: (str) e.g. 'RMSprop'
         :param lr: (float) learning rate
         """
+        super(MLP, self).__init__()
         self.obs_dim = layer_sizes[0]
 
         # Build NN
-        self.model = MLPBase(layer_sizes, activations)
-
-        # Set optimizer
-        if optimizer == 'Adam':
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr)
-        elif optimizer == 'RMSprop':
-            self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr)
-        else:
-            raise NameError(str(optimizer) + ' Optimizer not supported')
-
-    def predict(self, x):
-        x = torch.FloatTensor(x)
-        x = x.view(-1, self.obs_dim)
-        return self.model(x)
-
-    def train(self, loss):
-        self.loss = loss
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-    def save_weights(self, dir_path):
-        torch.save(self.model.state_dict(), dir_path)
-
-    def load_weights(self, dir_path):
-        self.model.load_state_dict(torch.load(dir_path))
-
-    def save_model(self, dir_path):
-        torch.save(self.model, dir_path)
-
-    def load_model(self, dir_path):
-        self.model = torch.load(dir_path)
-
-    def summary(self):
-        print(self.model)
-
-
-class MLPBase(nn.Module):
-    def __init__(self, layer_sizes, activations):
-        super(MLPBase, self).__init__()
         activations_dict = nn.ModuleDict({
             "relu": nn.ReLU(),
             "tanh": nn.Tanh(),
@@ -70,5 +33,41 @@ class MLPBase(nn.Module):
                                    for in_features, out_features, activation in
                                    zip(layer_sizes[:-1], layer_sizes[1:], activations)])
 
+        # Set optimizer
+        if optimizer == 'Adam':
+            self.optimizer = torch.optim.Adam(self.mlp.parameters(), lr)
+        elif optimizer == 'RMSprop':
+            self.optimizer = torch.optim.RMSprop(self.mlp.parameters(), lr)
+        else:
+            raise NameError(str(optimizer) + ' Optimizer not supported')
+
     def forward(self, x):
         return self.mlp(x)
+
+    def predict(self, x):
+        if type(x) == np.ndarray:
+            x = torch.from_numpy(x).float()
+        else:
+            x = torch.FloatTensor(x)
+        x = x.view(-1, self.obs_dim)
+        return self.forward(x)
+
+    def learn(self, loss):
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+    def save_weights(self, dir_path):
+        torch.save(self.mlp.state_dict(), dir_path)
+
+    def load_weights(self, dir_path):
+        self.mlp.load_state_dict(torch.load(dir_path))
+
+    def save_model(self, dir_path):
+        torch.save(self.mlp, dir_path)
+
+    def load_model(self, dir_path):
+        self.mlp = torch.load(dir_path)
+
+    def summary(self):
+        print(self.mlp)
