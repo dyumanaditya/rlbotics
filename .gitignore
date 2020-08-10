@@ -1,2 +1,4 @@
 __pycache__/
 .idea/
+rlbotics/common/logs/
+rlbotics/dqn/logs/

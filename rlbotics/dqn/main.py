@@ -13,6 +13,11 @@ def main():
 	ep_counter = 0
 	ep_rew = 0
 
+	# Logging
+	epsilon_list = []
+	ep_rew_list = []
+	ep_counter_list = []
+
 	for iteration in range(h.max_iterations):
 		if h.render:
 			env.render()
@@ -26,6 +31,7 @@ def main():
 
 		obs = new_obs
 		ep_rew += rew
+		epsilon_list.append(agent.epsilon)
 
 		# Episode done
 		if done:
@@ -35,6 +41,9 @@ def main():
 			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
 
 			# Logging
+			ep_counter_list.append(ep_counter)
+			ep_rew_list.append(ep_rew)
+			agent.log_data(epsilon_list, ep_counter_list, ep_rew_list)
 			ep_counter += 1
 			ep_rew = 0
 			continue

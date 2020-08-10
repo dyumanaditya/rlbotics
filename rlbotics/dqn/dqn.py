@@ -5,6 +5,7 @@ from rlbotics.dqn.replay_buffer import ReplayBuffer
 import rlbotics.dqn.hyperparameters as h
 from rlbotics.common.policies import MLPEpsilonGreedy
 from rlbotics.common.approximators import MLP
+from rlbotics.common.logger import Logger
 
 
 class DQN:
@@ -14,6 +15,9 @@ class DQN:
 
 		# Replay buffer
 		self.memory = ReplayBuffer(h.buffer_size)
+
+		# Logger
+		self.logger = Logger('DQN')
 
 		# Decaying epsilon
 		self.epsilon = h.epsilon
@@ -41,7 +45,7 @@ class DQN:
 		return self.policy.get_action(obs, self.epsilon)
 
 	def store_transition(self, obs, act, rew, new_obs, done):
-	    self.memory.add(obs, act, rew, new_obs, done)
+		self.memory.add(obs, act, rew, new_obs, done)
 
 	def update_policy(self):
 		if len(self.memory) < h.batch_size:
@@ -69,7 +73,10 @@ class DQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss)
 
-		# TODO: LOG DATA HERE epsilon
-
 	def update_target_policy(self):
-	    self.target_policy.load_state_dict(self.policy.state_dict())
+		self.target_policy.load_state_dict(self.policy.state_dict())
+
+	def log_data(self, epsilon, ep_count, ep_rew):
+		self.logger.log({'epsilon': epsilon,
+						 'episode count': ep_count,
+						 'episode reward': ep_rew})
