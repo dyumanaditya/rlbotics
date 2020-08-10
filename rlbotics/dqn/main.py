@@ -1,6 +1,7 @@
 import gym
 from rlbotics.dqn.dqn import DQN
 import rlbotics.dqn.hyperparameters as h
+from rlbotics.common.logger import Logger
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
 
 		obs = new_obs
 		ep_rew += rew
-		agent.log_data(epsilon=agent.epsilon)
+		agent.logger.log(epsilon=agent.epsilon)
 
 		# Episode done
 		if done:
@@ -36,7 +37,6 @@ def main():
 			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
 
 			# Logging
-			agent.log_data(episode_count=ep_counter, episode_reward=ep_rew)
 			ep_counter += 1
 			ep_rew = 0
 			continue
@@ -47,6 +47,10 @@ def main():
 		# Update target policy
 		if iteration % h.update_target_freq == 0:
 			agent.update_target_policy()
+
+	# End
+	env.close()
+	agent.logger.writer.close()
 
 
 if __name__ == '__main__':

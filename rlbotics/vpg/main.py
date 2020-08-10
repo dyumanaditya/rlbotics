@@ -1,7 +1,7 @@
 from rlbotics.vpg.vpg import *
 import gym
 import time
-import matplotlib.pyplot as plt
+
 
 def train(batch_size, render=False):
     global env, model, episode_count

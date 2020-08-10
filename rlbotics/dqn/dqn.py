@@ -47,6 +47,9 @@ class DQN:
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
 
+		# Log Done, reward data
+		self.logger.log(done=done, rewards=rew)
+
 	def update_policy(self):
 		if len(self.memory) < h.batch_size:
 			return
@@ -75,6 +78,3 @@ class DQN:
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())
-
-	def log_data(self, **kwargs):
-		self.logger.log(**kwargs)

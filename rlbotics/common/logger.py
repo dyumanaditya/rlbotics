@@ -1,11 +1,10 @@
 import os
 import csv
-import torch
 from torch.utils.tensorboard import SummaryWriter
 
 
 class Logger:
-	def __init__(self, log_name):
+	def __init__(self, log_name='data'):
 		"""
 		:param log_name: (str) name of file in which log will be stored
 		"""
@@ -17,6 +16,7 @@ class Logger:
 		self.log_dict = {}
 		self.filename = log_dir + 'log_' + log_name + '.csv'
 
+		# Tensor Board
 		self.writer = SummaryWriter(log_dir=log_dir)
 
 	def log(self, **kwargs):
