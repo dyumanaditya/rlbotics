@@ -1,7 +1,6 @@
 import gym
 from rlbotics.dqn.dqn import DQN
 import rlbotics.dqn.hyperparameters as h
-from rlbotics.common.logger import Logger
 
 
 def main():
@@ -24,10 +23,8 @@ def main():
 
 		# Store experience
 		agent.store_transition(obs, act, rew, new_obs, done)
-
-		obs = new_obs
 		ep_rew += rew
-		agent.logger.log(epsilon=agent.epsilon)
+		obs = new_obs
 
 		# Episode done
 		if done:
