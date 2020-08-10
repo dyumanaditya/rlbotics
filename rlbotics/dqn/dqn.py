@@ -27,9 +27,9 @@ class DQN:
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
-									   activations=h.activations,
-									   optimizer=h.optimizer,
-									   lr=h.lr)
+										activations=h.activations,
+										optimizer=h.optimizer,
+										lr=h.lr)
 
 		self.target_policy = MLP(layer_sizes=layer_sizes, activations=h.activations)
 		self.update_target_policy()
@@ -41,7 +41,7 @@ class DQN:
 		return self.policy.get_action(obs, self.epsilon)
 
 	def store_transition(self, obs, act, rew, new_obs, done):
-		self.memory.add(obs, act, rew, new_obs, done)
+	    self.memory.add(obs, act, rew, new_obs, done)
 
 	def update_policy(self):
 		if len(self.memory) < h.batch_size:
@@ -72,4 +72,4 @@ class DQN:
 		# TODO: LOG DATA HERE epsilon
 
 	def update_target_policy(self):
-		self.target_policy.load_state_dict(self.policy.state_dict())
+	    self.target_policy.load_state_dict(self.policy.state_dict())
