@@ -20,7 +20,7 @@ class MLPSoftmaxPolicy(MLP):
 	def get_log_prob(self, obs, act):
 		act_dist = self.get_policy(obs)
 		#log_p = act_dist.probs[act]
-		log_p = act_dist.log_prob(torch.as_tensor(act, dtype=torch.int32))
+		log_p = act_dist.log_prob(act)
 		return log_p
 
 

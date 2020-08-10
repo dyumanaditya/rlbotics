@@ -3,7 +3,9 @@ import gym
 import time
 import matplotlib.pyplot as plt
 
-def train(model, env, batch_size, render=False):
+def train(batch_size, render=False):
+    global env, model, episode_count
+
     obs_batch = []
     act_batch = []
     rew_batch = []
@@ -29,10 +31,14 @@ def train(model, env, batch_size, render=False):
 
         # failed or goal reached
         if done:
+            episode_count += 1
             finished_rendering_this_epoch = True
 
             episode_return = sum(episode_rewards)
             episode_len = len(episode_rewards)
+
+            model.logger.log(ep_rew=episode_return)
+            model.logger.writer.add_scalar('Reward/Episode', episode_return, episode_count)
 
             rew_batch += [episode_return] * episode_len
 
@@ -42,21 +48,16 @@ def train(model, env, batch_size, render=False):
                 break
 
     env.close()
-    model.update_policy(obs_batch, act_batch, rew_batch)
+    #model.update_policy(obs_batch, act_batch, rew_batch)
+    model.update_policy(obs_batch=torch.as_tensor(obs_batch, dtype=torch.float32),
+                        act_batch=torch.as_tensor(act_batch, dtype=torch.int32),
+                        rew_batch=torch.as_tensor(rew_batch, dtype=torch.float32))
 
-    # for testing
-    return max(rew_batch)
 
 def main():
-    env = gym.make('CartPole-v1')
-
-    model = VPG(env)
-
     render = False
 
-    max_reward_per_epoch = []
-
-    for epoch in range(1000):
+    for epoch in range(100):
         if epoch % 10 == 0:
             print("epoch : ", epoch)
             render = False
@@ -64,16 +65,14 @@ def main():
         else:
             render = False
 
-        max_reward_per_epoch.append(train(model, env, 1000, render=render))
+        train(1000, render=render)
 
-    plt.xlabel('epochs')
-    plt.ylabel('max reward')
-
-    plt.plot(max_reward_per_epoch, label = "max reward in epoch")
-
-    plt.legend()
-    plt.show()
+    model.logger.writer.close()
 
 
 if __name__ == "__main__":
+    episode_count = 0
+    env = gym.make('CartPole-v1')
+    model = VPG(env)
+
     main()

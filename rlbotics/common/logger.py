@@ -1,5 +1,7 @@
 import os
 import csv
+import torch
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Logger:
@@ -15,6 +17,8 @@ class Logger:
 		self.log_dict = {}
 		self.filename = log_dir + 'log_' + log_name + '.csv'
 
+		self.writer = SummaryWriter(log_dir=log_dir)
+
 	def log(self, **kwargs):
 		for key, value in kwargs.items():
 			if key in self.log_dict.keys():
@@ -29,4 +33,3 @@ class Logger:
 			writer = csv.writer(f)
 			for k, v in self.log_dict.items():
 				writer.writerow([k, v])
-

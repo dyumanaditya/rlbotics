@@ -47,8 +47,7 @@ class MLP(nn.Module):
     def predict(self, x):
         if type(x) == np.ndarray:
             x = torch.from_numpy(x).float()
-        else:
-            x = torch.FloatTensor(x)
+
         x = x.view(-1, self.obs_dim)
         return self.forward(x)
 
