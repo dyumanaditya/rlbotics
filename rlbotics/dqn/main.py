@@ -50,7 +50,6 @@ def main():
 
 	# End
 	env.close()
-	agent.logger.writer.close()
 
 
 if __name__ == '__main__':
