@@ -69,7 +69,7 @@ class DQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.train(loss)
 
-		# TODO: LOG DATA HERE
+		# TODO: LOG DATA HERE epsilon
 
 	def update_target_policy(self):
 		self.target_policy.model.load_state_dict(self.policy.model.state_dict())
