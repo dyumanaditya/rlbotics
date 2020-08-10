@@ -15,10 +15,14 @@ class Logger:
 		self.log_dict = {}
 		self.filename = log_dir + 'log_' + log_name + '.csv'
 
-	def log(self, dct):
-		self.log_dict.update(dct)
+	def log(self, **kwargs):
+		for key, value in kwargs.items():
+			if key in self.log_dict.keys():
+				self.log_dict[key].append(value)
+			else:
+				self.log_dict[key] = [value]
+
 		self._write_file()
-		self._clear()
 
 	def _write_file(self):
 		with open(self.filename, 'w') as f:
@@ -26,5 +30,3 @@ class Logger:
 			for k, v in self.log_dict.items():
 				writer.writerow([k, v])
 
-	def _clear(self):
-		self.log_dict = {}

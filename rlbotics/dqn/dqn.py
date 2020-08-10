@@ -76,7 +76,5 @@ class DQN:
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())
 
-	def log_data(self, epsilon, ep_count, ep_rew):
-		self.logger.log({'epsilon': epsilon,
-						 'episode count': ep_count,
-						 'episode reward': ep_rew})
+	def log_data(self, **kwargs):
+		self.logger.log(**kwargs)
