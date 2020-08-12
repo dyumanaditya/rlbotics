@@ -8,17 +8,16 @@ class MLPSoftmaxPolicy(MLP):
 	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
 
-	def get_policy(self, obs):
-		# with torch.no_grad():
-		act_logits = self.predict(obs)
-		act_dist = Categorical(logits=act_logits)
-		return act_dist
-
 	def get_action(self, obs):
-		return self.get_policy(obs).sample().item()
+		with torch.no_grad():
+			act_logits = self.predict(obs)
+
+		act_dist = Categorical(logits=act_logits)
+		return act_dist.sample().item()
 
 	def get_log_prob(self, obs, act):
-		act_dist = self.get_policy(obs)
+		act_logits = self.predict(obs)
+		act_dist = Categorical(logits=act_logits)
 		log_p = act_dist.log_prob(act)
 		return log_p
 
