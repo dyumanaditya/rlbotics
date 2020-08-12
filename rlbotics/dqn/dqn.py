@@ -7,6 +7,7 @@ from rlbotics.common.policies import MLPEpsilonGreedy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
 
+CUDA_LAUNCH_BLOCKING=1
 
 class DQN:
 	def __init__(self, env):

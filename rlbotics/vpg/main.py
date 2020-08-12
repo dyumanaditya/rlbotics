@@ -29,6 +29,8 @@ def train(batch_size, render=False):
         act_batch.append(action)
         episode_rewards.append(rew)
 
+        model.logger.log(ep_rew=rew, done=done)
+
         # failed or goal reached
         if done:
             episode_count += 1
@@ -36,9 +38,6 @@ def train(batch_size, render=False):
 
             episode_return = sum(episode_rewards)
             episode_len = len(episode_rewards)
-
-            model.logger.log(ep_rew=episode_return)
-            model.logger.writer.add_scalar('Reward/Episode', episode_return, episode_count)
 
             rew_batch += [episode_return] * episode_len
 
