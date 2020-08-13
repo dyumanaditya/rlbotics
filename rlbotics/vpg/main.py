@@ -1,79 +1,51 @@
-from rlbotics.vpg.vpg import *
 import gym
-import time
-
-def train(batch_size, render=False, log=False):
-    global env, model, episode_count
-
-    obs_batch = []
-    act_batch = []
-    rew_batch = []
-
-    episode_rewards = []
-
-    new_obs = env.reset()
-    done = False
-    finished_rendering_this_epoch = False
-
-    for i in range(batch_size):
-        if (not finished_rendering_this_epoch) and render:
-            env.render()
-            time.sleep(0.02)
-
-        obs_batch.append(new_obs.copy())
-
-        action = model.get_action(new_obs)
-        new_obs, rew, done, info = env.step(action)
-
-        act_batch.append(action)
-        episode_rewards.append(rew)
-
-        if log:
-            model.logger.log(ep_rew=rew, done=done)
-
-        if done:
-            episode_count += 1
-            finished_rendering_this_epoch = True
-
-            episode_return = sum(episode_rewards)
-            episode_len = len(episode_rewards)
-
-            #model.logger.writer.add_scalar("return/episode", episode_return, episode_count)
-
-            rew_batch += [episode_return] * episode_len
-
-            new_obs, done, episode_rewards = env.reset(), False, []
-
-
-    env.close()
-
-    obs_batch = obs_batch[:len(rew_batch)]
-    act_batch = act_batch[:len(rew_batch)]
-
-    model.update_policy(obs_batch=torch.as_tensor(obs_batch, dtype=torch.float32),
-                        act_batch=torch.as_tensor(act_batch, dtype=torch.int32),
-                        rew_batch=torch.as_tensor(rew_batch, dtype=torch.float32))
+from rlbotics.vpg.vpg import VPG
+import rlbotics.vpg.hyperparameters as h
 
 
 def main():
-    render = False
+    # Build environment
+    env = gym.make(h.env_name)
+    agent = VPG(env)
+    obs = env.reset()
 
-    for epoch in range(1000):
-        if epoch % 10 == 0:
-            print("epoch : ", epoch)
-            render = False
+    # Episode related information
+    ep_counter = 0
+    ep_rew = 0
 
-        else:
-            render = False
+    for iteration in range(h.max_iterations):
+        if h.render:
+            env.render()
 
-        train(1000, render=render)
+        # Take action
+        act = agent.get_action(obs)
+        new_obs, rew, done, _ = env.step(act)
 
-    model.logger.writer.close()
+        # Store experience
+        agent.store_transition(obs, act, rew, new_obs, done)
+        ep_rew += rew
+        obs = new_obs
+
+        # Episode done
+        if done:
+            obs = env.reset()
+            # Display results
+            if ep_counter % 1000 == 0:
+                print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+
+            agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
+
+            # Logging
+            ep_counter += 1
+            ep_rew = 0
+            continue
+
+        # Update Policy
+        agent.update_policy()
+
+    # End
+    env.close()
 
 
-if __name__ == "__main__":
-    episode_count = 0
-    env = gym.make('CartPole-v1')
-    model = VPG(env)
-
+if __name__ == '__main__':
     main()
