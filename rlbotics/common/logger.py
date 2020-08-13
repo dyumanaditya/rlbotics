@@ -1,35 +1,31 @@
 import os
-import csv
+import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 
 
 class Logger:
 	def __init__(self, log_name='data'):
 		"""
+		NOTE: You can only log once per time step
 		:param log_name: (str) name of file in which log will be stored
 		"""
 		cur_dir = os.getcwd()
-		log_dir = cur_dir + '/logs/'
+		log_dir = os.path.join(cur_dir, 'logs/')
 		if not os.path.exists(log_dir):
 			os.makedirs(log_dir)
 
-		self.log_dict = {}
-		self.filename = log_dir + 'log_' + log_name + '.csv'
+		self.keys = []
+		self.filename = os.path.join(log_dir, 'log_' + log_name + '.csv')
+		open(self.filename, 'w')
 
 		# Tensor Board
 		self.writer = SummaryWriter(log_dir=log_dir)
 
-	def log(self, **kwargs):
-		for key, value in kwargs.items():
-			if key in self.log_dict.keys():
-				self.log_dict[key].append(value)
-			else:
-				self.log_dict[key] = [value]
+	def save_tabular(self, **kwargs):
+		header = True if len(self.keys) == 0 else False
+		self.keys = list(kwargs.keys())
+		df = pd.DataFrame(kwargs, index=[0])
+		self._write_file(df, header)
 
-		self._write_file()
-
-	def _write_file(self):
-		with open(self.filename, 'w') as f:
-			writer = csv.writer(f)
-			for k, v in self.log_dict.items():
-				writer.writerow([k, v])
+	def _write_file(self, df, header):
+		df.to_csv(self.filename, header=header, mode='a', index=False)

@@ -51,7 +51,7 @@ class DQN:
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		self.logger.log(done=done, rewards=rew, epsilon=self.epsilon)
+		self.logger.save_tabular(done=done, rewards=rew, epsilon=self.epsilon)
 
 	def update_policy(self):
 		if len(self.memory) < h.batch_size:
