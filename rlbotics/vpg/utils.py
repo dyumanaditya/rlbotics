@@ -1,6 +1,6 @@
 import torch
 
-def get_episode_returns(obs_batch, act_batch, rew_batch, done_batch):
+def get_episode_returns(rew_batch, done_batch, gamma):
     episode_returns = []
     episodes = []
     prev_index = 0
@@ -14,27 +14,23 @@ def get_episode_returns(obs_batch, act_batch, rew_batch, done_batch):
     for ep in episodes:
 	     episode_returns += [ep.sum().item()] * len(ep)
 
-    return obs_batch[:len(episode_returns)], act_batch[:len(episode_returns)], torch.as_tensor(episode_returns, dtype=torch.float32)
+    return torch.as_tensor(episode_returns, dtype=torch.float32)
 
-def get_reward_to_go(obs_batch, act_batch, rew_batch, done_batch):
-    reward_to_go = []
-    episodes = []
-    prev_index = 0
 
-    indeces = torch.nonzero(done_batch, as_tuple=True)[0]
+def get_reward_to_go(rew_batch, done_batch, gamma):
+    rgts = torch.zeros_like(rew_batch, dtype=torch.float32)
+    cumulative = 0.0
+    for k in reversed(range(len(rew_batch))):
+        if done_batch[k]:
+            rgts[k] = 0
+        cumulative = rew_batch[k] + gamma * cumulative * (1.0 - done_batch[k])
+        rgts[k] = cumulative
 
-    for index in indeces:
-    	episodes.append(rew_batch[prev_index:index+1])
-    	prev_index = index + 1
+    return rgts
 
-    for ep in episodes:
-        n = len(ep)
-        rtgs = torch.zeros_like(ep)
-        for i in reversed(range(n)):
-            rtgs[i] = ep[i] + (rtgs[i+1] if i+1 < n else 0)
+def get_expected_return(rew_batch, done_batch, gamma):
+    rtgs = get_reward_to_go(rew_batch, done_batch, gamma)
+    return normalize(rtgs)
 
-        reward_to_go.append(rtgs)
-
-    reward_to_go_tensor = torch.cat(reward_to_go)
-
-    return obs_batch[:len(reward_to_go_tensor)], act_batch[:len(reward_to_go_tensor)], reward_to_go_tensor
+def normalize(x):
+    return (x - torch.mean(x)) / torch.std(x)
