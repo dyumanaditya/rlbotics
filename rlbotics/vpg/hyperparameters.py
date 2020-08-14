@@ -1,6 +1,6 @@
 # General Parameters:
 env_name       = 'CartPole-v1'
-lr             = 1e-4
+lr             = 1e-3
 max_iterations = 1000000
 render         = False
 batch_size    = 1000

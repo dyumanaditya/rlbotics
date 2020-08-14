@@ -1,9 +1,17 @@
 import gym
 from rlbotics.vpg.vpg import VPG
 import rlbotics.vpg.hyperparameters as h
+import torch
 
 
 def main():
+    # Set device
+    gpu = 0
+    device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
+    print(device)
+    if torch.cuda.is_available():
+        torch.cuda.set_device(device)
+
     # Build environment
     env = gym.make(h.env_name)
     agent = VPG(env)
