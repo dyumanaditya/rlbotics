@@ -17,7 +17,6 @@ def main():
 	# Set device
 	gpu = 0
 	device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
-	print(device)
 	if torch.cuda.is_available():
 		torch.cuda.set_device(device)
 

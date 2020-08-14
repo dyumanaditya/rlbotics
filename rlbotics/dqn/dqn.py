@@ -19,8 +19,9 @@ class DQN:
 		# Logger
 		self.logger = Logger('DQN')
 
-		# Decaying epsilon
+		# Decaying epsilon (exp. and rew-based)
 		self.epsilon = h.epsilon
+		self.epsilon_thresh = h.reward_thresh
 
 		# Loss function
 		self.criterion = nn.MSELoss()
@@ -39,10 +40,15 @@ class DQN:
 		self.update_target_policy()
 
 	def get_action(self, obs):
-		# Decay epsilon
-		if self.epsilon > h.min_epsilon:
-			self.epsilon *= h.epsilon_decay
-		return self.policy.get_action(obs, self.epsilon)
+		action = self.policy.get_action(obs, self.epsilon)
+		self.decay_epsilon(mode='exp')
+		return action
+
+	def decay_epsilon(self, mode):
+		if mode == 'exp':
+			self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
+		elif mode == 'linear':
+			self.epsilon = max(h.min_epsilon, self.epsilon-h.linear_decay)
 
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
