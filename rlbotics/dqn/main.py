@@ -1,4 +1,5 @@
 import gym
+import torch
 from rlbotics.dqn.dqn import DQN
 import rlbotics.dqn.hyperparameters as h
 
@@ -12,6 +13,12 @@ def main():
 	# Episode related information
 	ep_counter = 0
 	ep_rew = 0
+
+	# Set device
+	gpu = 0
+	device = torch.device("cuda:{gpu}" if torch.cuda.is_available() else "cpu")
+	if torch.cuda.is_available():
+		torch.cuda.set_device(device)
 
 	for iteration in range(h.max_iterations):
 		if h.render:
@@ -32,6 +39,7 @@ def main():
 
 			# Display results
 			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+			agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
 
 			# Logging
 			ep_counter += 1

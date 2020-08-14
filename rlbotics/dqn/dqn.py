@@ -22,11 +22,8 @@ class DQN:
 		# Decaying epsilon
 		self.epsilon = h.epsilon
 
-		# Device
-		self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 		# Loss function
-		self.criterion = nn.MSELoss().to(self.device)
+		self.criterion = nn.MSELoss()
 
 		# Build policies
 		self._build_policy()
@@ -36,9 +33,9 @@ class DQN:
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
 										activations=h.activations,
 										optimizer=h.optimizer,
-										lr=h.lr).to(self.device)
+										lr=h.lr)
 
-		self.target_policy = MLP(layer_sizes=layer_sizes, activations=h.activations).to(self.device)
+		self.target_policy = MLP(layer_sizes=layer_sizes, activations=h.activations)
 		self.update_target_policy()
 
 	def get_action(self, obs):
@@ -61,16 +58,16 @@ class DQN:
 		transition_batch = self.memory.sample(h.batch_size)
 
 		# Extract batches and convert to tensors
-		obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float).to(self.device)
-		act_batch = torch.as_tensor(transition_batch.act).to(self.device)
-		rew_batch = torch.as_tensor(transition_batch.rew).to(self.device)
-		new_obs_batch = torch.as_tensor(transition_batch.new_obs, dtype=torch.float).to(self.device)
-		done_batch = torch.as_tensor(transition_batch.done).to(self.device)
-		not_done_batch = torch.logical_not(done_batch).to(self.device)
+		obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
+		act_batch = torch.as_tensor(transition_batch.act)
+		rew_batch = torch.as_tensor(transition_batch.rew)
+		new_obs_batch = torch.as_tensor(transition_batch.new_obs, dtype=torch.float)
+		done_batch = torch.as_tensor(transition_batch.done)
+		not_done_batch = torch.logical_not(done_batch)
 
 		# Update
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
-		target_values = torch.zeros(h.batch_size, device=self.device)
+		target_values = torch.zeros(h.batch_size)
 		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).max(1)[0].detach()
 
 		expected_q_values = rew_batch + h.gamma * target_values

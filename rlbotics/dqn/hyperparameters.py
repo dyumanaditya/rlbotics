@@ -13,7 +13,6 @@ batch_size    = 128
 buffer_size   = 6000
 
 # Policy Network:
-start_learning = 500            # Start learning after some experience
 hidden_sizes   = [64, 64] 	# Dimensions have to be 1 less than activations
 activations    = ['relu', 'relu', 'none']
 optimizer      = 'Adam'
