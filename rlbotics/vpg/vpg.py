@@ -47,7 +47,7 @@ class VPG:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
-        obs_batch, act_batch, ret_batch = get_episode_returns(obs_batch, act_batch, rew_batch, done_batch)
+        obs_batch, act_batch, ret_batch = get_reward_to_go(obs_batch, act_batch, rew_batch, done_batch)
 
         loss = self._loss(obs_batch, act_batch, ret_batch)
         self.policy.learn(loss)
