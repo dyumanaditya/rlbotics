@@ -8,7 +8,7 @@ from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
 
 
-class DQN:
+class DDQN:
 	def __init__(self, env):
 		self.obs_dim = env.observation_space.shape[0]
 		self.act_dim = env.action_space.n
@@ -17,7 +17,7 @@ class DQN:
 		self.memory = ReplayBuffer(h.buffer_size)
 
 		# Logger
-		self.logger = Logger('DQN')
+		self.logger = Logger('DDQN')
 
 		# Decaying epsilon (exp. and linear)
 		self.epsilon = h.epsilon
@@ -31,9 +31,9 @@ class DQN:
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
-										activations=h.activations,
-										optimizer=h.optimizer,
-										lr=h.lr)
+									   activations=h.activations,
+									   optimizer=h.optimizer,
+									   lr=h.lr)
 
 		self.target_policy = MLP(layer_sizes=layer_sizes, activations=h.activations)
 		self.update_target_policy()
@@ -72,11 +72,11 @@ class DQN:
 
 		# Update
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
-		target_values = torch.zeros(h.batch_size)
-		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).max(1)[0].detach()
-																								# Is detach needed..?
-		expected_q_values = rew_batch + h.gamma * target_values
-		expected_q_values = expected_q_values.unsqueeze(1)
+		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1).detach()
+		target_values = torch.zeros(h.batch_size, 1)
+		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1))
+
+		expected_q_values = rew_batch.unsqueeze(1) + h.gamma * target_values
 
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss)
