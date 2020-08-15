@@ -43,7 +43,7 @@ class VPG:
         self.memory.add(obs, act, rew, new_obs, done)
 
         # Log Done, reward
-        #self.logger.save_tabular(done=done, rewards=rew)
+        self.logger.save_tabular(done=done, rewards=rew)
 
     def update_policy(self):
         if len(self.memory) < h.batch_size:
