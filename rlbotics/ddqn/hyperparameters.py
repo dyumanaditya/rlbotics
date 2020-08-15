@@ -13,7 +13,7 @@ buffer_size   = 6000
 # Exp. epsilon decay
 epsilon 	  = 1.0
 min_epsilon   = 0.01
-epsilon_decay = 0.999
+epsilon_decay = 200
 
 # Linear epsilon decay
 linear_decay   = 0.001
