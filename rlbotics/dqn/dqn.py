@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import math
 from rlbotics.dqn.replay_buffer import ReplayBuffer
 import rlbotics.dqn.hyperparameters as h
 from rlbotics.common.policies import MLPEpsilonGreedy
@@ -22,8 +22,15 @@ class DQN:
 		# Decaying epsilon (exp. and linear)
 		self.epsilon = h.epsilon
 
+		# Gradient clipping
+		if h.grad_clip:
+			self.grad_clip = (-1, 1)
+		else:
+			self.grad_clip = None
+
 		# Loss function
 		self.criterion = nn.MSELoss()
+		self.steps_done = 0
 
 		# Build policies
 		self._build_policy()
@@ -31,7 +38,7 @@ class DQN:
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
-										activations=h.activations,
+									    activations=h.activations,
 										optimizer=h.optimizer,
 										lr=h.lr)
 
@@ -45,7 +52,9 @@ class DQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
+			# self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
+			self.epsilon = h.min_epsilon + (h.epsilon - h.min_epsilon) * math.exp(-1. * self.steps_done / h.epsilon_decay)
+			self.steps_done += 1
 		elif mode == 'linear':
 			self.epsilon = max(h.min_epsilon, self.epsilon-h.linear_decay)
 
@@ -79,7 +88,8 @@ class DQN:
 		expected_q_values = expected_q_values.unsqueeze(1)
 
 		loss = self.criterion(q_values, expected_q_values)
-		self.policy.learn(loss)
+
+		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())

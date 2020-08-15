@@ -51,7 +51,7 @@ def main():
 		agent.update_policy()
 
 		# Update target policy
-		if iteration % h.update_target_freq == 0:
+		if ep_counter % h.update_target_freq == 0:
 			agent.update_target_policy()
 
 	# End

@@ -22,11 +22,22 @@ class DDQN:
 		# Decaying epsilon (exp. and linear)
 		self.epsilon = h.epsilon
 
+		# Gradient clipping
+		if h.grad_clip:
+			self.grad_clip = (-1, 1)
+		else:
+			self.grad_clip = None
+
+		# Steps
+		self.steps_done = 0
+
 		# Loss function
 		self.criterion = nn.MSELoss()
 
 		# Build policies
 		self._build_policy()
+
+
 
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
@@ -45,7 +56,9 @@ class DDQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
+			# self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
+			self.epsilon = h.min_epsilon + (h.epsilon - h.min_epsilon) * math.exp(-1. * self.steps_done / h.epsilon_decay)
+			self.steps_done += 1
 		elif mode == 'linear':
 			self.epsilon = max(h.min_epsilon, self.epsilon-h.linear_decay)
 
@@ -71,6 +84,8 @@ class DDQN:
 		not_done_batch = torch.logical_not(done_batch)
 
 		# Update
+		out = self.policy.predict(obs_batch)
+
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
 		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1)
 		target_values = torch.zeros(h.batch_size, 1)
@@ -79,7 +94,7 @@ class DDQN:
 		expected_q_values = rew_batch.unsqueeze(1) + h.gamma * target_values
 
 		loss = self.criterion(q_values, expected_q_values)
-		self.policy.learn(loss)
+		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())

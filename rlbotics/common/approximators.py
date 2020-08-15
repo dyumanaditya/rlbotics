@@ -51,9 +51,12 @@ class MLP(nn.Module):
         x = x.view(-1, self.obs_dim)
         return self.forward(x)
 
-    def learn(self, loss):
+    def learn(self, loss, grad_clip=None):
         self.optimizer.zero_grad()
         loss.backward()
+        if grad_clip is not None:
+            for param in self.mlp.parameters():
+                param.grad.data.clamp_(grad_clip[0], grad_clip[1])
         self.optimizer.step()
 
     def save_weights(self, dir_path):
