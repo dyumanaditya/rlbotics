@@ -46,9 +46,12 @@ def main():
             # Logging
             ep_counter += 1
             ep_rew = 0
-            
+
             # Update Policy
             agent.update_policy()
+
+            # Update Value
+            agent.update_value()
 
     # End
     env.close()
