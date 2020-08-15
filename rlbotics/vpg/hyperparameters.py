@@ -3,13 +3,14 @@ env_name       = 'CartPole-v1'
 gamma          = 0.99
 max_iterations = 1000000
 render         = False
-batch_size     = 1000
+batch_size     = 512
+num_v_iters    = 80
 
 
 # Policy Network:
 pi_hidden_sizes   = [64, 64]
 pi_activations    = ['relu', 'relu', 'none']
-pi_lr             = 1e-3
+pi_lr             = 3e-4
 
 # Policy Network:
 v_hidden_sizes   = [64, 64, 1]

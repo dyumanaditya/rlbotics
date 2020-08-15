@@ -37,8 +37,6 @@ class DDQN:
 		# Build policies
 		self._build_policy()
 
-
-
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,

@@ -6,7 +6,6 @@ import rlbotics.vpg.hyperparameters as h
 from rlbotics.common.visualization import plot
 
 
-
 def main():
     # Set device
     gpu = 0
@@ -41,8 +40,7 @@ def main():
         if done:
             obs = env.reset()
             # Display results
-            if ep_counter % 1000 == 0:
-                print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+            print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
 
             agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
 
@@ -50,6 +48,7 @@ def main():
             ep_counter += 1
             ep_rew = 0
 
+        if iteration % h.batch_size == 0:
             # Update Policy
             agent.update_policy()
 
@@ -59,6 +58,7 @@ def main():
     # End
     env.close()
     plot(agent.logger.filename, 'vpg', 'episodes', 'rewards', True)
+
 
 if __name__ == '__main__':
     main()

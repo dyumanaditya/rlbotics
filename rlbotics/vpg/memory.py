@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+
 class Memory:
     def __init__(self):
         self.memory = []
