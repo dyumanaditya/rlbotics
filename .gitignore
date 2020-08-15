@@ -4,3 +4,6 @@ __pycache__/
 /rlbotics/dqn/logs/
 /rlbotics/vpg/logs/
 /rlbotics/ddqn/logs/
+/rlbotics/ddqn/plots/
+/rlbotics/dqn/plots/
+/rlbotics/vpg/plots/

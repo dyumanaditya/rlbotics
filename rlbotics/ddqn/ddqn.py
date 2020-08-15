@@ -53,7 +53,7 @@ class DDQN:
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		self.logger.save_tabular(done=done, rewards=rew, epsilon=self.epsilon)
+		#self.logger.save_tabular(done=done, rewards=rew, epsilon=self.epsilon)
 
 	def update_policy(self):
 		if len(self.memory) < h.batch_size:
@@ -72,9 +72,9 @@ class DDQN:
 
 		# Update
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
-		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1).detach()
+		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1)
 		target_values = torch.zeros(h.batch_size, 1)
-		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1))
+		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1)).detach()
 
 		expected_q_values = rew_batch.unsqueeze(1) + h.gamma * target_values
 

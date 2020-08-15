@@ -1,7 +1,8 @@
 import gym
 import torch
 from rlbotics.ddqn.ddqn import DDQN
-import rlbotics.dqn.hyperparameters as h
+import rlbotics.ddqn.hyperparameters as h
+from rlbotics.common.visualization import plot
 
 
 def main():
@@ -55,6 +56,7 @@ def main():
 
 	# End
 	env.close()
+	plot(agent.logger.filename, 'ddqn', 'episodes', 'rewards', True)
 
 
 if __name__ == '__main__':

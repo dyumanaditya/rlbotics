@@ -74,7 +74,7 @@ class DQN:
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
 		target_values = torch.zeros(h.batch_size)
 		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).max(1)[0].detach()
-																								# Is detach needed..?
+
 		expected_q_values = rew_batch + h.gamma * target_values
 		expected_q_values = expected_q_values.unsqueeze(1)
 
