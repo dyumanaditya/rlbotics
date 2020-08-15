@@ -1,7 +1,10 @@
 import gym
+import torch
+
 from rlbotics.vpg.vpg import VPG
 import rlbotics.vpg.hyperparameters as h
-import torch
+from rlbotics.common.visualization import plot
+
 
 
 def main():
@@ -55,7 +58,7 @@ def main():
 
     # End
     env.close()
-
+    plot(agent.logger.filename, 'vpg', 'episodes', 'rewards', True)
 
 if __name__ == '__main__':
     main()
