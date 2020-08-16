@@ -8,9 +8,8 @@ All the algorithms are in the `rlbotics` directory. Each algorithm specified abo
 ### Common
 The directory `common` contains common modular classes to easily build new algorithms.
 - `approximators`: Basic Deep Neural Networks (Dense, Conv, LSTM).
-- `data_collection`: Performs rollouts and collect observations and rewards
 - `logger`: Log training data and other information
-- `plotter`: Plot graphs
+- `visualize`: Plot graphs
 - `policies`: Common policies such as Random, Softmax, Parametrized Softmax and Gaussian Policy
 - `utils`: Functions to compute the expected return, the Generalized Advantage Estimation (GAE), etc.
 
@@ -35,7 +34,6 @@ To contribute to this package, it is recommended to follow this structure:
   - `__init__`: Initializes the classes
   - `_build_policy`: Build policy
   - `_build_value_function`: Build value function
-  - `_loss`: Build policy loss function
+  - `compute_policy_loss`: Build policy loss function
   - `update_policy`: Update the policy
   - `update_value`: Update the value function
-  - `process_paths`: (optional) Process collected trajectories 
