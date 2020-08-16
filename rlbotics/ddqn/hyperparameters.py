@@ -1,7 +1,7 @@
 # General Parameters:
 env_name       = 'CartPole-v1'
 gamma          = 0.95
-lr             = 0.0006
+lr             = 1e-3
 max_iterations = 1000000
 render         = False
 
@@ -26,5 +26,7 @@ optimizer      = 'Adam'
 loss           = 'mse'
 
 # Policy Target Network:
-update_target_freq = 30	# Update target network per _ timesteps
+update_target_freq = 10	# Update target network per _ timesteps
 
+# Gradient clipping
+grad_clip = True

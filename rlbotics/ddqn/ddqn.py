@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
+import math
 
-from rlbotics.dqn.replay_buffer import ReplayBuffer
-import rlbotics.dqn.hyperparameters as h
+from rlbotics.ddqn.replay_buffer import ReplayBuffer
+import rlbotics.ddqn.hyperparameters as h
 from rlbotics.common.policies import MLPEpsilonGreedy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger

@@ -26,7 +26,7 @@ optimizer      = 'Adam'
 loss           = 'mse'
 
 # Policy Target Network:
-update_target_freq = 10	# Update target network per _ timesteps
+update_target_freq = 10	# Update target network per _ episodes
 
 # Gradient clipping
 grad_clip = False
