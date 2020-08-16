@@ -21,6 +21,11 @@ class MLPSoftmaxPolicy(MLP):
 		log_p = act_dist.log_prob(act)
 		return log_p
 
+	def get_distribution(self, obs):
+		act_logits = self.predict(obs)
+		act_dist = Categorical(logits=act_logits)
+		return act_dist
+
 
 class MLPGaussian(MLP):
 	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
