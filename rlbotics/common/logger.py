@@ -68,7 +68,6 @@ class Logger:
 		if 'transitions.csv' in file:
 			if kwargs.get('done'):
 				latest_return = get_latest_return(file)
-				print(latest_return)
 				self.writer.add_scalar("rewards", latest_return, self.reward_updated)
 				self.reward_updated += 1
 		else:
