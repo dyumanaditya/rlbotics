@@ -14,7 +14,7 @@ def plot(algo_name, env_name, seed, xlabel=None, ylabel=None, display=False):
 	os.makedirs(plt_dir)
 
 	ep_returns = get_return(log_file)
-	ax = sns.lineplot(x=ep_returns, y=list(range(len(ep_returns))))
+	ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns)
 	ax.set(xlabel=xlabel, ylabel=ylabel)
 	plt.savefig(plt_dir + '/' + algo_name + '_plt' + '.png')
 

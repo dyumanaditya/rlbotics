@@ -75,7 +75,7 @@ def main():
             if done:
                 obs = env.reset()
                 # Display results
-                print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+                print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
 
                 agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
 

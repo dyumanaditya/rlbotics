@@ -1,12 +1,5 @@
 __pycache__/
 .idea/
-/rlbotics/common/logs/
-/rlbotics/dqn/logs/
-/rlbotics/vpg/logs/
-/rlbotics/ddqn/logs/
-/rlbotics/ddqn/plots/
-/rlbotics/dqn/plots/
-/rlbotics/vpg/plots/
 /logs/
 /plots/
 /models/

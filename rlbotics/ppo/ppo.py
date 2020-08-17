@@ -139,8 +139,7 @@ class PPO:
             policy_loss.backward()
             self.policy.optimizer.step()
 
-        # TODO: Log KL, Entropy, Loss difference,
-        # TODO: Print
+        self.logger.log(name='policy_updates', loss=policy_loss.item(), kl=logging_info["kl"], entropy=logging_info["entropy"])
 
         # Log Model
         self.logger.log_model(self.policy)
