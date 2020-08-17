@@ -54,10 +54,13 @@ def main():
     obs = env.reset()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	# Episode related information
     ep_counter = 0
     ep_rew = 0
 
+=======
+>>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
 =======
 >>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
     for epoch in range(args.max_epochs):
@@ -72,9 +75,12 @@ def main():
             # Store experience
             agent.store_transition(obs, act, rew, new_obs, done)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 			ep_rew += rew
             obs = new_obs
+=======
+>>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
 =======
 >>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
 
@@ -85,10 +91,13 @@ def main():
                 print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 				# Logging
                 ep_counter += 1
                 ep_rew = 0
 
+=======
+>>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
 =======
 >>>>>>> f2f8469da7018ee69e2612221c77cebf85b91518
         # Update Policy
