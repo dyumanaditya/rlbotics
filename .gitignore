@@ -7,3 +7,6 @@ __pycache__/
 /rlbotics/ddqn/plots/
 /rlbotics/dqn/plots/
 /rlbotics/vpg/plots/
+/logs/
+/plots/
+/models/

@@ -1,14 +1,51 @@
 import gym
 import torch
+import argparse
+
 from rlbotics.ddqn.ddqn import DDQN
 import rlbotics.ddqn.hyperparameters as h
 from rlbotics.common.visualization import plot
 
 
+def argparser():
+	"""
+    Input argument parser.
+    Loads default hyperparameters from hyperparameters.py
+    :return: Parsed arguments
+    """
+	parser = argparse.ArgumentParser()
+	# General Parameters
+	parser.add_argument('--seed', type=int, default=h.seed)
+	parser.add_argument('--env_name', type=str, default=h.env_name)
+	parser.add_argument('--gamma', type=float, default=h.gamma)
+	parser.add_argument('--lr', type=float, default=h.lr)
+	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
+	parser.add_argument('--render', type=bool, default=h.render)
+
+	# DDQN Specific Parameters
+	parser.add_argument('--batch_size', type=int, default=h.batch_size)
+	parser.add_argument('--buffer_size', type=int, default=h.buffer_size)
+	parser.add_argument('--epsilon', type=float, default=h.epsilon)
+	parser.add_argument('--min_epsilon', type=float, default=h.min_epsilon)
+	parser.add_argument('--exp_decay', type=float, default=h.exp_decay)
+	parser.add_argument('-linear_decay', type=float, default=h.linear_decay)
+
+	# Policy/Target Network
+	parser.add_argument('--hidden_sizes', type=int, default=h.hidden_sizes)
+	parser.add_argument('--activations', type=str, default=h.activations)
+	parser.add_argument('--optimizer', type=str, default=h.optimizer)
+	parser.add_argument('--loss_type', type=str, default=h.loss_type)
+	parser.add_argument('--update_target_freq', type=int, default=h.update_target_freq)
+	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
+
+	return parser.parse_args()
+
+
 def main():
+	args = argparser()
 	# Build environment
-	env = gym.make(h.env_name)
-	agent = DDQN(env)
+	env = gym.make(args.env_name)
+	agent = DDQN(args, env)
 	obs = env.reset()
 
 	# Episode related information
@@ -21,8 +58,8 @@ def main():
 	if torch.cuda.is_available():
 		torch.cuda.set_device(device)
 
-	for iteration in range(h.max_iterations):
-		if h.render:
+	for iteration in range(args.max_iterations):
+		if args.render:
 			env.render()
 
 		# Take action
@@ -51,12 +88,12 @@ def main():
 		agent.update_policy()
 
 		# Update target policy
-		if ep_counter % h.update_target_freq == 0:
+		if ep_counter % args.update_target_freq == 0:
 			agent.update_target_policy()
 
 	# End
 	env.close()
-	plot(agent.logger.filename, 'ddqn', 'episodes', 'rewards', True)
+	plot('DDQN', args.env_name, args.seed, 'episodes', 'rewards', True)
 
 
 if __name__ == '__main__':

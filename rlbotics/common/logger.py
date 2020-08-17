@@ -1,31 +1,59 @@
 import os
-import pandas as pd
+import csv
+import json
+import shutil
 from torch.utils.tensorboard import SummaryWriter
 
 
 class Logger:
-	def __init__(self, log_name='data'):
+	def __init__(self, algo_name, env_name, seed):
 		"""
-		NOTE: You can only log once per time step
-		:param log_name: (str) name of file in which log will be stored
+		:param algo_name: (str) name of file in which log will be stored
+		:param env_name: (str) name of environment used in experiment
+		:param seed: (int) random seed used in experiment
 		"""
 		cur_dir = os.getcwd()
-		log_dir = os.path.join(cur_dir, 'logs/')
-		if not os.path.exists(log_dir):
-			os.makedirs(log_dir)
+		self.log_dir = os.path.join(cur_dir, 'logs', algo_name + '_' + env_name + '_ ' + str(seed))
+		self.model_dir = os.path.join(cur_dir, 'models', algo_name + '_' + env_name + '_ ' + str(seed))
+		if os.path.exists(self.log_dir):
+			shutil.rmtree(self.log_dir)
+		if os.path.exists(self.model_dir):
+			shutil.rmtree(self.model_dir)
+		os.makedirs(self.log_dir)
+		os.makedirs(self.model_dir)
 
-		self.keys = []
-		self.filename = os.path.join(log_dir, 'log_' + log_name + '.csv')
-		open(self.filename, 'w')
+		self.transition_keys, self.policy_update_keys = [], []
 
 		# Tensor Board
-		self.writer = SummaryWriter(log_dir=log_dir)
+		self.writer = SummaryWriter(log_dir=self.log_dir)
 
-	def save_tabular(self, **kwargs):
-		header = True if len(self.keys) == 0 else False
-		self.keys = list(kwargs.keys())
-		df = pd.DataFrame(kwargs, index=[0])
-		self._write_file(df, header)
+	def log(self, name='params', **kwargs):
+		if name == 'transitions':
+			file = os.path.join(self.log_dir, 'transitions.csv')
+			header = True if len(self.transition_keys) == 0 else False
+			if header:
+				self.transition_keys = list(kwargs.keys())
+			self._save_tabular(file, header, **kwargs)
 
-	def _write_file(self, df, header):
-		df.to_csv(self.filename, header=header, mode='a', index=False)
+		elif name == 'policy_updates':
+			file = os.path.join(self.log_dir, 'policy_updates.csv')
+			header = True if len(self.policy_update_keys) == 0 else False
+			if header:
+				self.policy_update_keys = list(kwargs.keys())
+			self._save_tabular(file, header, **kwargs)
+
+		elif name == 'params':
+			file = os.path.join(self.log_dir, 'params.json')
+			with open(file, 'w') as f:
+				json.dump(kwargs, f, indent=4)
+
+	def _save_tabular(self, file, header, **kwargs):
+		with open(file, 'a') as f:
+			writer = csv.writer(f)
+			if header:
+				writer.writerow(kwargs.keys())
+			writer.writerow(kwargs.values())
+
+	def log_model(self, mlp):
+		file = os.path.join(self.model_dir, 'model.pth')
+		mlp.save_model(file)

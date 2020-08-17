@@ -1,30 +1,46 @@
 import torch
-import torch.nn as nn
 import math
 
-from rlbotics.ddqn.replay_buffer import ReplayBuffer
-import rlbotics.ddqn.hyperparameters as h
-from rlbotics.common.policies import MLPEpsilonGreedy
-from rlbotics.common.approximators import MLP
+from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
+from rlbotics.common.approximators import MLP
+from rlbotics.ddqn.replay_buffer import ReplayBuffer
+from rlbotics.common.policies import MLPEpsilonGreedy
 
 
 class DDQN:
-	def __init__(self, env):
+	def __init__(self, args, env):
 		self.obs_dim = env.observation_space.shape[0]
 		self.act_dim = env.action_space.n
 
+		# General parameters
+		self.lr = args.lr
+		self.gamma = args.gamma
+		self.seed = args.seed
+
+		# DDQN specific parameters
+		self.epsilon = args.epsilon
+		self.min_epsilon = args.min_epsilon
+		self.exp_decay = args.exp_decay
+		self.linear_decay = args.linear_decay
+		self.batch_size = args.batch_size
+		self.buffer_size = args.buffer_size
+
+		# Policy network parameters
+		self.loss_type = args.loss_type
+		self.optimizer = args.optimizer
+		self.use_grad_clip = args.use_grad_clip
+		self.activations = args.activations
+		self.hidden_sizes = args.hidden_sizes
+
 		# Replay buffer
-		self.memory = ReplayBuffer(h.buffer_size)
+		self.memory = ReplayBuffer(self.buffer_size)
 
 		# Logger
-		self.logger = Logger('DDQN')
-
-		# Decaying epsilon (exp. and linear)
-		self.epsilon = h.epsilon
+		self.logger = Logger('DDQN', args.env_name, self.seed)
 
 		# Gradient clipping
-		if h.grad_clip:
+		if self.use_grad_clip:
 			self.grad_clip = (-1, 1)
 		else:
 			self.grad_clip = None
@@ -33,19 +49,24 @@ class DDQN:
 		self.steps_done = 0
 
 		# Loss function
-		self.criterion = nn.MSELoss()
+		self.criterion = losses(self.loss_type)
 
 		# Build policies
 		self._build_policy()
 
-	def _build_policy(self):
-		layer_sizes = [self.obs_dim] + h.hidden_sizes + [self.act_dim]
-		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
-									   activations=h.activations,
-									   optimizer=h.optimizer,
-									   lr=h.lr)
+		# Log parameter data
+		total_params = sum(p.numel() for p in self.policy.parameters())
+		trainable_params = sum(p.numel() for p in self.policy.parameters() if p.requires_grad)
+		self.logger.log(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
-		self.target_policy = MLP(layer_sizes=layer_sizes, activations=h.activations)
+	def _build_policy(self):
+		layer_sizes = [self.obs_dim] + self.hidden_sizes + [self.act_dim]
+		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
+									   activations=self.activations,
+									   optimizer=self.optimizer,
+									   lr=self.lr)
+
+		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations)
 		self.update_target_policy()
 
 	def get_action(self, obs):
@@ -55,24 +76,23 @@ class DDQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			# self.epsilon = max(h.min_epsilon, self.epsilon*h.epsilon_decay)
-			self.epsilon = h.min_epsilon + (h.epsilon - h.min_epsilon) * math.exp(-1. * self.steps_done / h.epsilon_decay)
+			self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
 			self.steps_done += 1
 		elif mode == 'linear':
-			self.epsilon = max(h.min_epsilon, self.epsilon-h.linear_decay)
+			self.epsilon = max(self.min_epsilon, self.epsilon-self.linear_decay)
 
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		#self.logger.save_tabular(done=done, rewards=rew, epsilon=self.epsilon)
+		self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
 
 	def update_policy(self):
-		if len(self.memory) < h.batch_size:
+		if len(self.memory) < self.batch_size:
 			return
 
 		# Sample batch of transitions
-		transition_batch = self.memory.sample(h.batch_size)
+		transition_batch = self.memory.sample(self.batch_size)
 
 		# Extract batches and convert to tensors
 		obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
@@ -83,17 +103,18 @@ class DDQN:
 		not_done_batch = torch.logical_not(done_batch)
 
 		# Update
-		out = self.policy.predict(obs_batch)
-
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
 		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1)
-		target_values = torch.zeros(h.batch_size, 1)
+		target_values = torch.zeros(self.batch_size, 1)
 		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1)).detach()
 
-		expected_q_values = rew_batch.unsqueeze(1) + h.gamma * target_values
+		expected_q_values = rew_batch.unsqueeze(1) + self.gamma * target_values
 
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
+
+		# Log Model
+		self.logger.log_model(self.policy)
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())
