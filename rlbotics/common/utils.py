@@ -3,6 +3,19 @@ import pandas as pd
 import torch
 import numpy as np
 
+def get_latest_return(log_file):
+    logs = pd.read_csv(log_file)
+    ep_return = 1
+
+    for i in reversed(range(len(logs)-1)):
+        if logs.loc[i,'done'] == False:
+            ep_return += logs.loc[i, 'rewards']
+
+        elif logs.loc[i,'done'] == True:
+            break
+
+    return ep_return
+
 
 def get_return(log_file):
     logs = pd.read_csv(log_file)
@@ -13,7 +26,7 @@ def get_return(log_file):
     for i in range(len(logs)):
         if logs.loc[i,'done'] == False:
             ep_sum += logs.loc[i, 'rewards']
-            
+
         elif logs.loc[i,'done'] == True:
             ep_sum += logs.loc[i, 'rewards']
             ep_returns.append(ep_sum)
@@ -54,4 +67,3 @@ def get_expected_return(rew, done, gamma, normalize_output=True):
 
 def normalize(x):
     return (x - torch.mean(x)) / torch.std(x)
-

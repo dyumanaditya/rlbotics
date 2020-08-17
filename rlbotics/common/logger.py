@@ -3,6 +3,7 @@ import csv
 import json
 import shutil
 from torch.utils.tensorboard import SummaryWriter
+from rlbotics.common.utils import *
 
 
 class Logger:
@@ -27,6 +28,12 @@ class Logger:
 		# Tensor Board
 		self.writer = SummaryWriter(log_dir=self.log_dir)
 
+		# counter to track number of policy updates
+		self.policy_updated = 0
+
+		# counter to track number of reward updates
+		self.reward_updated = 0
+
 	def log(self, name='params', **kwargs):
 		if name == 'transitions':
 			file = os.path.join(self.log_dir, 'transitions.csv')
@@ -48,11 +55,27 @@ class Logger:
 				json.dump(kwargs, f, indent=4)
 
 	def _save_tabular(self, file, header, **kwargs):
+		#print(file)
 		with open(file, 'a') as f:
 			writer = csv.writer(f)
 			if header:
 				writer.writerow(kwargs.keys())
 			writer.writerow(kwargs.values())
+
+		self._write_tensorboard(file, **kwargs)
+
+	def _write_tensorboard(self, file, **kwargs):
+		if 'transitions.csv' in file:
+			if kwargs.get('done'):
+				latest_return = get_latest_return(file)
+				print(latest_return)
+				self.writer.add_scalar("rewards", latest_return, self.reward_updated)
+				self.reward_updated += 1
+		else:
+			for key, value in kwargs.items():
+				self.writer.add_scalar(key, value, self.policy_updated)
+
+			self.policy_updated += 1
 
 	def log_model(self, mlp):
 		file = os.path.join(self.model_dir, 'model.pth')

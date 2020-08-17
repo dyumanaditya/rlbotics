@@ -5,7 +5,7 @@ from rlbotics.vpg.memory import Memory
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
-from rlbotics.vpg.utils import *
+from rlbotics.common.utils import *
 
 
 class VPG:

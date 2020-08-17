@@ -81,7 +81,7 @@ def main():
                 # Display results
                 print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
 
-                agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
+                #agent.logger.writer.add_scalar("return/episode", ep_rew, ep_counter)
 
                 # Logging
                 ep_counter += 1
