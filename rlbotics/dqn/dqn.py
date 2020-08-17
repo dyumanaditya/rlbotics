@@ -53,6 +53,7 @@ class DQN:
 
 		# Build policies
 		self._build_policy()
+
 		# Log parameter data
 		total_params = sum(p.numel() for p in self.policy.parameters())
 		trainable_params = sum(p.numel() for p in self.policy.parameters() if p.requires_grad)
