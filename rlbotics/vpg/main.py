@@ -39,59 +39,59 @@ def argparser():
 	return parser.parse_args()
 
 def main():
-    args = argparser()
+	args = argparser()
 
-    # Set device
-    gpu = 0
-    device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
-    print(device)
-    if torch.cuda.is_available():
-        torch.cuda.set_device(device)
+	# Set device
+	gpu = 0
+	device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
+	print(device)
+	if torch.cuda.is_available():
+		torch.cuda.set_device(device)
 
-    # Build environment
-    env = gym.make(args.env_name)
-    agent = VPG(args, env)
-    obs = env.reset()
+	# Build environment
+	env = gym.make(args.env_name)
+	agent = VPG(args, env)
+	obs = env.reset()
 
 	# Episode related information
-    ep_counter = 0
-    ep_rew = 0
+	ep_counter = 0
+	ep_rew = 0
 
-    for epoch in range(args.max_epochs):
-        for iteration in range(args.max_iterations):
-            if h.render:
-                env.render()
+	for epoch in range(args.max_epochs):
+		for iteration in range(args.max_iterations):
+			if h.render:
+				env.render()
 
-            # Take action
-            act = agent.get_action(obs)
-            new_obs, rew, done, _ = env.step(act)
+			# Take action
+			act = agent.get_action(obs)
+			new_obs, rew, done, _ = env.step(act)
 
-            # Store experience
-            agent.store_transition(obs, act, rew, new_obs, done)
+			# Store experience
+			agent.store_transition(obs, act, rew, new_obs, done)
 
 			ep_rew += rew
-            obs = new_obs
+			obs = new_obs
 
-            # Episode done
-            if done:
-                obs = env.reset()
-                # Display results
-                print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
+			# Episode done
+			if done:
+				obs = env.reset()
+				# Display results
+				print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
 
 				# Logging
-                ep_counter += 1
-                ep_rew = 0
+				ep_counter += 1
+				ep_rew = 0
 
-        # Update Policy
-        agent.update_policy()
+		# Update Policy
+		agent.update_policy()
 
-        # Update Value
-        agent.update_value()
+		# Update Value
+		agent.update_value()
 
-    # End
-    env.close()
-    plot('VPG', args.env_name, args.seed, 'episodes', 'rewards', True)
+	# End
+	env.close()
+	plot('VPG', args.env_name, args.seed, 'episodes', 'rewards', True)
 
 
 if __name__ == '__main__':
-    main()
+	main()
