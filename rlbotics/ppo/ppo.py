@@ -15,6 +15,7 @@ class PPO:
 
         # General parameters
         self.gamma = args.gamma
+        self.lam = args.lam
         self.seed = args.seed
         self.batch_size = args.batch_size
         self.num_value_iters = args.num_value_iters
@@ -84,10 +85,11 @@ class PPO:
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        values = self.value.predict(obs_batch)
+        values = torch.flatten(self.value.predict(obs_batch))
 
-        # adv_batch = reward_to_go - expected_return
         adv_batch = expected_return - values
+
+        adv_batch = finish_path(rew_batch, done_batch, values, adv_batch, self.gamma, self.lam)
 
         data = dict(obs=obs_batch,
                     act=act_batch,
@@ -139,8 +141,7 @@ class PPO:
             policy_loss.backward()
             self.policy.optimizer.step()
 
-        # TODO: Log KL, Entropy, Loss difference,
-        # TODO: Print
+        self.logger.log(name='policy_updates', loss=policy_loss.item(), kl=logging_info["kl"], entropy=logging_info["entropy"])
 
         # Log Model
         self.logger.log_model(self.policy)

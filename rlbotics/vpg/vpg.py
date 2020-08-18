@@ -5,7 +5,7 @@ from rlbotics.vpg.memory import Memory
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
-from rlbotics.vpg.utils import *
+from rlbotics.common.utils import *
 
 
 class VPG:
@@ -15,6 +15,7 @@ class VPG:
 
         # General parameters
         self.gamma = args.gamma
+        self.lam = args.lam
         self.seed = args.seed
         self.batch_size = args.batch_size
         self.num_v_iters = args.num_v_iters
@@ -79,10 +80,11 @@ class VPG:
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        values = self.value.predict(obs_batch)
+        values = torch.flatten(self.value.predict(obs_batch))
 
-        # adv_batch = reward_to_go - expected_return
         adv_batch = expected_return - values
+
+        adv_batch = finish_path(rew_batch, done_batch, values, adv_batch, self.gamma, self.lam)
 
         data = dict(obs=obs_batch,
                     act=act_batch,
@@ -104,6 +106,8 @@ class VPG:
 
         loss = self.compute_policy_loss(obs, act, adv)
         self.policy.learn(loss)
+
+        self.logger.log(name='policy_updates', loss=loss.item())
 
         # Log Model
         self.logger.log_model(self.policy)
