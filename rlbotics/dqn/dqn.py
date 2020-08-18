@@ -85,7 +85,7 @@ class DQN:
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
+		self.logger.log(name='transitions', done=done, rewards=rew)#, epsilon=self.epsilon)
 
 	def update_policy(self):
 		if len(self.memory) < self.batch_size:
@@ -113,9 +113,10 @@ class DQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
+		self.logger.log(name='policy_updates', loss=loss.item())
+
 		# Log Model and Loss
 		self.logger.log_model(self.policy)
-		self.logger.log(name='policy_updates', loss=loss)
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())

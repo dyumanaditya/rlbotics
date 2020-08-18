@@ -73,10 +73,11 @@ class Logger:
 			for key, value in kwargs.items():
 				self.writer.add_scalar(key, value, self.tensorboard_updated)
 
-			self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
-			self.episode_returns.clear()
+			if self.episode_returns:
+				self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
+				self.episode_returns.clear()
 
-			self.tensorboard_updated += 1
+				self.tensorboard_updated += 1
 
 	def log_model(self, mlp):
 		file = os.path.join(self.model_dir, 'model.pth')
