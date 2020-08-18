@@ -2,6 +2,7 @@ import os
 import csv
 import json
 import shutil
+import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from rlbotics.common.utils import *
 
@@ -29,10 +30,11 @@ class Logger:
 		self.writer = SummaryWriter(log_dir=self.log_dir)
 
 		# counter to track number of policy updates
-		self.policy_updated = 0
+		self.tensorboard_updated = 0
 
-		# counter to track number of reward updates
-		self.reward_updated = 0
+		# keeps track of returns from episodes for each epoch
+		self.episode_returns = []
+
 
 	def log(self, name='params', **kwargs):
 		if name == 'transitions':
@@ -68,13 +70,15 @@ class Logger:
 		if 'transitions.csv' in file:
 			if kwargs.get('done'):
 				latest_return = get_latest_return(file)
-				self.writer.add_scalar("rewards", latest_return, self.reward_updated)
-				self.reward_updated += 1
+				self.episode_returns.append(latest_return)
 		else:
 			for key, value in kwargs.items():
-				self.writer.add_scalar(key, value, self.policy_updated)
+				self.writer.add_scalar(key, value, self.tensorboard_updated)
 
-			self.policy_updated += 1
+			self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
+			self.episode_returns.clear()
+
+			self.tensorboard_updated += 1
 
 	def log_model(self, mlp):
 		file = os.path.join(self.model_dir, 'model.pth')

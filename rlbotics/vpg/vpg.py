@@ -105,6 +105,8 @@ class VPG:
         loss = self.compute_policy_loss(obs, act, adv)
         self.policy.learn(loss)
 
+        self.logger.log(name='policy_updates', loss=loss.item())
+
         # Log Model
         self.logger.log_model(self.policy)
 

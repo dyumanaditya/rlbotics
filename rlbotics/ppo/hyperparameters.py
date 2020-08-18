@@ -1,8 +1,8 @@
 # General Parameters:
 env_name            = 'CartPole-v1'
 gamma               = 0.99
-max_iterations      = 1000
-max_epochs          = 50
+max_iterations      = 512
+max_epochs          = 500
 render              = False
 batch_size          = 512
 num_value_iters     = 80
@@ -16,7 +16,7 @@ clip_ratio  = 0.2
 # Policy Network:
 pi_hidden_sizes   = [64, 64]
 pi_activations    = ['relu', 'relu', 'none']
-pi_lr             = 1e-3
+pi_lr             = 5e-4
 pi_optimizer        = 'Adam'
 
 # Value Network:
