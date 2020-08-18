@@ -7,8 +7,8 @@ render         = False
 seed           = 0
 
 # DQN Specific:
-batch_size    = 512
-buffer_size   = 6000
+batch_size    = 64
+buffer_size   = 4000
 
 # Exp. epsilon decay
 epsilon 	  = 1.0
@@ -19,13 +19,13 @@ exp_decay     = 200
 linear_decay   = 0.001
 
 # Policy Network:
-hidden_sizes   = [64, 64] 	# Dimensions have to be 1 less than activations
+hidden_sizes   = [24, 24] 	# Dimensions have to be 1 less than activations
 activations    = ['relu', 'relu', 'none']
 optimizer      = 'Adam'
 loss_type      = 'mse'
 
 # Policy Target Network:
-update_target_freq = 10	# Update target network per _ episodes
+update_target_freq = 30	# Update target network per _ episodes
 
 # Gradient clipping
 use_grad_clip = False

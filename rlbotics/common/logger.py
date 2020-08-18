@@ -15,8 +15,8 @@ class Logger:
 		:param seed: (int) random seed used in experiment
 		"""
 		cur_dir = os.getcwd()
-		self.log_dir = os.path.join(cur_dir, 'logs', algo_name + '_' + env_name + '_ ' + str(seed))
-		self.model_dir = os.path.join(cur_dir, 'models', algo_name + '_' + env_name + '_ ' + str(seed))
+		self.log_dir = os.path.join(cur_dir, 'experiments', 'logs', algo_name + '_' + env_name + '_' + str(seed))
+		self.model_dir = os.path.join(cur_dir, 'experiments', 'models', algo_name + '_' + env_name + '_' + str(seed))
 		if os.path.exists(self.log_dir):
 			shutil.rmtree(self.log_dir)
 		if os.path.exists(self.model_dir):
@@ -34,7 +34,6 @@ class Logger:
 
 		# keeps track of returns from episodes for each epoch
 		self.episode_returns = []
-
 
 	def log(self, name='params', **kwargs):
 		if name == 'transitions':
@@ -57,7 +56,6 @@ class Logger:
 				json.dump(kwargs, f, indent=4)
 
 	def _save_tabular(self, file, header, **kwargs):
-		#print(file)
 		with open(file, 'a') as f:
 			writer = csv.writer(f)
 			if header:

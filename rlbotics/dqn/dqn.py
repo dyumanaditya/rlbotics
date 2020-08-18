@@ -113,8 +113,9 @@ class DQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
-		# Log Model
+		# Log Model and Loss
 		self.logger.log_model(self.policy)
+		self.logger.log(name='policy_updates', loss=loss)
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())

@@ -7,8 +7,8 @@ from rlbotics.common.utils import get_return
 
 def plot(algo_name, env_name, seed, xlabel=None, ylabel=None, display=False):
 	cur_dir = os.getcwd()
-	plt_dir = os.path.join(cur_dir, 'plots/', algo_name + '_' + env_name + '_ ' + str(seed))
-	log_file = os.path.join(cur_dir, 'logs/', algo_name + '_' + env_name + '_ ' + str(seed), 'transitions.csv')
+	plt_dir = os.path.join(cur_dir, 'experiments', 'plots', algo_name + '_' + env_name + '_ ' + str(seed))
+	log_file = os.path.join(cur_dir, 'experiments', 'logs', algo_name + '_' + env_name + '_ ' + str(seed), 'transitions.csv')
 	if os.path.exists(plt_dir):
 		shutil.rmtree(plt_dir)
 	os.makedirs(plt_dir)
