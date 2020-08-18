@@ -18,6 +18,7 @@ def argparser():
 	parser.add_argument('--seed', type=int, default=h.seed)
 	parser.add_argument('--env_name', type=str, default=h.env_name)
 	parser.add_argument('--gamma', type=float, default=h.gamma)
+	parser.add_argument('--lam', type=float, default=h.lam)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--max_epochs', type=int, default=h.max_epochs)
 	parser.add_argument('--render', type=bool, default=h.render)

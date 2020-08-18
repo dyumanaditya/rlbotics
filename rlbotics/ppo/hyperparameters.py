@@ -1,6 +1,7 @@
 # General Parameters:
 env_name            = 'CartPole-v1'
 gamma               = 0.99
+lam                 = 0.9
 max_iterations      = 512
 max_epochs          = 500
 render              = False
