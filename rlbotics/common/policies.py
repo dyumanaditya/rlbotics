@@ -5,8 +5,9 @@ from torch.distributions import Categorical
 
 
 class MLPSoftmaxPolicy(MLP):
-	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+		torch.manual_seed(seed)
 
 	def get_action(self, obs):
 		with torch.no_grad():
@@ -28,8 +29,9 @@ class MLPSoftmaxPolicy(MLP):
 
 
 class MLPGaussian(MLP):
-	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+		torch.manual_seed(seed)
 
 	def get_policy(self, obs):
 		pass
@@ -42,8 +44,9 @@ class MLPGaussian(MLP):
 
 
 class MLPEpsilonGreedy(MLP):
-	def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+		torch.manual_seed(seed)
 		self.action_size = layer_sizes[-1]
 
 	def get_action(self, obs, epsilon):

@@ -34,7 +34,7 @@ class DDQN:
 		self.hidden_sizes = args.hidden_sizes
 
 		# Replay buffer
-		self.memory = ReplayBuffer(self.buffer_size)
+		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
 		# Logger
 		self.logger = Logger('DDQN', args.env_name, self.seed)
@@ -76,7 +76,8 @@ class DDQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
+			self.epsilon = max(self.min_epsilon, self.epsilon*self.exp_decay)
+			#self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
 			self.steps_done += 1
 		elif mode == 'linear':
 			self.epsilon = max(self.min_epsilon, self.epsilon-self.linear_decay)
@@ -113,8 +114,9 @@ class DDQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
-		# Log Model
+		# Log Model and Loss
 		self.logger.log_model(self.policy)
+		self.logger.log(name='policy_updates', loss=loss.item())
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())

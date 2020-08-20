@@ -8,7 +8,7 @@ class MLP(nn.Module):
     Multi-Layered Perceptron
     """
 
-    def __init__(self, layer_sizes, activations, optimizer='Adam', lr=0.01):
+    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
         """
         :param layer_sizes: (list) sizes of each layer (including IO layers)
         :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', 'none']
@@ -16,6 +16,7 @@ class MLP(nn.Module):
         :param lr: (float) learning rate
         """
         super(MLP, self).__init__()
+        torch.manual_seed(seed)
         self.obs_dim = layer_sizes[0]
 
         # Build NN

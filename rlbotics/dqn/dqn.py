@@ -4,7 +4,7 @@ import math
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
 from rlbotics.common.approximators import MLP
-from rlbotics.ddqn.replay_buffer import ReplayBuffer
+from rlbotics.dqn.replay_buffer import ReplayBuffer
 from rlbotics.common.policies import MLPEpsilonGreedy
 
 
@@ -34,7 +34,7 @@ class DQN:
 		self.hidden_sizes = args.hidden_sizes
 
 		# Replay buffer
-		self.memory = ReplayBuffer(self.buffer_size)
+		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
 		# Logger
 		self.logger = Logger('DQN', args.env_name, self.seed)
@@ -76,7 +76,9 @@ class DQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
+			self.epsilon = self.min_epsilon + (1.0 - self.min_epsilon) * math.exp(-0.0005 * self.steps_done)
+			#self.epsilon = max(self.min_epsilon, self.epsilon*self.exp_decay)
+			#self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
 			self.steps_done += 1
 		elif mode == 'linear':
 			self.epsilon = max(self.min_epsilon, self.epsilon-self.linear_decay)
@@ -85,7 +87,7 @@ class DQN:
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		self.logger.log(name='transitions', done=done, rewards=rew)#, epsilon=self.epsilon)
+		self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
 
 	def update_policy(self):
 		if len(self.memory) < self.batch_size:
@@ -113,10 +115,9 @@ class DQN:
 		loss = self.criterion(q_values, expected_q_values)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
-		self.logger.log(name='policy_updates', loss=loss.item())
-
 		# Log Model and Loss
-		self.logger.log_model(self.policy)
+		#self.logger.log_model(self.policy)
+		self.logger.log(name='policy_updates', loss=loss.item())
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())
