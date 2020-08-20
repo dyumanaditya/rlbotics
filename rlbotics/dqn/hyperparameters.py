@@ -2,7 +2,7 @@
 env_name       = 'CartPole-v1'
 gamma          = 1.0
 lr             = 1e-4
-max_iterations = 1000000
+max_iterations = 200000
 render         = False
 seed           = 0
 

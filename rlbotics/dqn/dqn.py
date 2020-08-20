@@ -34,7 +34,7 @@ class DQN:
 		self.hidden_sizes = args.hidden_sizes
 
 		# Replay buffer
-		self.memory = ReplayBuffer(self.buffer_size, self.seed)
+		self.memory = ReplayBuffer(self.buffer_size)
 
 		# Logger
 		self.logger = Logger('DQN', args.env_name, self.seed)
