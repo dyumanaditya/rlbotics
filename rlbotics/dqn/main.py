@@ -22,7 +22,7 @@ def argparser():
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--render', type=bool, default=h.render)
 
-	# DDQN Specific Parameters
+	# DQN Specific Parameters
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
 	parser.add_argument('--buffer_size', type=int, default=h.buffer_size)
 	parser.add_argument('--epsilon', type=float, default=h.epsilon)

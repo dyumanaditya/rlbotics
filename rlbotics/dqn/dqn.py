@@ -63,10 +63,11 @@ class DQN:
 		layer_sizes = [self.obs_dim] + self.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
 									   activations=self.activations,
+									   seed=self.seed,
 									   optimizer=self.optimizer,
 									   lr=self.lr)
 
-		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations)
+		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations, seed=self.seed)
 		self.update_target_policy()
 
 	def get_action(self, obs):
@@ -76,9 +77,7 @@ class DQN:
 
 	def decay_epsilon(self, mode):
 		if mode == 'exp':
-			self.epsilon = self.min_epsilon + (1.0 - self.min_epsilon) * math.exp(-0.0005 * self.steps_done)
-			#self.epsilon = max(self.min_epsilon, self.epsilon*self.exp_decay)
-			#self.epsilon = self.min_epsilon + (self.epsilon - self.min_epsilon) * math.exp(-1. * self.steps_done / self.exp_decay)
+			self.epsilon = self.min_epsilon + (1.0 - self.min_epsilon) * math.exp(-self.exp_decay * self.steps_done)
 			self.steps_done += 1
 		elif mode == 'linear':
 			self.epsilon = max(self.min_epsilon, self.epsilon-self.linear_decay)
@@ -116,7 +115,8 @@ class DQN:
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 		# Log Model and Loss
-		#self.logger.log_model(self.policy)
+		if self.steps_done % 5000 == 0:
+			self.logger.log_model(self.policy)
 		self.logger.log(name='policy_updates', loss=loss.item())
 
 	def update_target_policy(self):

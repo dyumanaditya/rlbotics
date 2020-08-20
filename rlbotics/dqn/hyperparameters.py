@@ -1,19 +1,19 @@
 # General Parameters:
 env_name       = 'CartPole-v1'
 gamma          = 1.0
-lr             = 6e-5
+lr             = 1e-4
 max_iterations = 1000000
 render         = False
 seed           = 0
 
 # DQN Specific:
-batch_size    = 32
-buffer_size   = 50000
+batch_size    = 512
+buffer_size   = 100000
 
 # Exp. epsilon decay
 epsilon 	  = 1.0
-min_epsilon   = 0.001
-exp_decay     = 200
+min_epsilon   = 0.01
+exp_decay     = 0.0001
 
 # Linear epsilon decay
 linear_decay   = 0.001
@@ -25,7 +25,7 @@ optimizer      = 'Adam'
 loss_type      = 'mse'
 
 # Policy Target Network:
-update_target_freq = 20	# Update target network per _ episodes
+update_target_freq = 10	# Update target network per _ episodes
 
 # Gradient clipping
-use_grad_clip = True
+use_grad_clip = False
