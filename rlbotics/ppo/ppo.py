@@ -55,6 +55,7 @@ class PPO:
     def _build_policy(self):
         self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                        activations=self.pi_activations,
+                                       seed=self.seed,
                                        optimizer=self.pi_optimizer,
                                        lr=self.pi_lr)
         self.policy.summary()
@@ -62,6 +63,7 @@ class PPO:
     def _build_value_function(self):
         self.value = MLP(layer_sizes=[self.obs_dim] + self.v_hidden_sizes,
                          activations=self.v_activations,
+                         seed=self.seed,
                          optimizer=self.v_optimizer,
                          lr=self.v_lr)
         self.value.summary()
