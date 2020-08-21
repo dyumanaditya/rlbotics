@@ -2,9 +2,10 @@ import gym
 import torch
 import argparse
 
-from rlbotics.ppo.ppo import PPO
-import rlbotics.ppo.hyperparameters as h
+from rlbotics.trpo.trpo import TRPO
+import rlbotics.trpo.hyperparameters as h
 from rlbotics.common.visualization import plot
+
 
 def argparser():
 	"""
@@ -22,12 +23,7 @@ def argparser():
 	parser.add_argument('--max_epochs', type=int, default=h.max_epochs)
 	parser.add_argument('--render', type=bool, default=h.render)
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
-	parser.add_argument('--num_value_iters', type=int, default=h.num_value_iters)
-	parser.add_argument('--num_policy_iters', type=int, default=h.num_policy_iters)
-
-	# PPO specific hyperparameters
-	parser.add_argument('--kl_target', type=float, default=h.kl_target)
-	parser.add_argument('--clip_ratio', type=float, default=h.clip_ratio)
+	parser.add_argument('--num_v_iters', type=int, default=h.num_v_iters)
 
 	# Policy Network:
 	parser.add_argument('--pi_hidden_sizes', nargs='+', type=int, default=h.pi_hidden_sizes)
@@ -55,7 +51,7 @@ def main():
 
 	# Build environment
 	env = gym.make(args.env_name)
-	agent = PPO(args, env)
+	agent = TRPO(args, env)
 	obs = env.reset()
 
 	# Episode related information
@@ -63,7 +59,7 @@ def main():
 	ep_rew = 0
 
 	for epoch in range(args.max_epochs):
-		for iteration in range(h.max_iterations):
+		for iteration in range(args.max_iterations):
 			if h.render:
 				env.render()
 
@@ -83,6 +79,7 @@ def main():
 				# Display results
 				print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
 
+				# Logging
 				ep_counter += 1
 				ep_rew = 0
 
@@ -94,7 +91,7 @@ def main():
 
 	# End
 	env.close()
-	plot('PPO', args.env_name, args.seed, 'episodes', 'rewards', True)
+	plot('TRPO', args.env_name, args.seed, 'episodes', 'rewards', True)
 
 
 if __name__ == '__main__':

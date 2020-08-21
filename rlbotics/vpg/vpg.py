@@ -100,9 +100,6 @@ class VPG:
         return -(logp * adv_batch).mean()
 
     def update_policy(self):
-        if len(self.memory) < self.batch_size:
-            return
-
         self.data = self._get_data()
         obs, act, adv = self.data["obs"],  self.data["act"],  self.data["adv"]
 
@@ -115,9 +112,6 @@ class VPG:
         self.logger.log_model(self.policy)
 
     def update_value(self):
-        if len(self.memory) < self.batch_size:
-            return
-
         for _ in range(self.num_v_iters):
             self.value.optimizer.zero_grad()
             val, ret = self.value.predict(self.data["obs"]).squeeze(1), self.data["ret"]

@@ -26,14 +26,14 @@ def argparser():
 	parser.add_argument('--num_v_iters', type=int, default=h.num_v_iters)
 
 	# Policy Network:
-	parser.add_argument('--pi_hidden_sizes', type=int, default=h.pi_hidden_sizes)
-	parser.add_argument('--pi_activations', type=str, default=h.pi_activations)
+	parser.add_argument('--pi_hidden_sizes', nargs='+', type=int, default=h.pi_hidden_sizes)
+	parser.add_argument('--pi_activations', nargs='+', type=str, default=h.pi_activations)
 	parser.add_argument('--pi_lr', type=float, default=h.pi_lr)
 	parser.add_argument('--pi_optimizer', type=str, default=h.pi_optimizer)
 
 	# Value Network:
-	parser.add_argument('--v_hidden_sizes', type=int, default=h.v_hidden_sizes)
-	parser.add_argument('--v_activations', type=str, default=h.v_activations)
+	parser.add_argument('--v_hidden_sizes', nargs='+', type=int, default=h.v_hidden_sizes)
+	parser.add_argument('--v_activations', nargs='+', type=str, default=h.v_activations)
 	parser.add_argument('--v_lr', type=float, default=h.v_lr)
 	parser.add_argument('--v_optimizer', type=str, default=h.v_optimizer)
 
