@@ -9,6 +9,9 @@ batch_size      = 512
 num_v_iters     = 80
 seed            = 0
 
+# TRPO specific hyperparameters
+kl_target =     0.01
+
 # Policy Network:
 pi_hidden_sizes     = [64, 64]
 pi_activations      = ['relu', 'relu', 'none']

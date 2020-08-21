@@ -25,6 +25,9 @@ def argparser():
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
 	parser.add_argument('--num_v_iters', type=int, default=h.num_v_iters)
 
+	# TRPO specific hyperparameters
+	parser.add_argument('--kl_target', type=float, default=h.kl_target)
+
 	# Policy Network:
 	parser.add_argument('--pi_hidden_sizes', nargs='+', type=int, default=h.pi_hidden_sizes)
 	parser.add_argument('--pi_activations', nargs='+', type=str, default=h.pi_activations)

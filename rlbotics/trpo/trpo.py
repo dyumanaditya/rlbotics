@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from rlbotics.trpo.memory import Memory
+from rlbotics.trpo.utils import *
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
@@ -19,6 +20,9 @@ class TRPO:
         self.seed = args.seed
         self.batch_size = args.batch_size
         self.num_v_iters = args.num_v_iters
+
+        # TRPO specific hyperparameters
+        self.kl_target = args.kl_target
 
         # Policy Network
         self.pi_hidden_sizes = args.pi_hidden_sizes
@@ -95,21 +99,47 @@ class TRPO:
                     ret=expected_return)
         return data
 
-    def compute_policy_loss(self, obs_batch, act_batch, adv_batch):
-        logp = self.policy.get_log_prob(obs_batch, act_batch)
-        return -(logp * adv_batch).mean()
+    def compute_policy_loss(self):
+        # return max_step
+        obs = self.data["obs"]
+        act = self.data["act"]
+        adv = self.data["adv"]
+
+        new_policy = self.policy.get_distribution(obs)
+        old_policy = self.data["old_policy"]
+
+        new_log_prob = self.policy.get_log_prob(obs, act)
+        old_log_prob = self.data["old_log_prob"]
+
+        L = torch.mul(torch.exp(new_log_prob - old_log_prob), adv).mean()
+        kl = torch.distributions.kl.kl_divergence(old_policy, new_policy).mean()
+        ent = new_policy.entropy().mean()
+
+        #print(L, kl, ent)
+        #logging_info = dict(kl=kl, entropy=ent)
+
+        return L, kl, ent
 
     def update_policy(self):
         self.data = self._get_data()
         obs, act, adv = self.data["obs"],  self.data["act"],  self.data["adv"]
+        self.data["old_log_prob"] = self.policy.get_log_prob(obs, act)
+        self.data["old_policy"] = self.policy.get_distribution(obs)
 
-        loss = self.compute_policy_loss(obs, act, adv)
-        self.policy.learn(loss)
+        L, kl, ent = self.compute_policy_loss()
 
-        self.logger.log(name='policy_updates', loss=loss.item())
+        parameters = list(self.policy.parameters())
+
+        g = flat_grad(L, parameters, retain_graph=True)
+        d_kl = flat_grad(kl, parameters, create_graph=True)
+
+        print(g)
+        print(d_kl)
+
+        #self.logger.log(name='policy_updates', loss=loss.item())
 
         # Log Model
-        self.logger.log_model(self.policy)
+        #self.logger.log_model(self.policy)
 
     def update_value(self):
         for _ in range(self.num_v_iters):
