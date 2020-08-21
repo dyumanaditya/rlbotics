@@ -130,8 +130,8 @@ class TRPO:
 
         parameters = list(self.policy.parameters())
 
-        g = flat_grad(L, parameters, retain_graph=True)
-        d_kl = flat_grad(kl, parameters, create_graph=True)
+        g = flat_grad(L, parameters)
+        d_kl = flat_grad(kl, parameters)
 
         print(g)
         print(d_kl)
