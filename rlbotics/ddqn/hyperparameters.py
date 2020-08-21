@@ -2,9 +2,10 @@
 env_name       = 'CartPole-v1'
 gamma          = 1.0
 lr             = 1e-4
-max_iterations = 200000
+max_iterations = 500000
 render         = False
 seed           = 0
+use_grad_clip  = False
 
 # DDQN Specific:
 batch_size    = 512
@@ -26,6 +27,3 @@ loss_type      = 'mse'
 
 # Policy Target Network:
 update_target_freq = 10	# Update target network per _ episodes
-
-# Gradient clipping
-use_grad_clip = False

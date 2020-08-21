@@ -31,8 +31,8 @@ def argparser():
 	parser.add_argument('-linear_decay', type=float, default=h.linear_decay)
 
 	# Policy/Target Network
-	parser.add_argument('--hidden_sizes', type=int, default=h.hidden_sizes)
-	parser.add_argument('--activations', type=str, default=h.activations)
+	parser.add_argument('--hidden_sizes', nargs='+', type=int, default=h.hidden_sizes)
+	parser.add_argument('--activations', nargs='+', type=str, default=h.activations)
 	parser.add_argument('--optimizer', type=str, default=h.optimizer)
 	parser.add_argument('--loss_type', type=str, default=h.loss_type)
 	parser.add_argument('--update_target_freq', type=int, default=h.update_target_freq)

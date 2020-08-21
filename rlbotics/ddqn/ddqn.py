@@ -63,10 +63,11 @@ class DDQN:
 		layer_sizes = [self.obs_dim] + self.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
 									   activations=self.activations,
+									   seed= self.seed,
 									   optimizer=self.optimizer,
 									   lr=self.lr)
 
-		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations)
+		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations, seed=self.seed)
 		self.update_target_policy()
 
 	def get_action(self, obs):
@@ -110,7 +111,7 @@ class DDQN:
 
 		expected_q_values = rew_batch.unsqueeze(1) + self.gamma * target_values
 
-		loss = self.criterion(q_values, expected_q_values)
+		loss = self.criterion(q_values, expected_q_values.float())
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 		# Log Model and Loss

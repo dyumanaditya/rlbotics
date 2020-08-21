@@ -111,7 +111,7 @@ class DQN:
 		expected_q_values = rew_batch + self.gamma * target_values
 		expected_q_values = expected_q_values.unsqueeze(1)
 
-		loss = self.criterion(q_values, expected_q_values)
+		loss = self.criterion(q_values, expected_q_values.float())
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 		# Log Model and Loss
