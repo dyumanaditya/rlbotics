@@ -17,7 +17,6 @@ class PPO:
         self.gamma = args.gamma
         self.lam = args.lam
         self.seed = args.seed
-        self.batch_size = args.batch_size
         self.num_value_iters = args.num_value_iters
         self.num_policy_iters = args.num_policy_iters
 
@@ -86,6 +85,9 @@ class PPO:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
+        old_log_prob = self.policy.get_log_prob(obs_batch, act_batch)
+        old_policy = self.policy.get_distribution(obs_batch)
+
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
         values = torch.flatten(self.value.predict(obs_batch))
 
@@ -97,7 +99,9 @@ class PPO:
                     act=act_batch,
                     val=values,
                     adv=adv_batch,
-                    ret=expected_return)
+                    ret=expected_return,
+                    old_log_prob=old_log_prob,
+                    old_policy=old_policy)
         return data
 
     def compute_policy_loss(self):
@@ -129,9 +133,6 @@ class PPO:
 
     def update_policy(self):
         self.data = self._get_data()
-        obs, act = self.data["obs"], self.data["act"]
-        self.data["old_log_prob"] = self.policy.get_log_prob(obs, act)
-        self.data["old_policy"] = self.policy.get_distribution(obs)
 
         for _ in range(self.num_policy_iters):
             self.policy.optimizer.zero_grad()

@@ -1,5 +1,6 @@
 import torch
 
 def flat_grad(y, x):
-    grads = torch.autograd.grad(y, x)
-    return torch.cat([torch.reshape(g, [-1]) for g in grads], axis=0)
+    g = torch.autograd.grad(y, x)
+    g = torch.cat([t.view(-1) for t in g])
+    return g

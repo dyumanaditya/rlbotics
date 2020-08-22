@@ -5,7 +5,6 @@ lam                 = 0.9
 max_iterations      = 512
 max_epochs          = 500
 render              = False
-batch_size          = 512
 num_value_iters     = 80
 num_policy_iters    = 20
 seed                = 0

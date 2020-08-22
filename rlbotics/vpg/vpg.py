@@ -17,7 +17,6 @@ class VPG:
         self.gamma = args.gamma
         self.lam = args.lam
         self.seed = args.seed
-        self.batch_size = args.batch_size
         self.num_v_iters = args.num_v_iters
 
         # Policy Network
@@ -81,6 +80,9 @@ class VPG:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
+        old_log_prob = self.policy.get_log_prob(obs_batch, act_batch)
+        old_policy = self.policy.get_distribution(obs_batch)
+
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
         values = torch.flatten(self.value.predict(obs_batch))
 
@@ -92,7 +94,9 @@ class VPG:
                     act=act_batch,
                     val=values,
                     adv=adv_batch,
-                    ret=expected_return)
+                    ret=expected_return,
+                    old_log_prob=old_log_prob,
+                    old_policy=old_policy)
         return data
 
     def compute_policy_loss(self, obs_batch, act_batch, adv_batch):

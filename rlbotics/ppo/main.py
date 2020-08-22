@@ -21,7 +21,6 @@ def argparser():
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--max_epochs', type=int, default=h.max_epochs)
 	parser.add_argument('--render', type=bool, default=h.render)
-	parser.add_argument('--batch_size', type=int, default=h.batch_size)
 	parser.add_argument('--num_value_iters', type=int, default=h.num_value_iters)
 	parser.add_argument('--num_policy_iters', type=int, default=h.num_policy_iters)
 
