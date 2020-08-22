@@ -46,6 +46,7 @@ class MLPGaussian(MLP):
 class MLPEpsilonGreedy(MLP):
 	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+		random.seed(seed)
 		torch.manual_seed(seed)
 		self.action_size = layer_sizes[-1]
 

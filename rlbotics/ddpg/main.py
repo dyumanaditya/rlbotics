@@ -2,8 +2,8 @@ import gym
 import torch
 import argparse
 
-from rlbotics.dqn.dqn import DQN
-import rlbotics.dqn.hyperparameters as h
+from rlbotics.ddpg.ddpg import DDPG
+import rlbotics.ddpg.hyperparameters as h
 from rlbotics.common.visualization import plot
 
 
@@ -18,25 +18,30 @@ def argparser():
 	parser.add_argument('--seed', type=int, default=h.seed)
 	parser.add_argument('--env_name', type=str, default=h.env_name)
 	parser.add_argument('--gamma', type=float, default=h.gamma)
-	parser.add_argument('--lr', type=float, default=h.lr)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--render', type=bool, default=h.render)
 	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
 
-	# DQN Specific Parameters
+	# DDPG Specific
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
 	parser.add_argument('--buffer_size', type=int, default=h.buffer_size)
-	parser.add_argument('--epsilon', type=float, default=h.epsilon)
-	parser.add_argument('--min_epsilon', type=float, default=h.min_epsilon)
-	parser.add_argument('--exp_decay', type=float, default=h.exp_decay)
-	parser.add_argument('-linear_decay', type=float, default=h.linear_decay)
+	parser.add_argument('--polyak', type=float, default=h.polyak)
+	parser.add_argument('--act_noise', type=float, default=h.act_noise)
+	parser.add_argument('--noise_type', type=str, default=h.noise_type)
+	parser.add_argument('--random_steps', type=int, default=h.random_steps)
+	parser.add_argument('--update_after', type=int, default=h.update_after)
 
-	# Policy/Target Network
-	parser.add_argument('--hidden_sizes', nargs='+', type=int, default=h.hidden_sizes)
-	parser.add_argument('--activations', nargs='+', type=str, default=h.activations)
-	parser.add_argument('--optimizer', type=str, default=h.optimizer)
-	parser.add_argument('--loss_type', type=str, default=h.loss_type)
-	parser.add_argument('--update_target_freq', type=int, default=h.update_target_freq)
+	# Policy and Q Network specific
+	parser.add_argument('--save_freq', type=int, default=h.save_freq)
+	parser.add_argument('--pi_lr', type=float, default=h.pi_lr)
+	parser.add_argument('--q_lr', type=float, default=h.q_lr)
+	parser.add_argument('--pi_hidden_sizes', nargs='+', type=int, default=h.pi_hidden_sizes)
+	parser.add_argument('--q_hidden_sizes', nargs='+', type=int, default=h.q_hidden_sizes)
+	parser.add_argument('--pi_activations', nargs='+', type=str, default=h.pi_activations)
+	parser.add_argument('--q_activations', nargs='+', type=str, default=h.q_activations)
+	parser.add_argument('--pi_optimizer', type=str, default=h.pi_optimizer)
+	parser.add_argument('--q_optimizer', type=str, default=h.q_optimizer)
+	parser.add_argument('--q_loss_type', type=str, default=h.q_loss_type)
 
 	return parser.parse_args()
 
@@ -45,7 +50,7 @@ def main():
 	args = argparser()
 	# Build environment
 	env = gym.make(args.env_name)
-	agent = DQN(args, env)
+	agent = DDPG(args, env)
 	obs = env.reset()
 
 	# Episode related information
@@ -62,8 +67,8 @@ def main():
 		if args.render:
 			env.render()
 
-		# Take action
-		act = agent.get_action(obs)
+		# Take action Random in the beginning for exploration
+		act = agent.get_action(obs) if iteration > args.random_steps else env.action_space.sample()
 		new_obs, rew, done, _ = env.step(act)
 
 		# Store experience
@@ -76,22 +81,18 @@ def main():
 			obs = env.reset()
 
 			# Display results
-			print("episode: {}, total reward: {}, epsilon: {}".format(ep_counter, ep_rew, agent.epsilon))
+			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
 
 			# Logging
 			ep_counter += 1
 			ep_rew = 0
 
-		# Update Policy
-		agent.update_policy()
-
-		# Update target policy
-		if ep_counter % args.update_target_freq == 0:
-			agent.update_target_policy()
+		# Update Actor Critic
+		agent.update_actor_critic()
 
 	# End
 	env.close()
-	plot('DQN', args.env_name, args.seed, 'episodes', 'rewards', True)
+	plot('DDPG', args.env_name, args.seed, 'episodes', 'rewards', True)
 
 
 if __name__ == '__main__':

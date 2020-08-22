@@ -78,6 +78,6 @@ class Logger:
 
 				self.tensorboard_updated += 1
 
-	def log_model(self, mlp):
-		file = os.path.join(self.model_dir, 'model.pth')
+	def log_model(self, mlp, name=''):
+		file = os.path.join(self.model_dir, name + 'model.pth')
 		mlp.save_model(file)
