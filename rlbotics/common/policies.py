@@ -2,6 +2,7 @@ import torch
 import random
 from rlbotics.common.approximators import MLP
 from torch.distributions import Categorical
+import torch.nn.functional as F
 
 
 class MLPSoftmaxPolicy(MLP):
@@ -10,20 +11,23 @@ class MLPSoftmaxPolicy(MLP):
 		torch.manual_seed(seed)
 
 	def get_action(self, obs):
+		obs = torch.FloatTensor(obs).unsqueeze(0)
 		with torch.no_grad():
-			act_logits = self.predict(obs)
+			act_logits = self.mlp(obs)
 
 		act_dist = Categorical(logits=act_logits)
-		return act_dist.sample().item()
+		return act_dist.sample()
 
 	def get_log_prob(self, obs, act):
-		act_logits = self.predict(obs)
+		obs = torch.FloatTensor(obs).unsqueeze(0)
+		act_logits = self.mlp(obs)
 		act_dist = Categorical(logits=act_logits)
 		log_p = act_dist.log_prob(act)
 		return log_p
 
 	def get_distribution(self, obs):
-		act_logits = self.predict(obs)
+		obs = torch.FloatTensor(obs).unsqueeze(0)
+		act_logits = self.mlp(obs)
 		act_dist = Categorical(logits=act_logits)
 		return act_dist
 

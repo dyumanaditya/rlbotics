@@ -85,7 +85,8 @@ class TRPO:
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
         old_log_prob = self.policy.get_log_prob(obs_batch, act_batch)
-        old_policy = self.policy.get_distribution(obs_batch)
+        old_policy = self.policy(obs_batch)
+        old_policy = torch.distributions.utils.clamp_probs(old_policy)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
         values = torch.flatten(self.value.predict(obs_batch))
@@ -109,38 +110,74 @@ class TRPO:
         act = self.data["act"]
         adv = self.data["adv"]
 
-        new_policy = self.policy.get_distribution(obs)
+        new_policy = self.policy(obs)
+        new_policy = torch.nn.Softmax(dim=1)(new_policy)
+        new_policy = torch.distributions.utils.clamp_probs(new_policy)
+        #new_policy = self.policy.get_distribution(obs)
         old_policy = self.data["old_policy"]
 
         new_log_prob = self.policy.get_log_prob(obs, act)
         old_log_prob = self.data["old_log_prob"]
 
+
         L = torch.mul(torch.exp(new_log_prob - old_log_prob.detach()), adv).mean()
-        kl = torch.distributions.kl.kl_divergence(old_policy, new_policy).mean()
-        ent = new_policy.entropy().mean()
+        kl = kl_div(old_policy, new_policy)
+        #kl = torch.distributions.kl.kl_divergence(old_policy, new_policy).mean()
+
+        #ent = new_policy.entropy().mean()
 
         #print(L, kl, ent)
         #logging_info = dict(kl=kl, entropy=ent)
 
-        return L, kl, ent
+        return L, kl#, ent
 
     def update_policy(self):
         self.data = self._get_data()
 
-        L, kl, ent = self.compute_policy_loss()
+        L, kl = self.compute_policy_loss()
 
         parameters = list(self.policy.parameters())
 
-        g = flat_grad(L, parameters)
-        d_kl = flat_grad(kl, parameters)
+        print("first kl", kl)
 
-        print(g)
-        print(d_kl)
+        g = flat_grad(L, parameters, retain_graph=True)
+        d_kl = flat_grad(kl, parameters, create_graph=True)
 
-        #self.logger.log(name='policy_updates', loss=loss.item())
+        def HVP(v):
+            return flat_grad(torch.dot(d_kl, v), parameters, retain_graph=True)
+
+        search_dir = conjugate_gradient(HVP, g)
+        print("search dir = ", search_dir)
+        print("denom = ", torch.dot(search_dir, HVP(search_dir)))
+        max_length = torch.sqrt(2 * self.kl_target / torch.dot(search_dir, HVP(search_dir)))
+        print("max_length = ", max_length)
+        max_step = max_length * search_dir
+        print("max_step = ", max_step)
+
+        i = 0
+        while not self.take_step((0.9 ** i) * max_step, L) and i < 10:
+            i += 1
+
+        self.logger.log(name='policy_updates', loss=L.item())
 
         # Log Model
-        #self.logger.log_model(self.policy)
+        self.logger.log_model(self.policy)
+
+    def take_step(self, step, L):
+        apply_update(self.policy, step)
+
+        L_new, kl_new = self.compute_policy_loss()
+
+        print("kl_new = ", kl_new)
+
+        L_improvement = L_new - L
+
+        if L_improvement > 0 and kl_new <= self.kl_target:
+            return True
+
+        apply_update(self.policy, -step)
+        return False
+
 
     def update_value(self):
         for _ in range(self.num_v_iters):

@@ -65,26 +65,27 @@ def get_expected_return(rew, done, gamma, normalize_output=True):
     return g
 
 
+def GAE(rew, done, val, gamma, lam, normalize_output=True):
+    advantages = []
+    advantage = 0
+    next_value = 0
+    count = 0
+
+    for r, v in zip(reversed(rew), reversed(val)):
+        if done[count]:
+            advantage = 0
+        td_error = r + next_value * gamma - v
+        advantage = td_error + advantage * gamma * lam
+        next_value = v
+        advantages.insert(0, advantage)
+
+        count += 1
+
+    advantages = torch.tensor(advantages)
+
+    if normalize_output:
+        normalize(advantages)
+    return advantages
+
 def normalize(x):
     return (x - torch.mean(x)) / torch.std(x)
-
-
-def finish_path(rew, done, val, adv, gamma, lam):
-
-    indices = torch.nonzero(done, as_tuple=True)[0]
-
-    last_done = max(indices)
-
-    if last_done >= len(rew)-2:
-        return adv
-
-    last_ep_rew = rew[max(indices) + 1:]
-    last_ep_done = done[max(indices) + 1:]
-    last_ep_val = val[max(indices) + 1:]
-
-    deltas = last_ep_rew[:-1] + gamma * torch.flatten(last_ep_val)[1:] - torch.flatten(last_ep_val)[:-1]
-    last_ep_adv = get_expected_return(deltas, last_ep_done, gamma * lam)
-
-    adv[max(indices) + 2:] = last_ep_adv
-
-    return adv

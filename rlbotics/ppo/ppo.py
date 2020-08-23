@@ -91,9 +91,10 @@ class PPO:
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
         values = torch.flatten(self.value.predict(obs_batch))
 
-        adv_batch = expected_return - values
+        #adv_batch = expected_return - values
 
-        adv_batch = finish_path(rew_batch, done_batch, values, adv_batch, self.gamma, self.lam)
+        adv_batch = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
+
 
         data = dict(obs=obs_batch,
                     act=act_batch,
