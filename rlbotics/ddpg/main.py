@@ -42,6 +42,7 @@ def argparser():
 	parser.add_argument('--pi_optimizer', type=str, default=h.pi_optimizer)
 	parser.add_argument('--q_optimizer', type=str, default=h.q_optimizer)
 	parser.add_argument('--q_loss_type', type=str, default=h.q_loss_type)
+	parser.add_argument('--weight_decay', type=float, default=h.weight_decay)
 
 	return parser.parse_args()
 

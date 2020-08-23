@@ -44,6 +44,7 @@ class DDPG:
 		self.q_activations = args.q_activations
 		self.q_optimizer = args.q_optimizer
 		self.q_loss_type = args.q_loss_type
+		self.weight_decay = args.weight_decay
 
 		# Initialize action noise
 		if self.noise_type == 'OU':
@@ -101,7 +102,8 @@ class DDPG:
 					 activations=self.q_activations,
 					 seed=self.seed,
 					 optimizer=self.q_optimizer,
-					 lr=self.q_lr)
+					 lr=self.q_lr,
+					 weight_decay=self.weight_decay)
 
 		self.q.summary()
 		self.q_target = MLP(layer_sizes=layer_sizes,
@@ -174,17 +176,17 @@ class DDPG:
 		# Polyak averaging
 		with torch.no_grad():
 			for p, p_targ in zip(self.q.parameters(), self.q_target.parameters()):
-				p_targ.data.mul_(self.polyak)
-				p_targ.data.add_((1-self.polyak) * p.data)
+				p_targ.data.mul_(1-self.polyak)
+				p_targ.data.add_(self.polyak * p.data)
 			for p, p_targ in zip(self.pi.parameters(), self.pi_target.parameters()):
-				p_targ.data.mul_(self.polyak)
-				p_targ.data.add_((1-self.polyak) * p.data)
+				p_targ.data.mul_(1-self.polyak)
+				p_targ.data.add_(self.polyak * p.data)
 
 	def get_action(self, obs):
 		self.steps_done += 1
 		action = self.pi.predict(obs).detach().numpy()
 		action += self.noise()
-		return np.squeeze(np.clip(action, -self.act_lim, self.act_lim))
+		return np.clip(action, -self.act_lim, self.act_lim)[0]
 
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
