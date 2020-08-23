@@ -34,7 +34,7 @@ class DDQN:
 		self.hidden_sizes = args.hidden_sizes
 
 		# Replay buffer
-		self.memory = ReplayBuffer(self.buffer_size)
+		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
 		# Logger
 		self.logger = Logger('DDQN', args.env_name, self.seed)
@@ -63,7 +63,7 @@ class DDQN:
 		layer_sizes = [self.obs_dim] + self.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
 									   activations=self.activations,
-									   seed= self.seed,
+									   seed=self.seed,
 									   optimizer=self.optimizer,
 									   lr=self.lr)
 

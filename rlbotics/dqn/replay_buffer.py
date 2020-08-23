@@ -3,8 +3,9 @@ import random
 
 
 class ReplayBuffer:
-	def __init__(self, buffer_size):
-		self.memory = deque(maxlen=buffer_size)
+	def __init__(self, buffer_size, seed):
+		random.seed(seed)
+		self.memory = deque(maxlen=int(buffer_size))
 		self.transition = namedtuple("transition", field_names=["obs", "act", "rew", "new_obs", "done"])
 
 	def add(self, obs, act, rew, new_obs, done):

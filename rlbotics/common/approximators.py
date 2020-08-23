@@ -8,7 +8,7 @@ class MLP(nn.Module):
     Multi-Layered Perceptron
     """
 
-    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
+    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
         """
         :param layer_sizes: (list) sizes of each layer (including IO layers)
         :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', 'none']
@@ -36,9 +36,9 @@ class MLP(nn.Module):
 
         # Set optimizer
         if optimizer == 'Adam':
-            self.optimizer = torch.optim.Adam(self.mlp.parameters(), lr)
+            self.optimizer = torch.optim.Adam(self.mlp.parameters(), lr, weight_decay=weight_decay)
         elif optimizer == 'RMSprop':
-            self.optimizer = torch.optim.RMSprop(self.mlp.parameters(), lr)
+            self.optimizer = torch.optim.RMSprop(self.mlp.parameters(), lr, weight_decay=weight_decay)
         else:
             raise NameError(str(optimizer) + ' Optimizer not supported')
 

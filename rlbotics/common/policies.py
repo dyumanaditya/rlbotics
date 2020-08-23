@@ -6,8 +6,8 @@ import torch.nn.functional as F
 
 
 class MLPSoftmaxPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr, weight_decay=weight_decay)
 		torch.manual_seed(seed)
 
 	def get_action(self, obs):
@@ -33,8 +33,8 @@ class MLPSoftmaxPolicy(MLP):
 
 
 class MLPGaussian(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr, weight_decay=weight_decay)
 		torch.manual_seed(seed)
 
 	def get_policy(self, obs):
@@ -48,8 +48,9 @@ class MLPGaussian(MLP):
 
 
 class MLPEpsilonGreedy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr, weight_decay=weight_decay)
+		random.seed(seed)
 		torch.manual_seed(seed)
 		self.action_size = layer_sizes[-1]
 

@@ -21,6 +21,7 @@ def argparser():
 	parser.add_argument('--lr', type=float, default=h.lr)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--render', type=bool, default=h.render)
+	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
 
 	# DQN Specific Parameters
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
@@ -36,7 +37,6 @@ def argparser():
 	parser.add_argument('--optimizer', type=str, default=h.optimizer)
 	parser.add_argument('--loss_type', type=str, default=h.loss_type)
 	parser.add_argument('--update_target_freq', type=int, default=h.update_target_freq)
-	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
 
 	return parser.parse_args()
 
@@ -81,7 +81,6 @@ def main():
 			# Logging
 			ep_counter += 1
 			ep_rew = 0
-			continue
 
 		# Update Policy
 		agent.update_policy()
