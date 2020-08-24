@@ -91,7 +91,8 @@ class DDPG:
 		self.pi.summary()
 		self.pi_target = MLP(layer_sizes=layer_sizes,
 					   		activations=self.pi_activations,
-					   		seed=self.seed)
+					   		seed=self.seed,
+							 batch_norm=True)
 		self.pi_target.load_state_dict(self.pi.state_dict())
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.pi_target.parameters():
@@ -110,7 +111,8 @@ class DDPG:
 		self.q.summary()
 		self.q_target = MLP(layer_sizes=layer_sizes,
 							activations=self.q_activations,
-							seed=self.seed)
+							seed=self.seed,
+							batch_norm=True)
 		self.q_target.load_state_dict(self.q.state_dict())
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.q_target.parameters():
@@ -186,6 +188,7 @@ class DDPG:
 
 	def get_action(self, obs):
 		self.steps_done += 1
+		self.pi.eval()
 		action = self.pi.predict(obs).detach().numpy()
 		action += self.noise()
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
