@@ -8,7 +8,7 @@ class MLP(nn.Module):
     Multi-Layered Perceptron
     """
 
-    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
+    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False):
         """
         :param layer_sizes: (list) sizes of each layer (including IO layers)
         :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', 'none']
@@ -20,7 +20,7 @@ class MLP(nn.Module):
         self.obs_dim = layer_sizes[0]
 
         # Build NN
-        activations_dict = nn.ModuleDict({
+        self.activations_dict = nn.ModuleDict({
             "relu": nn.ReLU(),
             "tanh": nn.Tanh(),
             "sigmoid": nn.Sigmoid(),
@@ -30,9 +30,7 @@ class MLP(nn.Module):
             "none": nn.Identity(),
         })
 
-        self.mlp = nn.Sequential(*[nn.Sequential(nn.Linear(in_features, out_features), activations_dict[activation])
-                                   for in_features, out_features, activation in
-                                   zip(layer_sizes[:-1], layer_sizes[1:], activations)])
+        self.mlp = self._make_mlp(layer_sizes, activations, batch_norm)
 
         # Set optimizer
         if optimizer == 'Adam':
@@ -41,6 +39,16 @@ class MLP(nn.Module):
             self.optimizer = torch.optim.RMSprop(self.mlp.parameters(), lr, weight_decay=weight_decay)
         else:
             raise NameError(str(optimizer) + ' Optimizer not supported')
+
+    def _make_mlp(self, layer_sizes, activations, batch_norm):
+        layers = []
+        for i in range(len(layer_sizes)-1):
+            if batch_norm:
+                layers += [nn.Linear(layer_sizes[i], layer_sizes[i+1]), nn.BatchNorm1d(layer_sizes[i+1]),
+                           self.activations_dict[activations[i]]]
+            else:
+                layers += [nn.Linear(layer_sizes[i], layer_sizes[i+1]), self.activations_dict[activations[i]]]
+        return nn.Sequential(*layers)
 
     def forward(self, x):
         return self.mlp(x)

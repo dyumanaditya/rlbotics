@@ -85,7 +85,8 @@ class DDPG:
 					  activations=self.pi_activations,
 					  seed=self.seed,
 					  optimizer=self.pi_optimizer,
-					  lr=self.pi_lr)
+					  lr=self.pi_lr,
+					  batch_norm=True)
 
 		self.pi.summary()
 		self.pi_target = MLP(layer_sizes=layer_sizes,
@@ -103,7 +104,8 @@ class DDPG:
 					 seed=self.seed,
 					 optimizer=self.q_optimizer,
 					 lr=self.q_lr,
-					 weight_decay=self.weight_decay)
+					 weight_decay=self.weight_decay,
+					 batch_norm=True)
 
 		self.q.summary()
 		self.q_target = MLP(layer_sizes=layer_sizes,
