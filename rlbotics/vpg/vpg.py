@@ -66,8 +66,8 @@ class VPG:
         return self.policy.get_action(obs)
 
     def store_transition(self, obs, act, rew, new_obs, done):
+        value = self.value.predict(obs)
         log_prob = self.policy.get_log_prob(obs, act)
-        value = torch.flatten(self.value.predict(obs))
 
         self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
 
@@ -80,14 +80,11 @@ class VPG:
 
         obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float32)
         act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int32)
-        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
-        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
+        rew_batch = list(transition_batch.rew)
+        done_batch = list(transition_batch.done)
 
-        log_prob = torch.as_tensor(transition_batch.log_prob, dtype=torch.float32)
-        log_prob.requires_grad = True
-
-        values = torch.as_tensor(transition_batch.val, dtype=torch.float32)
-        values.requires_grad = True
+        log_prob = torch.cat(list(transition_batch.log_prob))
+        values = torch.cat(transition_batch.val).squeeze(-1)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
         advantages = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
@@ -104,35 +101,33 @@ class VPG:
         return data
 
     def compute_policy_loss(self, log_prob_batch, adv_batch):
-        return -(log_prob_batch * adv_batch).mean()
+        return -(adv_batch * log_prob_batch ).sum()
 
     def update_policy(self):
         self.data = self._get_data()
 
-        adv = self.data["adv"]
+        adv = self.data["adv"].detach()
         log_prob = self.data["old_log_prob"]
 
+        policy_loss = self.compute_policy_loss(log_prob, adv)
+        self.logger.log(name='policy_updates', loss=policy_loss.item())
+
         self.policy.optimizer.zero_grad()
-
-        loss = self.compute_policy_loss(log_prob, adv)
-
-        loss.backward()
+        policy_loss.backward()
         self.policy.optimizer.step()
-        # self.policy.learn(loss)
 
-        self.logger.log(name='policy_updates', loss=loss.item())
         # Log Model
         self.logger.log_model(self.policy)
 
     def update_value(self):
         for _ in range(self.num_v_iters):
-            self.value.optimizer.zero_grad()
-
             val = self.data["val"]
-            ret = self.data["ret"]
+            ret = self.data["ret"].detach()
 
-            loss = F.mse_loss(val, ret)
-            loss.backward()
+            value_loss = F.smooth_l1_loss(ret, val).sum()
+
+            self.value.optimizer.zero_grad()
+            value_loss.backward()
             self.value.optimizer.step()
 
         self.memory.reset_memory()

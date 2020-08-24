@@ -71,7 +71,10 @@ class PPO:
         return self.policy.get_action(obs)
 
     def store_transition(self, obs, act, rew, new_obs, done):
-        self.memory.add(obs, act, rew, new_obs, done)
+        log_prob = self.policy.get_log_prob(obs, act)
+        value = torch.flatten(self.value.predict(obs))
+
+        self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
 
         # Log Done, reward
         self.logger.log(name='transitions', done=done, rewards=rew)
@@ -85,23 +88,25 @@ class PPO:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
-        old_log_prob = self.policy.get_log_prob(obs_batch, act_batch)
-        old_policy = self.policy.get_distribution(obs_batch)
+        log_prob = torch.as_tensor(transition_batch.log_prob, dtype=torch.float32)
+        log_prob.requires_grad = True
+
+        values = torch.as_tensor(transition_batch.val, dtype=torch.float32)
+        values.requires_grad = True
+
+        td_errors = rew_batch[:-1] + self.gamma * values[1:] - values[:-1]
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        values = torch.flatten(self.value.predict(obs_batch))
+        advantages = get_expected_return(td_errors, done_batch, self.gamma * self.lam)
 
-        #adv_batch = expected_return - values
-
-        adv_batch = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
-
+        old_policy = self.policy.get_distribution(obs_batch)
 
         data = dict(obs=obs_batch,
                     act=act_batch,
-                    val=values,
-                    adv=adv_batch,
-                    ret=expected_return,
-                    old_log_prob=old_log_prob,
+                    val=values[:-1],
+                    adv=advantages,
+                    ret=expected_return[:-1],
+                    old_log_prob=log_prob,
                     old_policy=old_policy)
         return data
 
@@ -151,11 +156,12 @@ class PPO:
     def update_value(self):
         for _ in range(self.num_value_iters):
             self.value.optimizer.zero_grad()
-            val, ret = self.value.predict(self.data["obs"]).squeeze(1), self.data["ret"]
+
+            val = self.data["val"]
+            ret = self.data["ret"]
+
             loss = F.mse_loss(val, ret)
             loss.backward()
             self.value.optimizer.step()
-
-        # TODO: Log value
 
         self.memory.reset_memory()
