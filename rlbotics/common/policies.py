@@ -7,37 +7,26 @@ import torch.nn.functional as F
 
 
 class MLPSoftmaxPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr, weight_decay=weight_decay)
+	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr)
 		torch.manual_seed(seed)
 
 	def get_action(self, obs):
-		if type(obs) == np.ndarray:
-			obs = torch.from_numpy(obs).float().unsqueeze(0)
-
 		with torch.no_grad():
-			act_logits = self.mlp(obs)
+			act_logits = self.predict(obs)
 
-		action_prob = F.softmax(act_logits, dim = -1)
-		act_dist = Categorical(action_prob)
-		act = act_dist.sample()
-		return act
+		act_dist = Categorical(logits=act_logits)
+		return act_dist.sample().item()
 
 	def get_log_prob(self, obs, act):
-		if type(obs) == np.ndarray:
-			obs = torch.from_numpy(obs).float().unsqueeze(0)
-		act_logits = self.mlp(obs)
-		action_prob = F.softmax(act_logits, dim = -1)
-		act_dist = Categorical(action_prob)
+		act_logits = self.predict(obs)
+		act_dist = Categorical(logits=act_logits)
 		log_p = act_dist.log_prob(act)
 		return log_p
 
 	def get_distribution(self, obs):
-		if type(obs) == np.ndarray:
-			obs = torch.from_numpy(obs).float().unsqueeze(0)
-		act_logits = self.mlp(obs)
-		action_prob = F.softmax(act_logits, dim = -1)
-		act_dist = Categorical(action_prob)
+		act_logits = self.predict(obs)
+		act_dist = Categorical(logits=act_logits)
 		return act_dist
 
 

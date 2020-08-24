@@ -64,7 +64,7 @@ def main():
 
 			# Take action
 			act = agent.get_action(obs)
-			new_obs, rew, done, _ = env.step(act.item())
+			new_obs, rew, done, _ = env.step(act)
 
 			# Store experience
 			agent.store_transition(obs, act, rew, new_obs, done)

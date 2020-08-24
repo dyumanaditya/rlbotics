@@ -53,43 +53,26 @@ def get_episode_returns(rew_batch, done_batch, gamma):
 
 
 def get_expected_return(rew, done, gamma, normalize_output=True):
-    returns = []
-    R = 0
-    count = 0
-    for r in reversed(rew):
-        if done[count]:
-            R = 0
-        R = r + R * gamma
-        returns.insert(0, R)
-        count += 1
-
-    returns = torch.tensor(returns)
-
+    g = torch.zeros_like(rew, dtype=torch.float32)
+    cumulative = 0.0
+    for k in reversed(range(len(rew))):
+        if done[k]:
+            g[k] = 0
+        cumulative = rew[k] + gamma * cumulative * (1.0 - done[k])
+        g[k] = cumulative
     if normalize_output:
-        returns = (returns - returns.mean()) / returns.std()
-
-    return returns
-
+        normalize(g)
+    return g
 
 def GAE(rew, done, val, gamma, lam, normalize_output=True):
-    advantages = []
-    advantage = 0
-    next_value = 0
-    count = 0
-    for r, v in zip(reversed(rew), reversed(val)):
-        if done[count]:
-            advantage = 0
-        td_error = r + next_value * gamma - v
-        advantage = td_error + advantage * gamma * lam
-        next_value = v
-        advantages.insert(0, advantage)
-        count += 1
+    rew = torch.cat((rew, torch.tensor([0])))
+    val = torch.cat((val, torch.tensor([0])))
 
-    advantages = torch.tensor(advantages)
+    td_errors = rew[:-1] + gamma * val[1:] - val[:-1]
 
-    if normalize_output:
-        advantages = (advantages - advantages.mean()) / advantages.std()
-    return advantages
+    adv = get_expected_return(td_errors, done, gamma*lam, normalize_output)
+
+    return adv
 
 def normalize(x):
     return (x - torch.mean(x)) / torch.std(x)
