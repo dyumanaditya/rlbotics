@@ -5,7 +5,7 @@ from rlbotics.ppo.memory import Memory
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
-from rlbotics.common.utils import *
+from rlbotics.common.utils import GAE, get_expected_return
 
 
 class PPO:
@@ -71,8 +71,8 @@ class PPO:
         return self.policy.get_action(obs)
 
     def store_transition(self, obs, act, rew, new_obs, done):
-        log_prob = self.policy.get_log_prob(obs, act)
-        value = torch.flatten(self.value.predict(obs))
+        value = self.value.predict(obs)
+        log_prob = self.policy.get_log_prob(obs, torch.tensor(act))
 
         self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
 
@@ -88,24 +88,19 @@ class PPO:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
-        log_prob = torch.as_tensor(transition_batch.log_prob, dtype=torch.float32)
-        log_prob.requires_grad = True
-
-        values = torch.as_tensor(transition_batch.val, dtype=torch.float32)
-        values.requires_grad = True
-
-        td_errors = rew_batch[:-1] + self.gamma * values[1:] - values[:-1]
+        log_prob = torch.cat(list(transition_batch.log_prob))
+        values = torch.cat(transition_batch.val).squeeze(-1)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        advantages = get_expected_return(td_errors, done_batch, self.gamma * self.lam)
+        adv_batch = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
 
         old_policy = self.policy.get_distribution(obs_batch)
 
         data = dict(obs=obs_batch,
                     act=act_batch,
-                    val=values[:-1],
-                    adv=advantages,
-                    ret=expected_return[:-1],
+                    val=values,
+                    adv=adv_batch,
+                    ret=expected_return,
                     old_log_prob=log_prob,
                     old_policy=old_policy)
         return data
@@ -141,26 +136,28 @@ class PPO:
         self.data = self._get_data()
 
         for _ in range(self.num_policy_iters):
-            self.policy.optimizer.zero_grad()
             policy_loss, logging_info = self.compute_policy_loss()
+
             if logging_info["kl"] > 1.5 * self.kl_target:
                 break
+
+            self.policy.optimizer.zero_grad()
             policy_loss.backward()
             self.policy.optimizer.step()
 
         self.logger.log(name='policy_updates', loss=policy_loss.item(), kl=logging_info["kl"], entropy=logging_info["entropy"])
 
         # Log Model
-        self.logger.log_model(self.policy)
+        self.logger.log_model(self.policy, name='pi')
 
     def update_value(self):
         for _ in range(self.num_value_iters):
-            self.value.optimizer.zero_grad()
-
-            val = self.data["val"]
+            val= self.value.predict(self.data["obs"]).squeeze(1)
             ret = self.data["ret"]
 
             loss = F.mse_loss(val, ret)
+
+            self.value.optimizer.zero_grad()
             loss.backward()
             self.value.optimizer.step()
 

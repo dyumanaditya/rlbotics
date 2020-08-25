@@ -2,8 +2,9 @@ import os
 import csv
 import json
 import shutil
+import numpy as np
 from torch.utils.tensorboard import SummaryWriter
-from rlbotics.common.utils import *
+from rlbotics.common.utils import get_latest_return
 
 
 class Logger:

@@ -5,7 +5,7 @@ from rlbotics.vpg.memory import Memory
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
-from rlbotics.common.utils import *
+from rlbotics.common.utils import GAE, get_expected_return
 
 
 class VPG:
@@ -115,7 +115,7 @@ class VPG:
         self.logger.log(name='policy_updates', loss=loss.item())
 
         # Log Model
-        self.logger.log_model(self.policy)
+        self.logger.log_model(self.policy, name='pi')
 
     def update_value(self):
         for _ in range(self.num_v_iters):
