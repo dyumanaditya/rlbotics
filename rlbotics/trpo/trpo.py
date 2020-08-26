@@ -70,7 +70,10 @@ class TRPO:
         return self.policy.get_action(obs)
 
     def store_transition(self, obs, act, rew, new_obs, done):
-        self.memory.add(obs, act, rew, new_obs, done)
+        value = self.value.predict(obs)
+        log_prob = self.policy.get_log_prob(obs, torch.tensor(act))
+
+        self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
 
         # Log Done, reward
         self.logger.log(name='transitions', done=done, rewards=rew)
@@ -84,46 +87,47 @@ class TRPO:
         rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
         done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
 
-        old_log_prob = self.policy.get_log_prob(obs_batch, act_batch)
-        old_policy = self.policy(obs_batch)
-        old_policy = torch.distributions.utils.clamp_probs(old_policy)
+        log_prob = torch.cat(list(transition_batch.log_prob))
+        values = torch.cat(transition_batch.val).squeeze(-1)
 
         expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        values = torch.flatten(self.value.predict(obs_batch))
+        adv_batch = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
 
-        adv_batch = expected_return - values
+        #old_policy = self.policy.get_distribution(obs_batch)
 
-        adv_batch = finish_path(rew_batch, done_batch, values, adv_batch, self.gamma, self.lam)
+        old_policy = self.policy(obs_batch)
+        old_policy = torch.nn.Softmax(dim=1)(old_policy)
+        old_policy = torch.distributions.utils.clamp_probs(old_policy)
 
         data = dict(obs=obs_batch,
                     act=act_batch,
                     val=values,
                     adv=adv_batch,
                     ret=expected_return,
-                    old_log_prob=old_log_prob,
+                    old_log_prob=log_prob,
                     old_policy=old_policy)
         return data
 
     def compute_policy_loss(self):
         # return max_step
-        obs = self.data["obs"]
-        act = self.data["act"]
-        adv = self.data["adv"]
+        obs = self.data["obs"].detach()
+        act = self.data["act"].detach()
+        adv = self.data["adv"].detach()
 
         new_policy = self.policy(obs)
         new_policy = torch.nn.Softmax(dim=1)(new_policy)
         new_policy = torch.distributions.utils.clamp_probs(new_policy)
-        #new_policy = self.policy.get_distribution(obs)
+        # new_policy = self.policy.get_distribution(obs)
+
         old_policy = self.data["old_policy"]
 
         new_log_prob = self.policy.get_log_prob(obs, act)
-        old_log_prob = self.data["old_log_prob"]
+        old_log_prob = self.data["old_log_prob"].detach()
 
 
-        L = torch.mul(torch.exp(new_log_prob - old_log_prob.detach()), adv).mean()
+        L = torch.mul(torch.exp(new_log_prob - old_log_prob), adv).mean()
         kl = kl_div(old_policy, new_policy)
         #kl = torch.distributions.kl.kl_divergence(old_policy, new_policy).mean()
-
         #ent = new_policy.entropy().mean()
 
         #print(L, kl, ent)
@@ -138,21 +142,17 @@ class TRPO:
 
         parameters = list(self.policy.parameters())
 
-        print("first kl", kl)
-
         g = flat_grad(L, parameters, retain_graph=True)
         d_kl = flat_grad(kl, parameters, create_graph=True)
+
+        #print(d_kl)
 
         def HVP(v):
             return flat_grad(torch.dot(d_kl, v), parameters, retain_graph=True)
 
         search_dir = conjugate_gradient(HVP, g)
-        print("search dir = ", search_dir)
-        print("denom = ", torch.dot(search_dir, HVP(search_dir)))
         max_length = torch.sqrt(2 * self.kl_target / torch.dot(search_dir, HVP(search_dir)))
-        print("max_length = ", max_length)
         max_step = max_length * search_dir
-        print("max_step = ", max_step)
 
         i = 0
         while not self.take_step((0.9 ** i) * max_step, L) and i < 10:
@@ -168,8 +168,6 @@ class TRPO:
 
         L_new, kl_new = self.compute_policy_loss()
 
-        print("kl_new = ", kl_new)
-
         L_improvement = L_new - L
 
         if L_improvement > 0 and kl_new <= self.kl_target:
@@ -181,9 +179,12 @@ class TRPO:
 
     def update_value(self):
         for _ in range(self.num_v_iters):
-            self.value.optimizer.zero_grad()
-            val, ret = self.value.predict(self.data["obs"]).squeeze(1), self.data["ret"]
+            val= self.value.predict(self.data["obs"]).squeeze(1)
+            ret = self.data["ret"]
+
             loss = F.mse_loss(val, ret)
+
+            self.value.optimizer.zero_grad()
             loss.backward()
             self.value.optimizer.step()
 
