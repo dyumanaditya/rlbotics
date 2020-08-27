@@ -12,13 +12,13 @@ seed            = 0
 kl_target =     0.003
 
 # Policy Network:
-pi_hidden_sizes     = [64, 64]
+pi_hidden_sizes     = [128, 128]
 pi_activations      = ['relu', 'relu', 'none']
-pi_lr               = 5e-5
+pi_lr               = 5e-4
 pi_optimizer        = 'Adam'
 
 # Value Network:
-v_hidden_sizes      = [64, 64, 1]
+v_hidden_sizes      = [128, 128, 1]
 v_activations       = ['relu', 'relu', 'relu', 'none']
-v_lr                = 1e-4
+v_lr                = 1e-3
 v_optimizer        = 'Adam'

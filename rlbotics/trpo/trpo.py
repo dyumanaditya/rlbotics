@@ -2,11 +2,11 @@ import torch
 import torch.nn.functional as F
 
 from rlbotics.trpo.memory import Memory
-from rlbotics.trpo.utils import *
+from rlbotics.trpo.utils import kl_div, flat_grad, conjugate_gradient
 from rlbotics.common.policies import MLPSoftmaxPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
-from rlbotics.common.utils import *
+from rlbotics.common.utils import GAE, get_expected_return
 
 
 class TRPO:
@@ -125,57 +125,63 @@ class TRPO:
         old_log_prob = self.data["old_log_prob"].detach()
 
 
-        L = torch.mul(torch.exp(new_log_prob - old_log_prob), adv).mean()
+        surrogate_loss = torch.mul(torch.exp(new_log_prob - old_log_prob), adv).mean()
         kl = kl_div(old_policy, new_policy)
         #kl = torch.distributions.kl.kl_divergence(old_policy, new_policy).mean()
         #ent = new_policy.entropy().mean()
 
-        #print(L, kl, ent)
+        #print(surrogate_loss, kl, ent)
         #logging_info = dict(kl=kl, entropy=ent)
 
-        return L, kl#, ent
+        return surrogate_loss, kl#, ent
 
     def update_policy(self):
         self.data = self._get_data()
 
-        L, kl = self.compute_policy_loss()
+        surrogate_loss, kl = self.compute_policy_loss()
 
-        parameters = list(self.policy.parameters())
+        params = list(self.policy.parameters())
 
-        g = flat_grad(L, parameters, retain_graph=True)
-        d_kl = flat_grad(kl, parameters, create_graph=True)
+        g = flat_grad(surrogate_loss, params, retain_graph=True)
+        kl_grad = flat_grad(kl, params, create_graph=True)
 
-        #print(d_kl)
+        def hvp(v):
+            return flat_grad(torch.dot(kl_grad, v), params, retain_graph=True)
 
-        def HVP(v):
-            return flat_grad(torch.dot(d_kl, v), parameters, retain_graph=True)
+        step_dir = conjugate_gradient(hvp, g)
+        max_length = torch.sqrt(2 * self.kl_target / torch.dot(step_dir, hvp(step_dir)))
+        max_step = max_length * step_dir
 
-        search_dir = conjugate_gradient(HVP, g)
-        max_length = torch.sqrt(2 * self.kl_target / torch.dot(search_dir, HVP(search_dir)))
-        max_step = max_length * search_dir
+        # i = 0
+        # while not self.take_step((0.9 ** i) * max_step, surrogate_loss) and i < 10:
+        #     i += 1
 
-        i = 0
-        while not self.take_step((0.9 ** i) * max_step, L) and i < 10:
-            i += 1
+        for i in range(10):
+            step = (0.9 ** i) * max_step
 
-        self.logger.log(name='policy_updates', loss=L.item())
+            self.unflatten_params(step)
+            surrogate_loss_new, kl_new = self.compute_policy_loss()
+
+            surrogate_loss_improvement = surrogate_loss_new - surrogate_loss
+
+            if surrogate_loss_improvement > 0 and kl_new <= self.kl_target:
+                break
+
+            self.unflatten_params(-step)
+
+        self.logger.log(name='policy_updates', loss=surrogate_loss.item())
 
         # Log Model
         self.logger.log_model(self.policy)
 
-    def take_step(self, step, L):
-        apply_update(self.policy, step)
 
-        L_new, kl_new = self.compute_policy_loss()
-
-        L_improvement = L_new - L
-
-        if L_improvement > 0 and kl_new <= self.kl_target:
-            return True
-
-        apply_update(self.policy, -step)
-        return False
-
+    def unflatten_params(self, grad_flattened):
+        n = 0
+        for p in self.policy.parameters():
+            numel = p.numel()
+            g = grad_flattened[n:n + numel].view(p.shape)
+            p.data += g
+            n += numel
 
     def update_value(self):
         for _ in range(self.num_v_iters):

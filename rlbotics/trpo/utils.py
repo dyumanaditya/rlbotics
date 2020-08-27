@@ -12,37 +12,28 @@ def flat_grad(y, x, retain_graph=False, create_graph=False):
     g = torch.cat([t.view(-1) for t in g])
     return g
 
-def conjugate_gradient(A, b, delta=0., max_iterations=10):
-    x = torch.zeros_like(b)
-    r = b.clone()
+def conjugate_gradient(f_Ax, b, cg_iters=10, callback=None, residual_tol=1e-10):
     p = b.clone()
+    r = b.clone()
+    x = torch.zeros_like(b)
 
-    i = 0
-    while i < max_iterations:
-        AVP = A(p)
+    rdotr = torch.dot(r, r)
 
-        dot_old = torch.dot(r, r)
+    for i in range(cg_iters):
+        if callback is not None:
+            callback(x)
+        z = f_Ax(p)
+        v = rdotr / torch.dot(p, z)
+        x += v*p
+        r -= v*z
+        newrdotr =torch.dot(r, r)
+        mu = newrdotr/rdotr
+        p = r + mu*p
 
-        alpha = dot_old / torch.dot(p, AVP)
+        rdotr = newrdotr
+        if rdotr < residual_tol:
+            break
 
-        x_new = x + alpha * p
-
-        if (x - x_new).norm() <= delta:
-            return x_new
-
-        i += 1
-        r = r - alpha * AVP
-
-        beta = torch.dot(r, r) / dot_old
-        p = r + beta * p
-
-        x = x_new
+    if callback is not None:
+        callback(x)
     return x
-
-def apply_update(model, grad_flattened):
-    n = 0
-    for p in model.parameters():
-        numel = p.numel()
-        g = grad_flattened[n:n + numel].view(p.shape)
-        p.data += g
-        n += numel

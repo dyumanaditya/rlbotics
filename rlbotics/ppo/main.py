@@ -54,6 +54,7 @@ def main():
 
 	# Build environment
 	env = gym.make(args.env_name)
+	env.seed(args.seed)
 	agent = PPO(args, env)
 	obs = env.reset()
 
