@@ -45,6 +45,7 @@ def main():
 	args = argparser()
 	# Build environment
 	env = gym.make(args.env_name)
+	env.seed(args.seed)
 	agent = DQN(args, env)
 	obs = env.reset()
 

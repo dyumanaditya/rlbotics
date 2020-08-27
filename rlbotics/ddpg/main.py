@@ -51,6 +51,7 @@ def main():
 	args = argparser()
 	# Build environment
 	env = gym.make(args.env_name)
+	env.seed(args.seed)
 	agent = DDPG(args, env)
 	obs = env.reset()
 

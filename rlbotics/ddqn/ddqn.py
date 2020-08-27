@@ -115,7 +115,7 @@ class DDQN:
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 		# Log Model and Loss
-		if self.steps_done % 5000 == 0:
+		if self.steps_done % 3000 == 0:
 			self.logger.log_model(self.policy)
 		self.logger.log(name='policy_updates', loss=loss.item())
 

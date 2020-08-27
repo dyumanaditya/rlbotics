@@ -51,7 +51,6 @@ class MLPEpsilonGreedy(MLP):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
 						 weight_decay=weight_decay, batch_norm=batch_norm)
 		random.seed(seed)
-		torch.manual_seed(seed)
 		self.action_size = layer_sizes[-1]
 
 	def get_action(self, obs, epsilon):
