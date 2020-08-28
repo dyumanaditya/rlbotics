@@ -4,7 +4,7 @@ import argparse
 
 from rlbotics.ddpg.ddpg import DDPG
 import rlbotics.ddpg.hyperparameters as h
-from rlbotics.common.visualization import plot
+from rlbotics.common.plotter import Plotter
 
 
 def argparser():
@@ -94,7 +94,8 @@ def main():
 
 	# End
 	env.close()
-	plot('DDPG', args.env_name, args.seed, 'episodes', 'rewards', True)
+	p = Plotter()
+	p.plot_individual('episodes', 'rewards', 'DDPG', args.env_name, args.seed, True)
 
 
 if __name__ == '__main__':

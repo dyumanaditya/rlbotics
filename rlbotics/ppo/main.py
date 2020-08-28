@@ -4,7 +4,7 @@ import argparse
 
 from rlbotics.ppo.ppo import PPO
 import rlbotics.ppo.hyperparameters as h
-from rlbotics.common.visualization import plot
+from rlbotics.common.plotter import plot
 
 def argparser():
 	"""

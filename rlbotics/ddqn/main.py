@@ -4,7 +4,7 @@ import argparse
 
 from rlbotics.ddqn.ddqn import DDQN
 import rlbotics.ddqn.hyperparameters as h
-from rlbotics.common.visualization import plot
+from rlbotics.common.plotter import Plotter
 
 
 def argparser():
@@ -92,8 +92,8 @@ def main():
 
 	# End
 	env.close()
-	plot('DDQN', args.env_name, args.seed, 'episodes', 'rewards', True)
-
+	p = Plotter()
+	p.plot_individual('episodes', 'rewards', 'DDQN', args.env_name, args.seed, True)
 
 if __name__ == '__main__':
 	main()

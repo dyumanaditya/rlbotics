@@ -4,7 +4,7 @@ import argparse
 
 from rlbotics.vpg.vpg import VPG
 import rlbotics.vpg.hyperparameters as h
-from rlbotics.common.visualization import plot
+from rlbotics.common.plotter import plot
 
 
 def argparser():
