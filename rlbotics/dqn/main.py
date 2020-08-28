@@ -93,7 +93,7 @@ def main():
 	# End
 	env.close()
 	p = Plotter()
-	p.plot_individual('episodes', 'rewards', 'DQN', args.env_name, args.seed, True)
+	p.plot_individual('Episode/Reward', 'episodes', 'rewards', 'DQN', args.env_name, args.seed, True)
 
 
 if __name__ == '__main__':

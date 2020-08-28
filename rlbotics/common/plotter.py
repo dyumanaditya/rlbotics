@@ -13,13 +13,16 @@ class Plotter:
 		if not os.path.exists(self.plt_dir):
 			os.makedirs(self.plt_dir)
 
-	def plot_individual(self, xlabel, ylabel, algo, env, seed, display=False):
+	def plot_individual(self, title, xlabel, ylabel, algo, env, seed, display=False):
 		log_file = os.path.join(self.cur_dir, 'experiments', 'logs', algo + '_' + env + '_' + str(seed), 'transitions.csv')
 		ep_returns = get_return(log_file)
 
 		# Plot
 		ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns)
-		ax.set(xlabel=xlabel, ylabel=ylabel)
+		ax.axes.set_title(title, fontsize=20)
+		ax.set_xlabel(xlabel, fontsize=15)
+		ax.set_ylabel(ylabel, fontsize=15)
+
 		filename = os.path.join(self.plt_dir, algo + '_' + env + '_plt.png')
 		plt.savefig(filename)
 
@@ -48,24 +51,29 @@ class Plotter:
 
 		return x, y
 
-	def plot_combined(self, xlabel, ylabel, algo, env, display=False, data='rewards', log_file_type='transitions'):
+	def plot_combined(self, title, xlabel, ylabel, algo, env, display=False, data='rewards', log_file_type='transitions'):
 		"""
 		:param data: Either rewards or anything else you want to plot
 		:param log_file_type: Either transitions or policy_updates
-		:return:
 		"""
 		filename = os.path.join(self.plt_dir, 'all_seeds', algo)
 		if not os.path.exists(filename):
 			os.makedirs(filename)
 
 		x, y = self.combine_csv_files(algo, env, data, log_file_type)
+		y = pd.Series(y).rolling(5, min_periods=1).mean()
 
 		# Plot
 		ax = sns.lineplot(x=x, y=y)
-		ax.set(xlabel=xlabel, ylabel=ylabel)
+		ax.axes.set_title(title, fontsize=20)
+		ax.set_xlabel(xlabel, fontsize=15)
+		ax.set_ylabel(ylabel, fontsize=15)
+		plt.legend([algo + '_' + env])
 		plt.savefig(filename + '/' + env + '_all_seeds_plt.png')
 
 		# Display
 		if display:
 			plt.show()
 
+p = Plotter()
+p.plot_combined('Episode/Reward', 'episodes', 'rewards', 'DDQN', 'CartPole-v1', True)
