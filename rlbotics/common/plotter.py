@@ -74,6 +74,3 @@ class Plotter:
 		# Display
 		if display:
 			plt.show()
-
-p = Plotter()
-p.plot_combined('Episode/Reward', 'episodes', 'rewards', 'DDQN', 'CartPole-v1', True)
