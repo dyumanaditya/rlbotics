@@ -8,7 +8,7 @@ class OUNoise:
 		:param mu: mean
 		:param sigma: standard deviation
 		"""
-		#np.random.seed(seed)
+		np.random.seed(seed)
 		self.mu = mu
 		self.sigma = sigma
 		self.theta = theta
@@ -34,7 +34,7 @@ class OUNoise:
 
 class GaussianNoise:
 	def __init__(self, seed, act_noise, act_dim):
-		#np.random.seed(seed)
+		np.random.seed(seed)
 		self.noise_scale = act_noise
 		self.act_dim = act_dim
 

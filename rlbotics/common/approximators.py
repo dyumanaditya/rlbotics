@@ -28,6 +28,7 @@ class MLP(nn.Module):
             "softmax": nn.LogSoftmax(),
             "selu": nn.SELU(),
             "elu": nn.ELU(),
+            "leakyrelu": nn.LeakyReLU(),
             "none": nn.Identity(),
         })
 

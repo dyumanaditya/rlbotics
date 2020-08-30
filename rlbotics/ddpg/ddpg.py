@@ -69,7 +69,7 @@ class DDPG:
 			self.grad_clip = None
 
 		# Steps
-		self.steps_done = 0
+		self.steps_done = -1
 
 		# Loss function
 		self.q_criterion = losses(self.q_loss_type)
@@ -186,11 +186,9 @@ class DDPG:
 		# Polyak averaging
 		with torch.no_grad():
 			for p, p_targ in zip(self.q.parameters(), self.q_target.parameters()):
-				p_targ.data.mul_(1-self.polyak)
-				p_targ.data.add_(self.polyak * p.data)
+				p_targ.data.copy_(self.polyak*p.data + (1-self.polyak)*p_targ.data)
 			for p, p_targ in zip(self.pi.parameters(), self.pi_target.parameters()):
-				p_targ.data.mul_(1-self.polyak)
-				p_targ.data.add_(self.polyak * p.data)
+				p_targ.data.copy_(self.polyak*p.data + (1-self.polyak)*p_targ.data)
 
 	def get_action(self, obs):
 		self.pi.eval()
