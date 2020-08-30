@@ -26,4 +26,4 @@ optimizer      = 'Adam'
 loss_type      = 'mse'
 
 # Policy Target Network:
-update_target_freq = 10	# Update target network per _ episodes
+update_target_freq = 3	# Update target network per _ episodes

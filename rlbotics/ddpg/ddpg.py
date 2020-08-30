@@ -46,11 +46,15 @@ class DDPG:
 		self.q_loss_type = args.q_loss_type
 		self.weight_decay = args.weight_decay
 
+		# Both networks
+		self.weight_init = args.weight_init
+		self.batch_norm = args.batch_norm
+
 		# Initialize action noise
 		if self.noise_type == 'OU':
-			self.noise = OUNoise(mu=np.zeros(self.act_dim))
+			self.noise = OUNoise(self.seed, mu=np.zeros(self.act_dim))
 		elif self.noise_type == 'gaussian':
-			self.noise = GaussianNoise(self.act_noise, self.act_dim)
+			self.noise = GaussianNoise(self.seed, self.act_noise, self.act_dim)
 
 		# Replay buffer
 		self.memory = ReplayBuffer(self.buffer_size, self.seed)
@@ -86,13 +90,14 @@ class DDPG:
 					  seed=self.seed,
 					  optimizer=self.pi_optimizer,
 					  lr=self.pi_lr,
-					  batch_norm=True)
+					  batch_norm=self.batch_norm,
+					  weight_init=self.weight_init)
 
 		self.pi.summary()
 		self.pi_target = MLP(layer_sizes=layer_sizes,
 					   		activations=self.pi_activations,
 					   		seed=self.seed,
-							 batch_norm=True)
+							batch_norm=self.batch_norm)
 		self.pi_target.load_state_dict(self.pi.state_dict())
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.pi_target.parameters():
@@ -106,13 +111,14 @@ class DDPG:
 					 optimizer=self.q_optimizer,
 					 lr=self.q_lr,
 					 weight_decay=self.weight_decay,
-					 batch_norm=True)
+					 batch_norm=self.batch_norm,
+					 weight_init=self.weight_init)
 
 		self.q.summary()
 		self.q_target = MLP(layer_sizes=layer_sizes,
 							activations=self.q_activations,
 							seed=self.seed,
-							batch_norm=True)
+							batch_norm=self.batch_norm)
 		self.q_target.load_state_dict(self.q.state_dict())
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.q_target.parameters():
@@ -168,7 +174,7 @@ class DDPG:
 			p.requires_grad = True
 
 		# Log Model and Loss
-		if self.steps_done % 5000 == 0:
+		if self.steps_done % self.save_freq == 0:
 			self.logger.log_model(self.q, name='q')
 			self.logger.log_model(self.pi, name='pi')
 		self.logger.log(name='policy_updates', q_loss=q_loss.item(), pi_loss=pi_loss.item())
@@ -187,7 +193,6 @@ class DDPG:
 				p_targ.data.add_(self.polyak * p.data)
 
 	def get_action(self, obs):
-		self.steps_done += 1
 		self.pi.eval()
 		action = self.pi.predict(obs).detach().numpy()
 		action += self.noise()
@@ -195,6 +200,7 @@ class DDPG:
 
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
+		self.steps_done += 1
 
 		# Log Done, reward data
 		self.logger.log(name='transitions', done=done, rewards=rew)

@@ -33,7 +33,7 @@ def main():
 	if continuous:
 		act_limit = env.action_space.high[0]
 
-	# Run test
+	# Run tests
 	max_episodes = 30
 	ep_count = 1
 	ep_rew = 0
@@ -48,7 +48,7 @@ def main():
 			if argmax:
 				act = act.argmax().item()
 			if continuous:
-				act = np.clip(act, -act_limit, act_limit)
+				act = np.clip(act, -act_limit, act_limit).numpy()[0]
 
 		new_obs, rew, done, info = env.step(act)
 		obs = new_obs

@@ -2,7 +2,7 @@
 env_name       = 'CartPole-v1'
 gamma          = 1.0
 lr             = 1e-4
-max_iterations = 500000
+max_iterations = 350000
 render         = False
 seed           = 0
 use_grad_clip  = False
@@ -26,4 +26,4 @@ optimizer      = 'Adam'
 loss_type      = 'mse'
 
 # Policy Target Network:
-update_target_freq = 10	# Update target network per _ episodes
+update_target_freq = 8	# Update target network per _ episodes

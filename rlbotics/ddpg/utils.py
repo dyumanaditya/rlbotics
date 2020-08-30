@@ -2,12 +2,13 @@ import numpy as np
 
 
 class OUNoise:
-	def __init__(self, mu, sigma=0.2, theta=0.15, dt=1e-2, x0=None):
+	def __init__(self, seed, mu, sigma=0.2, theta=0.15, dt=1e-2, x0=None):
 		"""
 		Ornstein-Uhlenbeck action noise
 		:param mu: mean
 		:param sigma: standard deviation
 		"""
+		#np.random.seed(seed)
 		self.mu = mu
 		self.sigma = sigma
 		self.theta = theta
@@ -32,7 +33,8 @@ class OUNoise:
 
 
 class GaussianNoise:
-	def __init__(self, act_noise, act_dim):
+	def __init__(self, seed, act_noise, act_dim):
+		#np.random.seed(seed)
 		self.noise_scale = act_noise
 		self.act_dim = act_dim
 

@@ -33,7 +33,7 @@ class Plotter:
 		# Combine all csv files with different seeds into x and y so we can plot
 		x = []
 		y = []
-		num_seeds = 3
+		num_seeds = 1
 
 		if data == 'rewards':
 			for seed in range(num_seeds):

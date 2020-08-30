@@ -30,6 +30,7 @@ def argparser():
 	parser.add_argument('--noise_type', type=str, default=h.noise_type)
 	parser.add_argument('--random_steps', type=int, default=h.random_steps)
 	parser.add_argument('--update_after', type=int, default=h.update_after)
+	parser.add_argument('--update_every', type=int, default=h.update_every)
 
 	# Policy and Q Network specific
 	parser.add_argument('--save_freq', type=int, default=h.save_freq)
@@ -43,6 +44,8 @@ def argparser():
 	parser.add_argument('--q_optimizer', type=str, default=h.q_optimizer)
 	parser.add_argument('--q_loss_type', type=str, default=h.q_loss_type)
 	parser.add_argument('--weight_decay', type=float, default=h.weight_decay)
+	parser.add_argument('--weight_init', type=float, default=h.weight_init)
+	parser.add_argument('--batch_norm', type=bool, default=h.batch_norm)
 
 	return parser.parse_args()
 
@@ -83,14 +86,16 @@ def main():
 			obs = env.reset()
 
 			# Display results
-			print("episode: {}, total reward: {}".format(ep_counter, ep_rew))
+			print("episode: {}, total reward: {}, timesteps: {}".format(ep_counter, ep_rew, iteration))
 
 			# Logging
 			ep_counter += 1
 			ep_rew = 0
 
-		# Update Actor Critic
-		agent.update_actor_critic()
+		# Update Actor Critic only after some time steps
+		if iteration % args.update_every == 0:
+			for _ in range(args.update_every):
+				agent.update_actor_critic()
 
 	# End
 	env.close()
