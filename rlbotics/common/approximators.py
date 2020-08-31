@@ -63,6 +63,9 @@ class MLP(nn.Module):
         return self.mlp(x)
 
     def predict(self, x):
+        """
+        Used for interaction with the environment. Otherwise use forward()
+        """
         if type(x) == np.ndarray:
             x = torch.from_numpy(x).float()
 

@@ -1,5 +1,6 @@
-import torch
 import math
+import torch
+from copy import deepcopy
 
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
@@ -67,8 +68,8 @@ class DDQN:
 									   optimizer=self.optimizer,
 									   lr=self.lr)
 
-		self.target_policy = MLP(layer_sizes=layer_sizes, activations=self.activations, seed=self.seed)
-		self.update_target_policy()
+		self.target_policy = deepcopy(self.policy)
+		self.policy.summary()
 
 	def get_action(self, obs):
 		action = self.policy.get_action(obs, self.epsilon)

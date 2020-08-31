@@ -18,7 +18,8 @@ class Plotter:
 		ep_returns = get_return(log_file)
 
 		# Plot
-		ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns)
+		ep_returns = pd.Series(ep_returns).rolling(10, min_periods=1).mean()
+		ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns, ci=95)
 		ax.axes.set_title(title, fontsize=20)
 		ax.set_xlabel(xlabel, fontsize=15)
 		ax.set_ylabel(ylabel, fontsize=15)
@@ -33,7 +34,7 @@ class Plotter:
 		# Combine all csv files with different seeds into x and y so we can plot
 		x = []
 		y = []
-		num_seeds = 1
+		num_seeds = 10
 
 		if data == 'rewards':
 			for seed in range(num_seeds):

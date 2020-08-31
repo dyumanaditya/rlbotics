@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from copy import deepcopy
 
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
@@ -51,7 +52,7 @@ class DDPG:
 		self.batch_norm = args.batch_norm
 
 		# Initialize action noise
-		if self.noise_type == 'OU':
+		if self.noise_type == 'ou':
 			self.noise = OUNoise(self.seed, mu=np.zeros(self.act_dim))
 		elif self.noise_type == 'gaussian':
 			self.noise = GaussianNoise(self.seed, self.act_noise, self.act_dim)
@@ -94,11 +95,8 @@ class DDPG:
 					  weight_init=self.weight_init)
 
 		self.pi.summary()
-		self.pi_target = MLP(layer_sizes=layer_sizes,
-					   		activations=self.pi_activations,
-					   		seed=self.seed,
-							batch_norm=self.batch_norm)
-		self.pi_target.load_state_dict(self.pi.state_dict())
+		self.pi_target = deepcopy(self.pi)
+
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.pi_target.parameters():
 			p.requires_grad = False
@@ -115,11 +113,8 @@ class DDPG:
 					 weight_init=self.weight_init)
 
 		self.q.summary()
-		self.q_target = MLP(layer_sizes=layer_sizes,
-							activations=self.q_activations,
-							seed=self.seed,
-							batch_norm=self.batch_norm)
-		self.q_target.load_state_dict(self.q.state_dict())
+		self.q_target = deepcopy(self.q)
+
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.q_target.parameters():
 			p.requires_grad = False
@@ -136,7 +131,7 @@ class DDPG:
 
 		# Bellman backup for Q function
 		with torch.no_grad():
-			targ_pi = self.pi(new_obs_batch)
+			targ_pi = self.pi(new_obs_batch) * self.act_lim		# Multiply to scale to action space
 			targ_q  = self.q_target(torch.cat([new_obs_batch, targ_pi], dim=-1)).detach()
 			expected_q = rew_batch + self.gamma * (targ_q * not_done_batch)
 
@@ -145,7 +140,7 @@ class DDPG:
 
 	def _compute_pi_loss(self, batch):
 		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float)
-		pi = self.pi(obs_batch)
+		pi = self.pi(obs_batch) * self.act_lim					# Multiply to scale to action space
 		q = self.q(torch.cat([obs_batch, pi], dim=-1))
 		return -q.mean()
 
@@ -192,7 +187,7 @@ class DDPG:
 
 	def get_action(self, obs):
 		self.pi.eval()
-		action = self.pi.predict(obs).detach().numpy()
+		action = self.pi.predict(obs).detach().numpy() * self.act_lim	# Multiply to scale to action space
 		action += self.noise()
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
 
