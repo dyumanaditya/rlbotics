@@ -4,7 +4,7 @@ import argparse
 
 from rlbotics.vpg.vpg import VPG
 import rlbotics.vpg.hyperparameters as h
-from rlbotics.common.plotter import plot
+from rlbotics.common.plotter import Plotter
 
 
 def argparser():
@@ -92,7 +92,8 @@ def main():
 
 	# End
 	env.close()
-	plot('VPG', args.env_name, args.seed, 'episodes', 'rewards', True)
+	p = Plotter()
+	p.plot_individual('Epoch/Reward', 'epochs', 'rewards', 'VPG', args.env_name, args.seed, True)
 
 
 if __name__ == '__main__':

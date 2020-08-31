@@ -94,7 +94,8 @@ def main():
 
 	# End
 	env.close()
-	plot('TRPO', args.env_name, args.seed, 'episodes', 'rewards', True)
+	p = Plotter()
+	p.plot_individual('Epoch/Reward', 'epochs', 'rewards', 'TRPO', args.env_name, args.seed, True)
 
 
 if __name__ == '__main__':
