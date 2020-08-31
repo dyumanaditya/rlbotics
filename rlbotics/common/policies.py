@@ -2,7 +2,8 @@ import torch
 import random
 import numpy as np
 from rlbotics.common.approximators import MLP
-from torch.distributions import Categorical
+from torch.distributions.normal import Normal
+from torch.distributions.categorical import Categorical
 
 
 class MLPSoftmaxPolicy(MLP):
@@ -30,20 +31,35 @@ class MLPSoftmaxPolicy(MLP):
 		return act_dist
 
 
-class MLPGaussian(MLP):
+class MLPGaussianPolicy(MLP):
 	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False, weight_init=None):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
 						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
 		torch.manual_seed(seed)
 
-	def get_policy(self, obs):
-		pass
+		log_std = -0.5 * np.ones(layer_sizes[-1], dtype=np.float32)
+        self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
 
 	def get_action(self, obs):
-		pass
+		with torch.no_grad():
+			act_logits = self.predict(obs)
+
+        std = torch.exp(self.log_std)
+        act_dist = Normal(act_logits, std)
+		return act_dist.sample().item()
 
 	def get_log_prob(self, obs, act):
-		pass
+		act_logits = self.predict(obs)
+		std = torch.exp(self.log_std)
+        act_dist = Normal(act_logits, std)
+		log_p = act_dist.log_prob(act).sum(axis=-1)
+		return log_p
+
+	def get_policy(self, obs):
+		act_logits = self.predict(obs)
+        std = torch.exp(self.log_std)
+        act_dist = Normal(mu, std)
+		return act_dist
 
 
 class MLPEpsilonGreedy(MLP):
