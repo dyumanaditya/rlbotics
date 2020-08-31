@@ -38,27 +38,27 @@ class MLPGaussianPolicy(MLP):
 		torch.manual_seed(seed)
 
 		log_std = -0.5 * np.ones(layer_sizes[-1], dtype=np.float32)
-        self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
+		self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
 
 	def get_action(self, obs):
 		with torch.no_grad():
 			act_logits = self.predict(obs)
 
-        std = torch.exp(self.log_std)
-        act_dist = Normal(act_logits, std)
+		std = torch.exp(self.log_std)
+		act_dist = Normal(act_logits, std)
 		return act_dist.sample().item()
 
 	def get_log_prob(self, obs, act):
 		act_logits = self.predict(obs)
 		std = torch.exp(self.log_std)
-        act_dist = Normal(act_logits, std)
+		act_dist = Normal(act_logits, std)
 		log_p = act_dist.log_prob(act).sum(axis=-1)
 		return log_p
 
 	def get_policy(self, obs):
 		act_logits = self.predict(obs)
-        std = torch.exp(self.log_std)
-        act_dist = Normal(mu, std)
+		std = torch.exp(self.log_std)
+		act_dist = Normal(mu, std)
 		return act_dist
 
 
