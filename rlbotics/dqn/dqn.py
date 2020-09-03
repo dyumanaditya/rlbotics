@@ -34,6 +34,10 @@ class DQN:
 		self.activations = args.activations
 		self.hidden_sizes = args.hidden_sizes
 
+		# Set device
+		gpu = 0
+		self.device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
+
 		# Replay buffer
 		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
@@ -66,9 +70,9 @@ class DQN:
 									   activations=self.activations,
 									   seed=self.seed,
 									   optimizer=self.optimizer,
-									   lr=self.lr)
+									   lr=self.lr).to(self.device)
 
-		self.target_policy = deepcopy(self.policy)
+		self.target_policy = deepcopy(self.policy).to(self.device)
 		self.policy.summary()
 
 	def get_action(self, obs):
@@ -97,22 +101,22 @@ class DQN:
 		transition_batch = self.memory.sample(self.batch_size)
 
 		# Extract batches and convert to tensors
-		obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
-		act_batch = torch.as_tensor(transition_batch.act)
-		rew_batch = torch.as_tensor(transition_batch.rew)
-		new_obs_batch = torch.as_tensor(transition_batch.new_obs, dtype=torch.float)
-		done_batch = torch.as_tensor(transition_batch.done)
-		not_done_batch = torch.logical_not(done_batch)
+		obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float).to(self.device)
+		act_batch = torch.as_tensor(transition_batch.act).to(self.device)
+		rew_batch = torch.as_tensor(transition_batch.rew).to(self.device)
+		new_obs_batch = torch.as_tensor(transition_batch.new_obs, dtype=torch.float).to(self.device)
+		done_batch = torch.as_tensor(transition_batch.done).to(self.device)
+		not_done_batch = torch.logical_not(done_batch).to(self.device)
 
 		# Update
 		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
-		target_values = torch.zeros(self.batch_size)
+		target_values = torch.zeros(self.batch_size).to(self.device)
 		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).max(1)[0].detach()
 
 		expected_q_values = rew_batch + self.gamma * target_values
-		expected_q_values = expected_q_values.unsqueeze(1)
+		expected_q_values = expected_q_values.unsqueeze(1).to(self.device)
 
-		loss = self.criterion(q_values, expected_q_values.float())
+		loss = self.criterion(q_values, expected_q_values.float()).to(self.device)
 		self.policy.learn(loss, grad_clip=self.grad_clip)
 
 		# Log Model and Loss

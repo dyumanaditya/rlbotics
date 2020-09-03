@@ -5,6 +5,7 @@ from copy import deepcopy
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
 from rlbotics.common.approximators import MLP
+from rlbotics.common.policies import MLPContinuous
 from rlbotics.ddpg.replay_buffer import ReplayBuffer
 from rlbotics.ddpg.utils import OUNoise, GaussianNoise
 
@@ -51,6 +52,10 @@ class DDPG:
 		self.weight_init = args.weight_init
 		self.batch_norm = args.batch_norm
 
+		# Set device
+		gpu = 0
+		self.device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
+
 		# Initialize action noise
 		if self.noise_type == 'ou':
 			self.noise = OUNoise(self.seed, mu=np.zeros(self.act_dim))
@@ -86,16 +91,17 @@ class DDPG:
 
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + self.pi_hidden_sizes + [self.act_dim]
-		self.pi = MLP(layer_sizes=layer_sizes,
-					  activations=self.pi_activations,
-					  seed=self.seed,
-					  optimizer=self.pi_optimizer,
-					  lr=self.pi_lr,
-					  batch_norm=self.batch_norm,
-					  weight_init=self.weight_init)
+		self.pi = MLPContinuous(seed=self.seed,
+								lr=self.pi_lr,
+								act_lim=self.act_lim,
+								layer_sizes=layer_sizes,
+								batch_norm=self.batch_norm,
+								optimizer=self.pi_optimizer,
+								weight_init=self.weight_init,
+					  			activations=self.pi_activations).to(self.device)
 
 		self.pi.summary()
-		self.pi_target = deepcopy(self.pi)
+		self.pi_target = deepcopy(self.pi).to(self.device)
 
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.pi_target.parameters():
@@ -103,44 +109,43 @@ class DDPG:
 
 	def _build_q_function(self):
 		layer_sizes = [self.obs_dim + self.act_dim] + self.q_hidden_sizes + [1]
-		self.q = MLP(layer_sizes=layer_sizes,
-					 activations=self.q_activations,
-					 seed=self.seed,
-					 optimizer=self.q_optimizer,
-					 lr=self.q_lr,
-					 weight_decay=self.weight_decay,
+		self.q = MLP(seed=self.seed,
+					 lr=self.pi_lr,
+					 layer_sizes=layer_sizes,
 					 batch_norm=self.batch_norm,
-					 weight_init=self.weight_init)
+					 optimizer=self.pi_optimizer,
+					 weight_init=self.weight_init,
+					 activations=self.pi_activations).to(self.device)
 
 		self.q.summary()
-		self.q_target = deepcopy(self.q)
+		self.q_target = deepcopy(self.q).to(self.device)
 
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p in self.q_target.parameters():
 			p.requires_grad = False
 
 	def _compute_q_loss(self, batch):
-		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float)
-		act_batch = torch.as_tensor(batch.act)
-		rew_batch = torch.as_tensor(batch.rew).unsqueeze(1)
-		new_obs_batch = torch.as_tensor(batch.new_obs, dtype=torch.float)
-		done_batch = torch.as_tensor(batch.done)
-		not_done_batch = torch.logical_not(done_batch).unsqueeze(1)
+		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float).to(self.device)
+		act_batch = torch.as_tensor(batch.act).to(self.device)
+		rew_batch = torch.as_tensor(batch.rew).unsqueeze(1).to(self.device)
+		new_obs_batch = torch.as_tensor(batch.new_obs, dtype=torch.float).to(self.device)
+		done_batch = torch.as_tensor(batch.done).to(self.device)
+		not_done_batch = torch.logical_not(done_batch).unsqueeze(1).to(self.device)
 
 		pred_q = self.q(torch.cat([obs_batch, act_batch], dim=-1))
 
 		# Bellman backup for Q function
 		with torch.no_grad():
-			targ_pi = self.pi(new_obs_batch) * self.act_lim		# Multiply to scale to action space
-			targ_q  = self.q_target(torch.cat([new_obs_batch, targ_pi], dim=-1)).detach()
+			targ_pi = self.pi.get_action(new_obs_batch)
+			targ_q  = self.q_target(torch.cat([new_obs_batch, targ_pi], dim=-1))
 			expected_q = rew_batch + self.gamma * (targ_q * not_done_batch)
 
-		loss = self.q_criterion(pred_q, expected_q.float())
+		loss = self.q_criterion(pred_q, expected_q.float()).to(self.device)
 		return loss
 
 	def _compute_pi_loss(self, batch):
-		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float)
-		pi = self.pi(obs_batch) * self.act_lim					# Multiply to scale to action space
+		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float).to(self.device)
+		pi = self.pi.get_action(obs_batch)
 		q = self.q(torch.cat([obs_batch, pi], dim=-1))
 		return -q.mean()
 
@@ -187,7 +192,7 @@ class DDPG:
 
 	def get_action(self, obs):
 		self.pi.eval()
-		action = self.pi.predict(obs).detach().numpy() * self.act_lim	# Multiply to scale to action space
+		action = self.pi.get_action(obs).detach().numpy()
 		action += self.noise()
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
 

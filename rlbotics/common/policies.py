@@ -77,3 +77,14 @@ class MLPEpsilonGreedy(MLP):
 				output = self.predict(obs)
 				action = output.argmax().item()
 		return action
+
+
+class MLPContinuous(MLP):
+	def __init__(self, act_lim, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0,
+				 batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
+						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+		self.act_lim = act_lim
+
+	def get_action(self, obs):
+		return self.predict(obs) * self.act_lim			# Multiply to scale to action space

@@ -20,13 +20,13 @@ update_every   = 1            # Number of iteration to pass before doing an upda
 # Note: Regardless of how long you wait between updates, the ratio of env steps to gradient steps is locked to 1.
 
 # Policy Network Parameters
-pi_lr           = 1e-4
+pi_lr           = 5e-5
 pi_hidden_sizes = [256, 256, 256] 	  # Dimensions have to be 1 less than activations
 pi_activations  = ['relu', 'relu', 'relu', 'tanh']
 pi_optimizer    = 'Adam'
 
 # Q Network Parameters
-q_lr      	    = 1e-3
+q_lr      	    = 5e-5
 q_hidden_sizes  = [256, 256, 256]	  # Dimensions have to be 1 less than activations
 q_activations   = ['relu', 'relu', 'relu', 'none']
 q_optimizer     = 'Adam'

@@ -62,12 +62,6 @@ def main():
 	ep_counter = 0
 	ep_rew = 0
 
-	# Set device
-	gpu = 0
-	device = torch.device(f"cuda:{gpu}"if torch.cuda.is_available() else "cpu")
-	if torch.cuda.is_available():
-		torch.cuda.set_device(device)
-
 	for iteration in range(args.max_iterations):
 		if args.render:
 			env.render()
