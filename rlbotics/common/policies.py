@@ -42,21 +42,21 @@ class MLPGaussianPolicy(MLP):
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			act_logits = self.predict(obs)
+			mu = self.predict(obs)
 
 		std = torch.exp(self.log_std)
-		act_dist = Normal(act_logits, std)
-		return act_dist.sample().item()
+		act_dist = Normal(mu, std)
+		return act_dist.sample().numpy()[0]
 
 	def get_log_prob(self, obs, act):
-		act_logits = self.predict(obs)
+		mu = self.predict(obs)
 		std = torch.exp(self.log_std)
-		act_dist = Normal(act_logits, std)
+		act_dist = Normal(mu, std)
 		log_p = act_dist.log_prob(act).sum(axis=-1)
 		return log_p
 
-	def get_policy(self, obs):
-		act_logits = self.predict(obs)
+	def get_distribution(self, obs):
+		mu = self.predict(obs)
 		std = torch.exp(self.log_std)
 		act_dist = Normal(mu, std)
 		return act_dist

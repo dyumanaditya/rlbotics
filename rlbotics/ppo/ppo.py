@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from rlbotics.ppo.memory import Memory
-from rlbotics.common.policies import MLPSoftmaxPolicy
+from rlbotics.common.policies import MLPSoftmaxPolicy, MLPGaussianPolicy
 from rlbotics.common.approximators import MLP
 from rlbotics.common.logger import Logger
 from rlbotics.common.utils import GAE, get_expected_return
@@ -10,8 +10,7 @@ from rlbotics.common.utils import GAE, get_expected_return
 
 class PPO:
     def __init__(self, args, env):
-        self.obs_dim = env.observation_space.shape[0]
-        self.act_dim = env.action_space.n
+        self.env = env
 
         # General parameters
         self.gamma = args.gamma
@@ -52,11 +51,26 @@ class PPO:
         self.logger.log(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
     def _build_policy(self):
-        self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
-                                       activations=self.pi_activations,
-                                       seed=self.seed,
-                                       optimizer=self.pi_optimizer,
-                                       lr=self.pi_lr)
+        continuous = False if len(self.env.action_space.shape) == 0 else True
+
+        if continuous:
+            self.obs_dim = self.env.observation_space.shape[0]
+            self.act_dim = self.env.action_space.shape[0]
+
+            self.policy = MLPGaussianPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+                                           activations=self.pi_activations,
+                                           seed=self.seed,
+                                           optimizer=self.pi_optimizer,
+                                           lr=self.pi_lr)
+        else:
+            self.obs_dim = self.env.observation_space.shape[0]
+            self.act_dim = self.env.action_space.n
+
+            self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+                                           activations=self.pi_activations,
+                                           seed=self.seed,
+                                           optimizer=self.pi_optimizer,
+                                           lr=self.pi_lr)
         self.policy.summary()
 
     def _build_value_function(self):
