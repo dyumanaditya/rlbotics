@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import torch
 import shutil
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
@@ -81,4 +82,4 @@ class Logger:
 
 	def log_model(self, mlp, name=''):
 		file = os.path.join(self.model_dir, name + 'model.pth')
-		mlp.save_model(file)
+		torch.save(mlp, file)

@@ -33,7 +33,7 @@ class MLP(nn.Module):
         })
 
         # Build MLP and initialize weights if necessary
-        self.mlp = self._make_mlp(layer_sizes, activations, batch_norm)
+        self.mlp = self._build_mlp(layer_sizes, activations, batch_norm)
         if weight_init is not None:
             self.mlp.apply(self.init_weights)
 
@@ -45,7 +45,7 @@ class MLP(nn.Module):
         else:
             raise NameError(str(optimizer) + ' Optimizer not supported')
 
-    def _make_mlp(self, layer_sizes, activations, batch_norm):
+    def _build_mlp(self, layer_sizes, activations, batch_norm):
         layers = []
         for i in range(len(layer_sizes)-1):
             if batch_norm:
@@ -60,17 +60,11 @@ class MLP(nn.Module):
             nn.init.uniform_(mlp.weight, -self.weight_init, self.weight_init)
 
     def forward(self, x):
-        return self.mlp(x)
-
-    def predict(self, x):
-        """
-        Used for interaction with the environment. Otherwise use forward()
-        """
         if type(x) == np.ndarray:
             x = torch.from_numpy(x).float()
 
         x = x.view(-1, self.obs_dim)
-        return self.forward(x)
+        return self.mlp(x)
 
     def learn(self, loss, grad_clip=None):
         self.optimizer.zero_grad()
@@ -79,18 +73,6 @@ class MLP(nn.Module):
             for param in self.mlp.parameters():
                 param.grad.data.clamp_(grad_clip[0], grad_clip[1])
         self.optimizer.step()
-
-    def save_weights(self, dir_path):
-        torch.save(self.mlp.state_dict(), dir_path)
-
-    def load_weights(self, dir_path):
-        self.mlp.load_state_dict(torch.load(dir_path))
-
-    def save_model(self, dir_path):
-        torch.save(self.mlp, dir_path)
-
-    def load_model(self, dir_path):
-        self.mlp = torch.load(dir_path)
 
     def summary(self):
         print(self.mlp)

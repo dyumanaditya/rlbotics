@@ -109,10 +109,10 @@ class DDQN:
 		not_done_batch = torch.logical_not(done_batch).to(self.device)
 
 		# Update
-		q_values = self.policy.predict(obs_batch).gather(1, act_batch.unsqueeze(1))
-		next_state_q_values = self.policy.predict(new_obs_batch[not_done_batch]).argmax(1)
+		q_values = self.policy(obs_batch).gather(1, act_batch.unsqueeze(1))
+		next_state_q_values = self.policy(new_obs_batch[not_done_batch]).argmax(1)
 		target_values = torch.zeros(self.batch_size, 1).to(self.device)
-		target_values[not_done_batch] = self.target_policy.predict(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1)).detach()
+		target_values[not_done_batch] = self.target_policy(new_obs_batch[not_done_batch]).gather(1, next_state_q_values.unsqueeze(1)).detach()
 
 		expected_q_values = rew_batch.unsqueeze(1) + self.gamma * target_values
 

@@ -78,7 +78,7 @@ class DDPG:
 		self.steps_done = -1
 
 		# Loss function
-		self.q_criterion = losses(self.q_loss_type)
+		self.q_criterion = losses(self.q_loss_type).to(self.device)
 
 		# Build pi and q Networks
 		self._build_policy()
@@ -91,14 +91,14 @@ class DDPG:
 
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + self.pi_hidden_sizes + [self.act_dim]
-		self.pi = MLPContinuous(seed=self.seed,
-								lr=self.pi_lr,
-								act_lim=self.act_lim,
-								layer_sizes=layer_sizes,
-								batch_norm=self.batch_norm,
-								optimizer=self.pi_optimizer,
-								weight_init=self.weight_init,
-					  			activations=self.pi_activations).to(self.device)
+		self.pi = MLPContinuous(act_lim=self.act_lim,
+			layer_sizes=layer_sizes,
+					  activations=self.pi_activations,
+					  seed=self.seed,
+					  optimizer=self.pi_optimizer,
+					  lr=self.pi_lr,
+					  batch_norm=self.batch_norm,
+					  weight_init=self.weight_init).to(self.device)
 
 		self.pi.summary()
 		self.pi_target = deepcopy(self.pi).to(self.device)
@@ -109,13 +109,14 @@ class DDPG:
 
 	def _build_q_function(self):
 		layer_sizes = [self.obs_dim + self.act_dim] + self.q_hidden_sizes + [1]
-		self.q = MLP(seed=self.seed,
-					 lr=self.pi_lr,
-					 layer_sizes=layer_sizes,
+		self.q = MLP(layer_sizes=layer_sizes,
+					 activations=self.q_activations,
+					 seed=self.seed,
+					 optimizer=self.q_optimizer,
+					 lr=self.q_lr,
+					 weight_decay=self.weight_decay,
 					 batch_norm=self.batch_norm,
-					 optimizer=self.pi_optimizer,
-					 weight_init=self.weight_init,
-					 activations=self.pi_activations).to(self.device)
+					 weight_init=self.weight_init).to(self.device)
 
 		self.q.summary()
 		self.q_target = deepcopy(self.q).to(self.device)
@@ -140,7 +141,7 @@ class DDPG:
 			targ_q  = self.q_target(torch.cat([new_obs_batch, targ_pi], dim=-1))
 			expected_q = rew_batch + self.gamma * (targ_q * not_done_batch)
 
-		loss = self.q_criterion(pred_q, expected_q.float()).to(self.device)
+		loss = self.q_criterion(pred_q, expected_q.float())
 		return loss
 
 	def _compute_pi_loss(self, batch):
