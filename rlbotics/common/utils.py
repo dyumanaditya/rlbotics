@@ -36,23 +36,6 @@ def get_return(log_file):
     return ep_returns
 
 
-def get_episode_returns(rew_batch, done_batch, gamma):
-    episode_returns = []
-    episodes = []
-    prev_index = 0
-
-    indices = torch.nonzero(done_batch, as_tuple=True)[0]
-
-    for index in indices:
-        episodes.append(rew_batch[prev_index:index+1])
-        prev_index = index + 1
-
-    for ep in episodes:
-        episode_returns += [ep.sum().item()] * len(ep)
-
-    return torch.as_tensor(episode_returns, dtype=torch.float32)
-
-
 def get_expected_return(rew, done, gamma, normalize_output=True):
     g = torch.zeros_like(rew, dtype=torch.float32)
     cumulative = 0.0
