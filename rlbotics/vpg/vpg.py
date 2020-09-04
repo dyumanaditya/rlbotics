@@ -66,7 +66,7 @@ class VPG:
         return self.policy.get_action(obs)
 
     def store_transition(self, obs, act, rew, new_obs, done):
-        value = self.value.predict(obs)
+        value = self.value(obs)
         log_prob = self.policy.get_log_prob(obs, torch.tensor(act))
 
         self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
@@ -119,7 +119,7 @@ class VPG:
 
     def update_value(self):
         for _ in range(self.num_v_iters):
-            val= self.value.predict(self.data["obs"]).squeeze(1)
+            val= self.value(self.data["obs"]).squeeze(1)
             ret = self.data["ret"]
 
             loss = F.mse_loss(val, ret)

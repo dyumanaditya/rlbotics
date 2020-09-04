@@ -48,7 +48,7 @@ def main():
 			if argmax:
 				act = act.argmax().item()
 			if continuous:
-				act = np.clip(act, -act_limit, act_limit).numpy()[0]
+				act = np.clip(act * act_limit, -act_limit, act_limit).numpy()[0]
 
 		new_obs, rew, done, info = env.step(act)
 		obs = new_obs

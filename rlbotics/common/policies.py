@@ -14,19 +14,19 @@ class MLPSoftmaxPolicy(MLP):
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			act_logits = self.predict(obs)
+			act_logits = self.forward(obs)
 
 		act_dist = Categorical(logits=act_logits)
 		return act_dist.sample().item()
 
 	def get_log_prob(self, obs, act):
-		act_logits = self.predict(obs)
+		act_logits = self.forward(obs)
 		act_dist = Categorical(logits=act_logits)
 		log_p = act_dist.log_prob(act)
 		return log_p
 
 	def get_distribution(self, obs):
-		act_logits = self.predict(obs)
+		act_logits = self.forward(obs)
 		act_dist = Categorical(logits=act_logits)
 		return act_dist
 
@@ -42,21 +42,21 @@ class MLPGaussianPolicy(MLP):
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			mu = self.predict(obs)
+			mu = self.forward(obs)
 
 		std = torch.exp(self.log_std)
 		act_dist = Normal(mu, std)
 		return act_dist.sample().numpy()[0]
 
 	def get_log_prob(self, obs, act):
-		mu = self.predict(obs)
+		mu = self.forward(obs)
 		std = torch.exp(self.log_std)
 		act_dist = Normal(mu, std)
 		log_p = act_dist.log_prob(act).sum(axis=-1)
 		return log_p
 
 	def get_distribution(self, obs):
-		mu = self.predict(obs)
+		mu = self.forward(obs)
 		std = torch.exp(self.log_std)
 		act_dist = Normal(mu, std)
 		return act_dist
@@ -74,6 +74,17 @@ class MLPEpsilonGreedy(MLP):
 			action = random.randrange(self.action_size)
 		else:
 			with torch.no_grad():
-				output = self.predict(obs)
+				output = self.forward(obs)
 				action = output.argmax().item()
 		return action
+
+
+class MLPContinuous(MLP):
+	def __init__(self, act_lim, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0,
+				 batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
+						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+		self.act_lim = act_lim
+
+	def get_action(self, obs):
+		return self.forward(obs) * self.act_lim			# Multiply to scale to action space
