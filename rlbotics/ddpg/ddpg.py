@@ -1,13 +1,13 @@
+import os
 import torch
 import numpy as np
 from copy import deepcopy
 
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
-from rlbotics.common.approximators import MLP
-from rlbotics.common.policies import MLPContinuous
 from rlbotics.ddpg.replay_buffer import ReplayBuffer
 from rlbotics.ddpg.utils import OUNoise, GaussianNoise
+from rlbotics.common.policies import MLPActorContinuous, MLPQFunctionContinuous
 
 
 class DDPG:
@@ -91,14 +91,14 @@ class DDPG:
 
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + self.pi_hidden_sizes + [self.act_dim]
-		self.pi = MLPContinuous(act_lim=self.act_lim,
-			layer_sizes=layer_sizes,
-					  activations=self.pi_activations,
-					  seed=self.seed,
-					  optimizer=self.pi_optimizer,
-					  lr=self.pi_lr,
-					  batch_norm=self.batch_norm,
-					  weight_init=self.weight_init).to(self.device)
+		self.pi = MLPActorContinuous(act_lim=self.act_lim,
+									 layer_sizes=layer_sizes,
+									 activations=self.pi_activations,
+									 seed=self.seed,
+									 optimizer=self.pi_optimizer,
+									 lr=self.pi_lr,
+									 batch_norm=self.batch_norm,
+									 weight_init=self.weight_init).to(self.device)
 
 		self.pi.summary()
 		self.pi_target = deepcopy(self.pi).to(self.device)
@@ -109,14 +109,15 @@ class DDPG:
 
 	def _build_q_function(self):
 		layer_sizes = [self.obs_dim + self.act_dim] + self.q_hidden_sizes + [1]
-		self.q = MLP(layer_sizes=layer_sizes,
-					 activations=self.q_activations,
-					 seed=self.seed,
-					 optimizer=self.q_optimizer,
-					 lr=self.q_lr,
-					 weight_decay=self.weight_decay,
-					 batch_norm=self.batch_norm,
-					 weight_init=self.weight_init).to(self.device)
+		self.q = MLPQFunctionContinuous(num_mlp=1,
+										layer_sizes=layer_sizes,
+										activations=self.q_activations,
+										seed=self.seed,
+										optimizer=self.q_optimizer,
+										lr=self.q_lr,
+										weight_decay=self.weight_decay,
+										batch_norm=self.batch_norm,
+										weight_init=self.weight_init).to(self.device)
 
 		self.q.summary()
 		self.q_target = deepcopy(self.q).to(self.device)
@@ -133,12 +134,12 @@ class DDPG:
 		done_batch = torch.as_tensor(batch.done).to(self.device)
 		not_done_batch = torch.logical_not(done_batch).unsqueeze(1).to(self.device)
 
-		pred_q = self.q(torch.cat([obs_batch, act_batch], dim=-1))
+		pred_q = self.q.get_q_value(obs_batch, act_batch)
 
 		# Bellman backup for Q function
 		with torch.no_grad():
 			targ_pi = self.pi.get_action(new_obs_batch)
-			targ_q  = self.q_target(torch.cat([new_obs_batch, targ_pi], dim=-1))
+			targ_q  = self.q_target.get_q_value(new_obs_batch, targ_pi)
 			expected_q = rew_batch + self.gamma * (targ_q * not_done_batch)
 
 		loss = self.q_criterion(pred_q, expected_q.float())
@@ -147,7 +148,7 @@ class DDPG:
 	def _compute_pi_loss(self, batch):
 		obs_batch = torch.as_tensor(batch.obs, dtype=torch.float).to(self.device)
 		pi = self.pi.get_action(obs_batch)
-		q = self.q(torch.cat([obs_batch, pi], dim=-1))
+		q = self.q.get_q_value(obs_batch, pi)
 		return -q.mean()
 
 	def update_actor_critic(self):

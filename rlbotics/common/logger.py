@@ -9,22 +9,25 @@ from rlbotics.common.utils import get_latest_return
 
 
 class Logger:
-	def __init__(self, algo_name, env_name, seed):
+	def __init__(self, algo_name, env_name, seed, resume=False):
 		"""
 		:param algo_name: (str) name of file in which log will be stored
 		:param env_name: (str) name of environment used in experiment
 		:param seed: (int) random seed used in experiment
+		:param resume: (bool) Resume training some model
 		"""
 		cur_dir = os.getcwd()
 		self.log_dir = os.path.join(cur_dir, 'experiments', 'logs', algo_name + '_' + env_name + '_' + str(seed))
 		self.model_dir = os.path.join(cur_dir, 'experiments', 'models', algo_name + '_' + env_name + '_' + str(seed))
-		if os.path.exists(self.log_dir):
+		if os.path.exists(self.log_dir) and not resume:
 			shutil.rmtree(self.log_dir)
-		if os.path.exists(self.model_dir):
+		if os.path.exists(self.model_dir) and not resume:
 			shutil.rmtree(self.model_dir)
-		os.makedirs(self.log_dir)
-		os.makedirs(self.model_dir)
+		if not resume:
+			os.makedirs(self.log_dir)
+			os.makedirs(self.model_dir)
 
+		self.resume = resume
 		self.transition_keys, self.policy_update_keys = [], []
 
 		# Tensor Board
@@ -39,14 +42,14 @@ class Logger:
 	def log(self, name='params', **kwargs):
 		if name == 'transitions':
 			file = os.path.join(self.log_dir, 'transitions.csv')
-			header = True if len(self.transition_keys) == 0 else False
+			header = True if len(self.transition_keys) == 0 and not self.resume else False
 			if header:
 				self.transition_keys = list(kwargs.keys())
 			self._save_tabular(file, header, **kwargs)
 
 		elif name == 'policy_updates':
 			file = os.path.join(self.log_dir, 'policy_updates.csv')
-			header = True if len(self.policy_update_keys) == 0 else False
+			header = True if len(self.policy_update_keys) == 0 and not self.resume else False
 			if header:
 				self.policy_update_keys = list(kwargs.keys())
 			self._save_tabular(file, header, **kwargs)
@@ -55,6 +58,10 @@ class Logger:
 			file = os.path.join(self.log_dir, 'params.json')
 			with open(file, 'w') as f:
 				json.dump(kwargs, f, indent=4)
+
+		elif name == 'checkpoint':
+			file = os.path.join(self.log_dir, 'checkpoint')
+			torch.save(kwargs, file)
 
 	def _save_tabular(self, file, header, **kwargs):
 		with open(file, 'a') as f:
