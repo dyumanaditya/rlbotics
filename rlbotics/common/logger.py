@@ -5,7 +5,7 @@ import torch
 import shutil
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
-from rlbotics.common.utils import get_latest_return
+from rlbotics.common.utils import get_latest_ep_return
 
 
 class Logger:
@@ -75,7 +75,7 @@ class Logger:
 	def _write_tensorboard(self, file, **kwargs):
 		if 'transitions.csv' in file:
 			if kwargs.get('done'):
-				latest_return = get_latest_return(file)
+				latest_return = get_latest_ep_return(file)
 				self.episode_returns.append(latest_return)
 		else:
 			for key, value in kwargs.items():

@@ -29,7 +29,7 @@ def argparser():
 	parser.add_argument('--epsilon', type=float, default=h.epsilon)
 	parser.add_argument('--min_epsilon', type=float, default=h.min_epsilon)
 	parser.add_argument('--exp_decay', type=float, default=h.exp_decay)
-	parser.add_argument('-linear_decay', type=float, default=h.linear_decay)
+	parser.add_argument('--linear_decay', type=float, default=h.linear_decay)
 
 	# Policy/Target Network
 	parser.add_argument('--hidden_sizes', nargs='+', type=int, default=h.hidden_sizes)

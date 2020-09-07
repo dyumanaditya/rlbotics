@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from rlbotics.common.utils import get_return
+from rlbotics.common.utils import get_ep_returns
 
 
 class Plotter:
@@ -13,9 +13,9 @@ class Plotter:
 		if not os.path.exists(self.plt_dir):
 			os.makedirs(self.plt_dir)
 
-	def plot_individual(self, title, xlabel, ylabel, algo, env, seed, display=False):
+	def plot_individual(self, title, xlabel, ylabel, algo, env, seed, epoch_iter=1, display=False):
 		log_file = os.path.join(self.cur_dir, 'experiments', 'logs', algo + '_' + env + '_' + str(seed), 'transitions.csv')
-		ep_returns = get_return(log_file)
+		ep_returns = get_ep_returns(log_file, epoch_iter)
 
 		# Plot
 		ep_returns = pd.Series(ep_returns).rolling(10, min_periods=1).mean()
@@ -30,7 +30,7 @@ class Plotter:
 		if display:
 			plt.show()
 
-	def combine_csv_files(self, algo, env, data='rewards', log_file_type='transitions'):
+	def combine_csv_files(self, algo, env, epoch_iter, data='rewards', log_file_type='transitions'):
 		# Combine all csv files with different seeds into x and y so we can plot
 		x = []
 		y = []
@@ -39,7 +39,7 @@ class Plotter:
 		if data == 'rewards':
 			for seed in range(num_seeds):
 				filename = os.path.join('experiments', 'logs', algo + '_' + env + '_' + str(seed), log_file_type + '.csv')
-				returns = get_return(filename)
+				returns = get_ep_returns(filename, epoch_iter)
 				x += list(range(len(returns)))
 				y += returns
 		else:
@@ -52,8 +52,9 @@ class Plotter:
 
 		return x, y
 
-	def plot_combined(self, title, xlabel, ylabel, algo, env, display=False, data='rewards', log_file_type='transitions'):
+	def plot_combined(self, title, xlabel, ylabel, algo, env, epoch_iter=1, display=False, data='rewards', log_file_type='transitions'):
 		"""
+		:param epoch_iter: number of iterations for 1 epoch. (hyperparameters:max_iterations)
 		:param data: Either rewards or anything else you want to plot
 		:param log_file_type: Either transitions or policy_updates
 		"""
@@ -61,7 +62,7 @@ class Plotter:
 		if not os.path.exists(filename):
 			os.makedirs(filename)
 
-		x, y = self.combine_csv_files(algo, env, data, log_file_type)
+		x, y = self.combine_csv_files(algo, env, epoch_iter, data, log_file_type)
 		y = pd.Series(y).rolling(5, min_periods=1).mean()
 
 		# Plot

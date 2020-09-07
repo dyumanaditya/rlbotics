@@ -21,6 +21,7 @@ def argparser():
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--render', type=bool, default=h.render)
 	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
+	parser.add_argument('--resume', type=bool, default=h.resume)
 
 	# DDPG Specific
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)

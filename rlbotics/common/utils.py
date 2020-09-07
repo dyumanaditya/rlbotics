@@ -1,10 +1,9 @@
-import pandas as pd
-
 import torch
-import numpy as np
+import pandas as pd
+from statistics import mean
 
 
-def get_latest_return(log_file):
+def get_latest_ep_return(log_file):
     logs = pd.read_csv(log_file)
     ep_return = 1
 
@@ -18,10 +17,16 @@ def get_latest_return(log_file):
     return ep_return
 
 
-def get_return(log_file):
+def get_ep_returns(log_file, epoch_iter=1):
+    """
+    :param log_file: file where transitions.csv is found
+    :param epoch_iter: number of iterations for one epoch. (hyperparameters:max_iterations)
+    :return: (list) of returns from each episode
+    """
     logs = pd.read_csv(log_file)
 
     ep_sum = 0
+    temp = []
     ep_returns = []
 
     for i in range(len(logs)):
@@ -30,8 +35,11 @@ def get_return(log_file):
 
         elif logs.loc[i,'done'] == True:
             ep_sum += logs.loc[i, 'rewards']
-            ep_returns.append(ep_sum)
+            temp.append(ep_sum)
             ep_sum = 0
+
+        if i % epoch_iter == 0:
+            ep_returns.append(mean(temp))
 
     return ep_returns
 

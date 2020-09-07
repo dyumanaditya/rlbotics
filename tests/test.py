@@ -3,6 +3,7 @@ import gym
 import torch
 import argparse
 import numpy as np
+from gym import wrappers
 
 
 def argparser():
@@ -11,6 +12,7 @@ def argparser():
 	parser.add_argument('--env', type=str, required=True)
 	parser.add_argument('--seed', type=int, default=0)
 	parser.add_argument('--verbose', type=bool, default=True)
+	parser.add_argument('--video', type=bool, default=False)
 	return parser.parse_args()
 
 
@@ -32,6 +34,11 @@ def main():
 
 	if continuous:
 		act_limit = env.action_space.high[0]
+
+	# Save video of test
+	if args.video:
+		video_file = os.path.join('tests', 'videos', args.algo.upper() + '_' + args.env + '_' + str(args.seed))
+		env = wrappers.Monitor(env, video_file, video_callable=lambda episode_id: True, force=True)
 
 	# Run tests
 	max_episodes = 30

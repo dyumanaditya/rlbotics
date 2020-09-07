@@ -7,6 +7,7 @@ render         = False
 seed           = 0
 use_grad_clip  = False
 save_freq      = 2000		  # Freq to save policy and q models
+resume         = False		  # Resume training
 
 # DDPG Specific:
 batch_size     = 100

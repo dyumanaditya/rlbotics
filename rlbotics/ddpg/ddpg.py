@@ -22,6 +22,7 @@ class DDPG:
 		# General parameters
 		self.seed = args.seed
 		self.gamma = args.gamma
+		self.resume = args.resume
 		self.save_freq = args.save_freq
 		self.use_grad_clip = args.use_grad_clip
 
@@ -175,10 +176,14 @@ class DDPG:
 		for p in self.q.parameters():
 			p.requires_grad = True
 
-		# Log Model and Loss
+		# Log Model/Optimizer and Loss
 		if self.steps_done % self.save_freq == 0:
 			self.logger.log_model(self.q, name='q')
 			self.logger.log_model(self.pi, name='pi')
+			self.logger.log_model(self.q_target, name='q_targ')
+			self.logger.log_model(self.pi_target, name='pi_targ')
+			self.logger.log_model(self.q.optimizer.state_dict(), name='q_optim')
+			self.logger.log_model(self.pi.optimizer.state_dict(), name='pi_optim')
 		self.logger.log(name='policy_updates', q_loss=q_loss.item(), pi_loss=pi_loss.item())
 
 		# Update Target Networks
