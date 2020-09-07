@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+import pandas as pd
 from copy import deepcopy
 
 from rlbotics.common.loss import losses
@@ -20,9 +21,11 @@ class DDPG:
 		self.act_lim = env.action_space.high[0]
 
 		# General parameters
+		self.env = env
 		self.seed = args.seed
 		self.gamma = args.gamma
 		self.resume = args.resume
+		self.env_name = args.env_name
 		self.save_freq = args.save_freq
 		self.use_grad_clip = args.use_grad_clip
 
@@ -67,7 +70,7 @@ class DDPG:
 		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
 		# Logger
-		self.logger = Logger('DDPG', args.env_name, self.seed)
+		self.logger = Logger('DDPG', args.env_name, self.seed, resume=self.resume)
 
 		# Gradient clipping
 		if self.use_grad_clip:
@@ -76,14 +79,18 @@ class DDPG:
 			self.grad_clip = None
 
 		# Steps
-		self.steps_done = -1
+		self.steps_done = 0
 
 		# Loss function
 		self.q_criterion = losses(self.q_loss_type).to(self.device)
 
 		# Build pi and q Networks
-		self._build_policy()
-		self._build_q_function()
+		# Resume training if necessary
+		if not self.resume:
+			self._build_policy()
+			self._build_q_function()
+		else:
+			self.resume_training()
 
 		# Log parameter data
 		total_params = sum(p.numel() for p in self.pi.parameters())
@@ -153,7 +160,7 @@ class DDPG:
 		return -q.mean()
 
 	def update_actor_critic(self):
-		if self.steps_done < self.update_after:
+		if self.steps_done < self.update_after or len(self.memory) < self.batch_size:
 			return
 
 		# Sample batch of transitions
@@ -176,15 +183,16 @@ class DDPG:
 		for p in self.q.parameters():
 			p.requires_grad = True
 
-		# Log Model/Optimizer and Loss
+		# Log Model/Optimizer, Loss and # iterations and episodes
 		if self.steps_done % self.save_freq == 0:
 			self.logger.log_model(self.q, name='q')
 			self.logger.log_model(self.pi, name='pi')
 			self.logger.log_model(self.q_target, name='q_targ')
 			self.logger.log_model(self.pi_target, name='pi_targ')
-			self.logger.log_model(self.q.optimizer.state_dict(), name='q_optim')
-			self.logger.log_model(self.pi.optimizer.state_dict(), name='pi_optim')
+			self.logger.log_state_dict(self.q.optimizer.state_dict(), name='q_optim')
+			self.logger.log_state_dict(self.pi.optimizer.state_dict(), name='pi_optim')
 		self.logger.log(name='policy_updates', q_loss=q_loss.item(), pi_loss=pi_loss.item())
+		self.logger.log(name='checkpoint', iterations=self.steps_done, episodes=self.logger.tensorboard_updated)
 
 		# Update Target Networks
 		self._update_target_actor_critic()
@@ -208,4 +216,25 @@ class DDPG:
 		self.steps_done += 1
 
 		# Log Done, reward data
-		self.logger.log(name='transitions', done=done, rewards=rew)
+		if self.steps_done > self.update_after:
+			self.logger.log(name='transitions', done=done, rewards=rew)
+
+	def resume_training(self):
+		print('Resuming training...')
+		print('Loading previously saved models...')
+
+		# Load saved models
+		model_file = os.path.join('experiments', 'models', 'DDPG' + '_' + self.env_name + '_' + str(self.seed))
+		self.q = torch.load(os.path.join(model_file, 'qmodel.pth'))
+		self.pi = torch.load(os.path.join(model_file, 'pimodel.pth'))
+		self.q_target = torch.load(os.path.join(model_file, 'q_targmodel.pth'))
+		self.pi_target = torch.load(os.path.join(model_file, 'pi_targmodel.pth'))
+
+		# Load optimizer state_dicts
+		self.q.optimizer.load_state_dict(torch.load(os.path.join(model_file, 'q_optim')))
+		self.pi.optimizer.load_state_dict(torch.load(os.path.join(model_file, 'pi_optim')))
+
+		# Start where we left off
+		log_file = os.path.join('experiments', 'logs', 'DDPG' + '_' + self.env_name + '_' + str(self.seed), 'transitions.csv')
+		log = pd.read_csv(log_file)
+		self.steps_done = len(log) + self.update_after
