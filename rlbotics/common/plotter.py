@@ -19,7 +19,7 @@ class Plotter:
 
 		# Plot
 		ep_returns = pd.Series(ep_returns).rolling(10, min_periods=1).mean()
-		ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns, ci=95)
+		ax = sns.lineplot(x=list(range(len(ep_returns))), y=ep_returns)
 		ax.axes.set_title(title, fontsize=20)
 		ax.set_xlabel(xlabel, fontsize=15)
 		ax.set_ylabel(ylabel, fontsize=15)

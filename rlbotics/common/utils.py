@@ -38,8 +38,9 @@ def get_ep_returns(log_file, epoch_iter=1):
             temp.append(ep_sum)
             ep_sum = 0
 
-        if i % epoch_iter == 0:
+        if i % epoch_iter == 0 and len(temp) != 0:
             ep_returns.append(mean(temp))
+            temp.clear()
 
     return ep_returns
 
