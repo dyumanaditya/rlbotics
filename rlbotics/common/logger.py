@@ -96,9 +96,9 @@ class Logger:
 		file = os.path.join(self.model_dir, name + 'model.pth')
 		torch.save(mlp, file)
 
-	def log_state_dict(self, dict, name):
+	def log_state_dict(self, dct, name):
 		file = os.path.join(self.model_dir, name)
-		torch.save(dict, file)
+		torch.save(dct, file)
 
 	def resume_log(self):
 		log_file = os.path.join(self.log_dir, 'transitions.csv')
