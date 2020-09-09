@@ -1,5 +1,4 @@
 import gym
-import torch
 import argparse
 
 from rlbotics.ddpg.ddpg import DDPG
@@ -31,7 +30,6 @@ def argparser():
 	parser.add_argument('--noise_type', type=str, default=h.noise_type)
 	parser.add_argument('--random_steps', type=int, default=h.random_steps)
 	parser.add_argument('--update_after', type=int, default=h.update_after)
-	parser.add_argument('--update_every', type=int, default=h.update_every)
 
 	# Policy and Q Network specific
 	parser.add_argument('--save_freq', type=int, default=h.save_freq)
@@ -59,11 +57,13 @@ def main():
 	agent = DDPG(args, env)
 	obs = env.reset()
 
-	# Episode related information
-	ep_counter = 0
+	# Episode related information (resume if necessary)
+	ep_counter = agent.logger.tensorboard_updated
 	ep_rew = 0
 
-	for iteration in range(args.max_iterations):
+	# If resuming training, x is where we left off
+	x = agent.steps_done
+	for iteration in range(x, args.max_iterations):
 		if args.render:
 			env.render()
 
@@ -83,14 +83,13 @@ def main():
 			# Display results
 			print("episode: {}, total reward: {}, timesteps: {}".format(ep_counter, ep_rew, iteration))
 
-			# Logging
-			ep_counter += 1
+			# Increment ep_counter after policy updates start
 			ep_rew = 0
+			if iteration > args.update_after:
+				ep_counter += 1
 
-		# Update Actor Critic only after some time steps
-		if iteration % args.update_every == 0:
-			for _ in range(args.update_every):
-				agent.update_actor_critic()
+		# Update Actor Critic
+		agent.update_actor_critic()
 
 	# End
 	env.close()

@@ -7,7 +7,7 @@ render         = False
 seed           = 0
 use_grad_clip  = False
 save_freq      = 2000		  # Freq to save policy and q models
-resume         = False		  # Resume training
+resume         = True		  # Resume training
 
 # DDPG Specific:
 batch_size     = 100
@@ -17,8 +17,6 @@ act_noise      = 0.1		  # Stddev for Gaussian exploration noise added to policy 
 noise_type     = 'gaussian'   # Gaussian or ou noise
 random_steps   = 1e4		  # Random actions before training for exploration
 update_after   = 1000		  # Number of env interactions to collect before training. Ensures replay buffer is full
-update_every   = 1            # Number of iteration to pass before doing an update.
-# Note: Regardless of how long you wait between updates, the ratio of env steps to gradient steps is locked to 1.
 
 # Policy Network Parameters
 pi_lr           = 1e-4

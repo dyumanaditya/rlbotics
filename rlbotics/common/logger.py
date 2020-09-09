@@ -4,6 +4,7 @@ import json
 import torch
 import shutil
 import numpy as np
+import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 from rlbotics.common.utils import get_latest_ep_return
 
@@ -33,11 +34,14 @@ class Logger:
 		# Tensor Board
 		self.writer = SummaryWriter(log_dir=self.log_dir)
 
-		# counter to track number of policy updates
+		# Counter to track number of policy updates
 		self.tensorboard_updated = 0
 
-		# keeps track of returns from episodes for each epoch
+		# Keeps track of returns from episodes for each epoch
 		self.episode_returns = []
+
+		if self.resume:
+			self.resume_log()
 
 	def log(self, name='params', **kwargs):
 		if name == 'transitions':
@@ -61,7 +65,8 @@ class Logger:
 
 		elif name == 'checkpoint':
 			file = os.path.join(self.log_dir, 'checkpoint')
-			torch.save(kwargs, file)
+			with open(file, 'w') as f:
+				json.dump(kwargs, f, indent=4)
 
 	def _save_tabular(self, file, header, **kwargs):
 		with open(file, 'a') as f:
@@ -90,3 +95,14 @@ class Logger:
 	def log_model(self, mlp, name=''):
 		file = os.path.join(self.model_dir, name + 'model.pth')
 		torch.save(mlp, file)
+
+	def log_state_dict(self, dct, name):
+		file = os.path.join(self.model_dir, name)
+		torch.save(dct, file)
+
+	def resume_log(self):
+		log_file = os.path.join(self.log_dir, 'transitions.csv')
+		log = pd.read_csv(log_file)
+		for i in range(len(log)):
+			if log.loc[i, 'done']:
+				self.tensorboard_updated += 1
