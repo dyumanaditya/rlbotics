@@ -93,7 +93,7 @@ def main():
 	# End
 	env.close()
 	p = Plotter()
-	p.plot_individual('Epoch/Reward', 'epochs', 'rewards', 'VPG', args.env_name, args.seed, True)
+	p.plot_individual('Epoch/Reward', 'epochs', 'rewards', 'VPG', args.env_name, args.seed, epoch_iter=args.max_iterations, display=True)
 
 
 if __name__ == '__main__':

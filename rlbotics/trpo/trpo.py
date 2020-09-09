@@ -152,28 +152,40 @@ class TRPO:
         max_length = torch.sqrt(2 * self.kl_target / torch.dot(step_dir, hvp(step_dir)))
         max_step = max_length * step_dir
 
-        # i = 0
-        # while not self.take_step((0.9 ** i) * max_step, surrogate_loss) and i < 10:
-        #     i += 1
+        i = 0
+        while not self.take_step((0.9 ** i) * max_step, surrogate_loss) and i < 10:
+            i += 1
 
-        for i in range(10):
-            step = (0.9 ** i) * max_step
-
-            self.unflatten_params(step)
-            surrogate_loss_new, kl_new = self.compute_policy_loss()
-
-            surrogate_loss_improvement = surrogate_loss_new - surrogate_loss
-
-            if surrogate_loss_improvement > 0 and kl_new <= self.kl_target:
-                break
-
-            self.unflatten_params(-step)
+        # for i in range(10):
+        #     step = (0.9 ** i) * max_step
+        #
+        #     self.unflatten_params(step)
+        #     surrogate_loss_new, kl_new = self.compute_policy_loss()
+        #
+        #     surrogate_loss_improvement = surrogate_loss_new - surrogate_loss
+        #
+        #     if surrogate_loss_improvement > 0 and kl_new <= self.kl_target:
+        #         break
+        #
+        #     self.unflatten_params(-step)
 
         self.logger.log(name='policy_updates', loss=surrogate_loss.item())
 
         # Log Model
         self.logger.log_model(self.policy)
 
+    def take_step(self, step, L):
+        self.unflatten_params(step)
+
+        L_new, kl_new = self.compute_policy_loss()
+
+        L_improvement = L_new - L
+
+        if L_improvement > 0 and kl_new <= self.kl_target:
+            return True
+
+        self.unflatten_params(-step)
+        return False
 
     def unflatten_params(self, grad_flattened):
         n = 0
