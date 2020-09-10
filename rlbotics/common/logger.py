@@ -63,11 +63,6 @@ class Logger:
 			with open(file, 'w') as f:
 				json.dump(kwargs, f, indent=4)
 
-		elif name == 'checkpoint':
-			file = os.path.join(self.log_dir, 'checkpoint')
-			with open(file, 'w') as f:
-				json.dump(kwargs, f, indent=4)
-
 	def _save_tabular(self, file, header, **kwargs):
 		with open(file, 'a') as f:
 			writer = csv.writer(f)

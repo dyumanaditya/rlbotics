@@ -82,14 +82,13 @@ class DDPG:
 		self.steps_done = 0
 
 		# Loss function
-		self.q_criterion = losses(self.q_loss_type).to(self.device)
+		self.q_criterion = losses(self.q_loss_type)
 
 		# Build pi and q Networks
 		# Resume training if necessary
-		if not self.resume:
-			self._build_policy()
-			self._build_q_function()
-		else:
+		self._build_policy()
+		self._build_q_function()
+		if self.resume:
 			self.resume_training()
 
 		# Log parameter data
@@ -103,12 +102,20 @@ class DDPG:
 									 layer_sizes=layer_sizes,
 									 activations=self.pi_activations,
 									 seed=self.seed,
-									 optimizer=self.pi_optimizer,
-									 lr=self.pi_lr,
 									 batch_norm=self.batch_norm,
 									 weight_init=self.weight_init).to(self.device)
 
 		self.pi.summary()
+
+		# Set Optimizer
+		if self.pi_optimizer == 'Adam':
+			self.pi_optim = torch.optim.Adam(self.pi.parameters(), lr=self.pi_lr)
+		elif self.pi_optimizer == 'RMSprop':
+			self.pi_optim = torch.optim.RMSprop(self.pi.parameters(), lr=self.pi_lr)
+		else:
+			raise NameError(str(self.pi_optimizer) + ' Optimizer not supported')
+
+		# Build Target
 		self.pi_target = deepcopy(self.pi).to(self.device)
 
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
@@ -117,17 +124,23 @@ class DDPG:
 
 	def _build_q_function(self):
 		layer_sizes = [self.obs_dim + self.act_dim] + self.q_hidden_sizes + [1]
-		self.q = MLPQFunctionContinuous(num_mlp=1,
-										layer_sizes=layer_sizes,
-										activations=self.q_activations,
-										seed=self.seed,
-										optimizer=self.q_optimizer,
-										lr=self.q_lr,
-										weight_decay=self.weight_decay,
-										batch_norm=self.batch_norm,
-										weight_init=self.weight_init).to(self.device)
+		self.q = MLPQFunctionContinuous(layer_sizes=layer_sizes,
+										 activations=self.q_activations,
+										 seed=self.seed,
+										 batch_norm=self.batch_norm,
+										 weight_init=self.weight_init).to(self.device)
 
 		self.q.summary()
+
+		# Set Optimizer
+		if self.q_optimizer == 'Adam':
+			self.q_optim = torch.optim.Adam(self.q.parameters(), lr=self.q_lr, weight_decay=self.weight_decay)
+		elif self.q_optimizer == 'RMSprop':
+			self.q_optim = torch.optim.RMSprop(self.q.parameters(), lr=self.q_lr, weight_decay=self.weight_decay)
+		else:
+			raise NameError(str(self.q_optimizer) + ' Optimizer not supported')
+
+		# Build Target
 		self.q_target = deepcopy(self.q).to(self.device)
 
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
@@ -168,7 +181,12 @@ class DDPG:
 
 		# Update q Network
 		q_loss = self._compute_q_loss(transition_batch)
-		self.q.learn(q_loss, grad_clip=self.grad_clip)
+		self.q_optim.zero_grad()
+		q_loss.backward()
+		if self.grad_clip is not None:
+			for param in self.q.parameters():
+				param.grad.data.clamp_(self.grad_clip[0], self.grad_clip[1])
+		self.q_optim.step()
 
 		# Freeze Q-network so you don't waste computational effort
 		# computing gradients for it during the policy learning step.
@@ -177,7 +195,12 @@ class DDPG:
 
 		# Update pi Network
 		pi_loss = self._compute_pi_loss(transition_batch)
-		self.pi.learn(pi_loss, grad_clip=self.grad_clip)
+		self.pi_optim.zero_grad()
+		pi_loss.backward()
+		if self.grad_clip is not None:
+			for param in self.pi.parameters():
+				param.grad.data.clamp_(self.grad_clip[0], self.grad_clip[1])
+		self.pi_optim.step()
 
 		# Unfreeze Q-network so you can optimize it at next DDPG step.
 		for p in self.q.parameters():
@@ -189,10 +212,9 @@ class DDPG:
 			self.logger.log_model(self.pi, name='pi')
 			self.logger.log_model(self.q_target, name='q_targ')
 			self.logger.log_model(self.pi_target, name='pi_targ')
-			self.logger.log_state_dict(self.q.optimizer.state_dict(), name='q_optim')
-			self.logger.log_state_dict(self.pi.optimizer.state_dict(), name='pi_optim')
+			self.logger.log_state_dict(self.q_optim.state_dict(), name='q_optim')
+			self.logger.log_state_dict(self.pi_optim.state_dict(), name='pi_optim')
 		self.logger.log(name='policy_updates', q_loss=q_loss.item(), pi_loss=pi_loss.item())
-		self.logger.log(name='checkpoint', iterations=self.steps_done, episodes=self.logger.tensorboard_updated)
 
 		# Update Target Networks
 		self._update_target_actor_critic()
@@ -231,8 +253,8 @@ class DDPG:
 		self.pi_target = torch.load(os.path.join(model_file, 'pi_targmodel.pth'))
 
 		# Load optimizer state_dicts
-		self.q.optimizer.load_state_dict(torch.load(os.path.join(model_file, 'q_optim')))
-		self.pi.optimizer.load_state_dict(torch.load(os.path.join(model_file, 'pi_optim')))
+		self.q_optim.load_state_dict(torch.load(os.path.join(model_file, 'q_optim')))
+		self.pi_optim.load_state_dict(torch.load(os.path.join(model_file, 'pi_optim')))
 
 		# Start where we left off
 		log_file = os.path.join('experiments', 'logs', 'DDPG' + '_' + self.env_name + '_' + str(self.seed), 'transitions.csv')

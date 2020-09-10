@@ -1,19 +1,19 @@
 # https://spinningup.openai.com/en/latest/algorithms/ddpg.html
 # General Parameters:
 env_name       = 'Humanoid-v2'
+seed           = 0
 gamma          = 0.99
 max_iterations = 1500000
 render         = False
-seed           = 0
 use_grad_clip  = False
 save_freq      = 2000		  # Freq to save policy and q models
-resume         = True		  # Resume training
+resume         = False		  # Resume training
 
 # DDPG Specific:
-batch_size     = 100
+batch_size     = 128
 buffer_size    = 1e6
 polyak         = 0.005		  # Soft update for target network
-act_noise      = 0.1		  # Stddev for Gaussian exploration noise added to policy at training time
+act_noise      = 0.05		  # Stddev for Gaussian exploration noise added to policy at training time
 noise_type     = 'gaussian'   # Gaussian or ou noise
 random_steps   = 1e4		  # Random actions before training for exploration
 update_after   = 1000		  # Number of env interactions to collect before training. Ensures replay buffer is full

@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import itertools
 
 
 class MLP(nn.Module):
@@ -56,15 +55,6 @@ class MLP(nn.Module):
 
         x = x.view(-1, self.obs_dim)
         return self.mlp(x)
-
-# TODO: remove learn
-    def learn(self, loss, grad_clip=None):
-        self.optimizer.zero_grad()
-        loss.backward()
-        if grad_clip is not None:
-            for param in self.params:
-                param.grad.data.clamp_(grad_clip[0], grad_clip[1])
-        self.optimizer.step()
 
     def summary(self):
         print(self.mlp)
