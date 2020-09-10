@@ -2,19 +2,16 @@ import torch
 import torch.nn as nn
 import numpy as np
 import itertools
-import copy
+
 
 class MLP(nn.Module):
     """
     Multi-Layered Perceptron
     """
-    def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False, weight_init=None):
+    def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
         """
         :param layer_sizes: (list) sizes of each layer (including IO layers)
         :param activations: (list)(strings) activations corresponding to each layer	e.g. ['relu', 'relu', 'none']
-        :param optimizer: (str) e.g. 'RMSprop'
-        :param lr: (float) learning rate
-        :param weight_decay: (float) L2 decay for optimizer
         :param weight_init: (None/float) uniform initialization for mlp params
         """
         super(MLP, self).__init__()
@@ -39,10 +36,6 @@ class MLP(nn.Module):
         if weight_init is not None:
             self.mlp.apply(self.init_weights)
 
-        # Set optimizer
-        self.set_params(self.mlp.parameters())
-        self.set_optimizer(self.params, optimizer, lr, weight_decay)
-
     def _build_mlp(self, layer_sizes, activations, batch_norm):
         layers = []
         for i in range(len(layer_sizes)-1):
@@ -52,17 +45,6 @@ class MLP(nn.Module):
             else:
                 layers += [nn.Linear(layer_sizes[i], layer_sizes[i+1]), self.activations_dict[activations[i]]]
         return nn.Sequential(*layers)
-
-    def set_optimizer(self, params, optimizer, lr, weight_decay):
-        if optimizer == 'Adam':
-            self.optimizer = torch.optim.Adam(params, lr, weight_decay=weight_decay)
-        elif optimizer == 'RMSprop':
-            self.optimizer = torch.optim.RMSprop(params, lr, weight_decay=weight_decay)
-        else:
-            raise NameError(str(optimizer) + ' Optimizer not supported')
-
-    def set_params(self, params):
-        self.params = itertools.chain(params)
 
     def init_weights(self, mlp):
         if type(mlp) == nn.Linear:
@@ -75,6 +57,7 @@ class MLP(nn.Module):
         x = x.view(-1, self.obs_dim)
         return self.mlp(x)
 
+# TODO: remove learn
     def learn(self, loss, grad_clip=None):
         self.optimizer.zero_grad()
         loss.backward()

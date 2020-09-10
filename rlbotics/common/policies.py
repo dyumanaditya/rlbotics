@@ -8,9 +8,8 @@ from torch.distributions.categorical import Categorical
 
 
 class MLPSoftmaxPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
-						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		torch.manual_seed(seed)
 
 	def get_action(self, obs):
@@ -33,9 +32,8 @@ class MLPSoftmaxPolicy(MLP):
 
 
 class MLPGaussianPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
-						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		torch.manual_seed(seed)
 
 		log_std = -0.5 * np.ones(layer_sizes[-1], dtype=np.float32)
@@ -64,9 +62,8 @@ class MLPGaussianPolicy(MLP):
 
 
 class MLPEpsilonGreedy(MLP):
-	def __init__(self, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0, batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
-						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		random.seed(seed)
 		self.action_size = layer_sizes[-1]
 
@@ -81,10 +78,8 @@ class MLPEpsilonGreedy(MLP):
 
 
 class MLPActorContinuous(MLP):
-	def __init__(self, act_lim, layer_sizes, activations, seed, optimizer='Adam', lr=0.01, weight_decay=0,
-				 batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
-						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+	def __init__(self, act_lim, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		self.act_lim = act_lim
 
 	def get_action(self, obs):
@@ -92,10 +87,8 @@ class MLPActorContinuous(MLP):
 
 
 class MLPQFunctionContinuous(MLP):
-	def __init__(self, layer_sizes, activations, seed, num_mlp=1, optimizer='Adam', lr=0.01, weight_decay=0,
-				 batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, optimizer=optimizer, lr=lr,
-						 weight_decay=weight_decay, batch_norm=batch_norm, weight_init=weight_init)
+	def __init__(self, layer_sizes, activations, seed, num_mlp=1, batch_norm=False, weight_init=None):
+		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 
 		# Build combined MLPs if necessary
 		self.mlps = []
