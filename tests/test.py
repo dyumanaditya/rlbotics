@@ -25,7 +25,7 @@ def main():
 	env = gym.make(args.env)
 
 	continuous = False if len(env.action_space.shape) == 0 else True
-	argmax = True if args.algo.lower() in ['dqn', 'ddqn', 'vpg', 'ppo'] else False
+	argmax = True if not continuous else False
 	model_name = 'model.pth' if args.algo.lower() in ['dqn', 'ddqn'] else 'pimodel.pth'
 	model_path = os.path.join('experiments', 'models', args.algo.upper() + '_' + args.env + '_' + str(args.seed), model_name)
 
@@ -51,11 +51,11 @@ def main():
 		obs = torch.from_numpy(obs).float()
 		obs = obs.view(-1, obs_dim)
 		with torch.no_grad():
-			act = model(obs)
+			act = model(obs).numpy()
 			if argmax:
 				act = act.argmax().item()
 			if continuous:
-				act = np.clip(act * act_limit, -act_limit, act_limit).numpy()[0]
+				act = np.clip(act * act_limit, -act_limit, act_limit)[0]
 
 		new_obs, rew, done, info = env.step(act)
 		obs = new_obs
