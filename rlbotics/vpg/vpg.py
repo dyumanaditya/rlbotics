@@ -119,13 +119,11 @@ class VPG:
 
     def update_value(self):
         for _ in range(self.num_v_iters):
-            val= self.value(self.data["obs"]).squeeze(1)
+            val = self.value(self.data["obs"]).squeeze(1)
             ret = self.data["ret"]
 
             loss = F.mse_loss(val, ret)
 
-            self.value.optimizer.zero_grad()
-            loss.backward()
-            self.value.optimizer.step()
+            self.value.learn(loss)
 
         self.memory.reset_memory()
