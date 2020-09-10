@@ -6,6 +6,8 @@ max_iterations = 350000
 render         = False
 seed           = 0
 use_grad_clip  = False
+save_freq      = 1000
+resume         = False
 
 # DDQN Specific:
 batch_size    = 512

@@ -1,23 +1,27 @@
+import os
 import math
 import torch
+import pandas as pd
 from copy import deepcopy
 
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
-from rlbotics.common.approximators import MLP
 from rlbotics.ddqn.replay_buffer import ReplayBuffer
 from rlbotics.common.policies import MLPEpsilonGreedy
 
 
 class DDQN:
 	def __init__(self, args, env):
-		self.obs_dim = env.observation_space.shape[0]
+		self.env_name = args.env_name
 		self.act_dim = env.action_space.n
+		self.obs_dim = env.observation_space.shape[0]
 
 		# General parameters
 		self.lr = args.lr
-		self.gamma = args.gamma
 		self.seed = args.seed
+		self.gamma = args.gamma
+		self.resume = args.resume
+		self.save_freq = args.save_freq
 
 		# DDQN specific parameters
 		self.epsilon = args.epsilon
@@ -42,7 +46,7 @@ class DDQN:
 		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
 		# Logger
-		self.logger = Logger('DDQN', args.env_name, self.seed)
+		self.logger = Logger('DDQN', args.env_name, self.seed, resume=self.resume)
 
 		# Gradient clipping
 		if self.use_grad_clip:
@@ -58,6 +62,8 @@ class DDQN:
 
 		# Build policies
 		self._build_policy()
+		if self.resume:
+			self.resume_training()
 
 		# Log parameter data
 		total_params = sum(p.numel() for p in self.policy.parameters())
@@ -68,12 +74,18 @@ class DDQN:
 		layer_sizes = [self.obs_dim] + self.hidden_sizes + [self.act_dim]
 		self.policy = MLPEpsilonGreedy(layer_sizes=layer_sizes,
 									   activations=self.activations,
-									   seed=self.seed,
-									   optimizer=self.optimizer,
-									   lr=self.lr).to(self.device)
+									   seed=self.seed).to(self.device)
 
 		self.target_policy = deepcopy(self.policy).to(self.device)
 		self.policy.summary()
+
+		# Set Optimizer
+		if self.optimizer == 'Adam':
+			self.optim = torch.optim.Adam(self.policy.parameters(), lr=self.lr)
+		elif self.optimizer == 'RMSprop':
+			self.q_optim = torch.optim.RMSprop(self.policy.parameters(), lr=self.lr)
+		else:
+			raise NameError(str(self.optimizer) + ' Optimizer not supported')
 
 	def get_action(self, obs):
 		action = self.policy.get_action(obs, self.epsilon)
@@ -91,7 +103,8 @@ class DDQN:
 		self.memory.add(obs, act, rew, new_obs, done)
 
 		# Log Done, reward, epsilon data
-		self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
+		if len(self.memory) >= self.batch_size:
+			self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
 
 	def update_policy(self):
 		if len(self.memory) < self.batch_size:
@@ -117,12 +130,38 @@ class DDQN:
 		expected_q_values = rew_batch.unsqueeze(1) + self.gamma * target_values
 
 		loss = self.criterion(q_values, expected_q_values.float()).to(self.device)
-		self.policy.learn(loss, grad_clip=self.grad_clip)
+
+		# Learn
+		self.optim.zero_grad()
+		loss.backward()
+		if self.grad_clip is not None:
+			for param in self.policy.parameters():
+				param.grad.data.clamp_(self.grad_clip[0], self.grad_clip[1])
+		self.optim.step()
 
 		# Log Model and Loss
-		if self.steps_done % 3000 == 0:
+		if self.steps_done % self.save_freq == 0:
 			self.logger.log_model(self.policy)
+			self.logger.log_state_dict(self.optim.state_dict(), name='optim')
 		self.logger.log(name='policy_updates', loss=loss.item())
 
 	def update_target_policy(self):
 		self.target_policy.load_state_dict(self.policy.state_dict())
+
+	def resume_training(self):
+		print('Resuming training...')
+		print('Loading previously saved models...')
+
+		# Load saved models
+		model_file = os.path.join('experiments', 'models', 'DDQN' + '_' + self.env_name + '_' + str(self.seed))
+		self.policy = torch.load(os.path.join(model_file, 'model.pth'))
+		self.taget_policy = deepcopy(self.policy)
+
+		# Load optimizer state_dicts
+		self.optim.load_state_dict(torch.load(os.path.join(model_file, 'optim')))
+
+		# Start where we left off
+		log_file = os.path.join('experiments', 'logs', 'DDQN' + '_' + self.env_name + '_' + str(self.seed), 'transitions.csv')
+		log = pd.read_csv(log_file)
+		self.steps_done = len(log) + self.batch_size
+
