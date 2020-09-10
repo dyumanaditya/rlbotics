@@ -18,9 +18,9 @@ def argparser():
 	parser.add_argument('--env_name', type=str, default=h.env_name)
 	parser.add_argument('--gamma', type=float, default=h.gamma)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
-	parser.add_argument('--render', type=bool, default=h.render)
-	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
-	parser.add_argument('--resume', type=bool, default=h.resume)
+	parser.add_argument('--render', type=int, default=h.render)
+	parser.add_argument('--use_grad_clip', type=int, default=h.use_grad_clip)
+	parser.add_argument('--resume', type=int, default=h.resume)
 
 	# DDPG Specific
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
@@ -44,7 +44,7 @@ def argparser():
 	parser.add_argument('--q_loss_type', type=str, default=h.q_loss_type)
 	parser.add_argument('--weight_decay', type=float, default=h.weight_decay)
 	parser.add_argument('--weight_init', type=float, default=h.weight_init)
-	parser.add_argument('--batch_norm', type=bool, default=h.batch_norm)
+	parser.add_argument('--batch_norm', type=int, default=h.batch_norm)
 
 	return parser.parse_args()
 
