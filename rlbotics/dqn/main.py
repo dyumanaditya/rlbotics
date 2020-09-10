@@ -20,8 +20,10 @@ def argparser():
 	parser.add_argument('--gamma', type=float, default=h.gamma)
 	parser.add_argument('--lr', type=float, default=h.lr)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
-	parser.add_argument('--render', type=bool, default=h.render)
-	parser.add_argument('--use_grad_clip', type=bool, default=h.use_grad_clip)
+	parser.add_argument('--render', type=int, default=h.render)
+	parser.add_argument('--use_grad_clip', type=int, default=h.use_grad_clip)
+	parser.add_argument('--save_freq', type=int, default=h.save_freq)
+	parser.add_argument('--resume', type=int, default=h.resume)
 
 	# DQN Specific Parameters
 	parser.add_argument('--batch_size', type=int, default=h.batch_size)
@@ -49,11 +51,13 @@ def main():
 	agent = DQN(args, env)
 	obs = env.reset()
 
-	# Episode related information
-	ep_counter = 0
+	# Episode related information (resume if necessary)
+	ep_counter = agent.logger.tensorboard_updated
 	ep_rew = 0
 
-	for iteration in range(args.max_iterations):
+	# If resuming training, x is where we left off
+	x = agent.steps_done
+	for iteration in range(x, args.max_iterations):
 		if args.render:
 			env.render()
 
@@ -71,11 +75,12 @@ def main():
 			obs = env.reset()
 
 			# Display results
-			print("episode: {}, total reward: {}, epsilon: {}".format(ep_counter, ep_rew, agent.epsilon))
+			print(f"episode: {ep_counter}, total reward: {ep_rew}, epsilon: {agent.epsilon}, iter: {iteration}")
 
-			# Logging
-			ep_counter += 1
+			# Increment ep_counter after policy updates start
 			ep_rew = 0
+			if iteration >= agent.batch_size:
+				ep_counter += 1
 
 		# Update Policy
 		agent.update_policy()

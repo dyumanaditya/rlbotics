@@ -102,7 +102,7 @@ class DDQN:
 	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
 
-		# Log Done, reward, epsilon data
+		# Log Done, reward, epsilon data only after policy updates start
 		if len(self.memory) >= self.batch_size:
 			self.logger.log(name='transitions', done=done, rewards=rew, epsilon=self.epsilon)
 
