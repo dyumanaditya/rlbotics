@@ -30,7 +30,7 @@ q_hidden_sizes  = [256, 256, 128]	  # Dimensions have to be 1 less than activati
 q_activations   = ['relu', 'relu', 'relu', 'none']
 q_optimizer     = 'Adam'
 q_loss_type     = 'mse'
-weight_decay    = 1e-4				# L2 weight decay for the parameters
+weight_decay    = 0				# L2 weight decay for the parameters
 
 # Both Networks
 weight_init     = 3e-3			# Initialise MLP params from (-x, x) either float or None
