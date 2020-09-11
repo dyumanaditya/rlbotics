@@ -18,8 +18,8 @@ class Logger:
 		:param resume: (bool) Resume training some model
 		"""
 		cur_dir = os.getcwd()
-		self.log_dir = os.path.join(cur_dir, 'experiments', 'logs', algo_name + '_' + env_name + '_' + str(seed))
-		self.model_dir = os.path.join(cur_dir, 'experiments', 'models', algo_name + '_' + env_name + '_' + str(seed))
+		self.log_dir = os.path.join(cur_dir, 'experiments', 'logs', f'{algo_name}_{env_name}_{seed}')
+		self.model_dir = os.path.join(cur_dir, 'experiments', 'models', f'{algo_name}_{env_name}_{seed}')
 		if os.path.exists(self.log_dir) and not resume:
 			shutil.rmtree(self.log_dir)
 		if os.path.exists(self.model_dir) and not resume:
