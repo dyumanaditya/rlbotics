@@ -153,7 +153,7 @@ class DDQN:
 		print('Loading previously saved models...')
 
 		# Load saved models
-		model_file = os.path.join('experiments', 'models', 'DDQN' + '_' + self.env_name + '_' + str(self.seed))
+		model_file = os.path.join('experiments', 'models', f'DDQN_{self.env_name}_{self.seed}')
 		self.policy = torch.load(os.path.join(model_file, 'model.pth'))
 		self.taget_policy = deepcopy(self.policy)
 
@@ -161,7 +161,7 @@ class DDQN:
 		self.optim.load_state_dict(torch.load(os.path.join(model_file, 'optim')))
 
 		# Start where we left off
-		log_file = os.path.join('experiments', 'logs', 'DDQN' + '_' + self.env_name + '_' + str(self.seed), 'transitions.csv')
+		log_file = os.path.join('experiments', 'logs', f'DDQN_{self.env_name}_{self.seed}', 'transitions.csv')
 		log = pd.read_csv(log_file)
 		self.steps_done = len(log) + self.batch_size
 

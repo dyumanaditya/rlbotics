@@ -81,7 +81,7 @@ def main():
 			obs = env.reset()
 
 			# Display results
-			print("episode: {}, total reward: {}, timesteps: {}".format(ep_counter, ep_rew, iteration))
+			print(f"episode: {ep_counter}, total reward: {ep_rew}, timesteps: {iteration}")
 
 			# Increment ep_counter after policy updates start
 			ep_rew = 0

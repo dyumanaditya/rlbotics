@@ -246,7 +246,7 @@ class DDPG:
 		print('Loading previously saved models...')
 
 		# Load saved models
-		model_file = os.path.join('experiments', 'models', 'DDPG' + '_' + self.env_name + '_' + str(self.seed))
+		model_file = os.path.join('experiments', 'models', f'DDPG_{self.env_name}_{self.seed}')
 		self.q = torch.load(os.path.join(model_file, 'qmodel.pth'))
 		self.pi = torch.load(os.path.join(model_file, 'pimodel.pth'))
 		self.q_target = torch.load(os.path.join(model_file, 'q_targmodel.pth'))
@@ -257,6 +257,6 @@ class DDPG:
 		self.pi_optim.load_state_dict(torch.load(os.path.join(model_file, 'pi_optim')))
 
 		# Start where we left off
-		log_file = os.path.join('experiments', 'logs', 'DDPG' + '_' + self.env_name + '_' + str(self.seed), 'transitions.csv')
+		log_file = os.path.join('experiments', 'logs', f'DDPG_{self.env_name}_{self.seed}', 'transitions.csv')
 		log = pd.read_csv(log_file)
 		self.steps_done = len(log) + self.update_after

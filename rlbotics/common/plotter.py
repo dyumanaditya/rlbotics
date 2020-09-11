@@ -14,7 +14,7 @@ class Plotter:
 			os.makedirs(self.plt_dir)
 
 	def plot_individual(self, title, xlabel, ylabel, algo, env, seed, epoch_iter=1, display=False):
-		log_file = os.path.join(self.cur_dir, 'experiments', 'logs', algo + '_' + env + '_' + str(seed), 'transitions.csv')
+		log_file = os.path.join(self.cur_dir, 'experiments', 'logs', f'{algo}_{env}_{seed}', 'transitions.csv')
 		ep_returns = get_ep_returns(log_file, epoch_iter)
 
 		# Plot
@@ -24,7 +24,7 @@ class Plotter:
 		ax.set_xlabel(xlabel, fontsize=15)
 		ax.set_ylabel(ylabel, fontsize=15)
 
-		filename = os.path.join(self.plt_dir, algo + '_' + env + '_plt.png')
+		filename = os.path.join(self.plt_dir, f'{algo}_{env}_plt.png')
 		plt.savefig(filename)
 
 		if display:
@@ -38,13 +38,13 @@ class Plotter:
 
 		if data == 'rewards':
 			for seed in range(num_seeds):
-				filename = os.path.join('experiments', 'logs', algo + '_' + env + '_' + str(seed), log_file_type + '.csv')
+				filename = os.path.join('experiments', 'logs', f'{algo}_{env}_{seed}', f'{log_file_type}.csv')
 				returns = get_ep_returns(filename, epoch_iter)
 				x += list(range(len(returns)))
 				y += returns
 		else:
 			for seed in range(num_seeds):
-				filename = os.path.join('experiments', 'logs', algo + '_' + env + '_' + str(seed), log_file_type + '.csv')
+				filename = os.path.join('experiments', 'logs', f'{algo}_{env}_{seed}', f'{log_file_type}.csv')
 				df = pd.read_csv(filename)
 				col = list(df[data])
 				x += list(range(len(col)))
@@ -71,7 +71,7 @@ class Plotter:
 		ax.set_xlabel(xlabel, fontsize=15)
 		ax.set_ylabel(ylabel, fontsize=15)
 		plt.legend([algo + '_' + env])
-		plt.savefig(filename + '/' + env + '_all_seeds_plt.png')
+		plt.savefig(f'{filename}/{env}_all_seeds_plt.png')
 
 		# Display
 		if display:
