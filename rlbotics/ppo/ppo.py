@@ -59,27 +59,38 @@ class PPO:
 
             self.policy = MLPGaussianPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                            activations=self.pi_activations,
-                                           seed=self.seed,
-                                           optimizer=self.pi_optimizer,
-                                           lr=self.pi_lr)
+                                           seed=self.seed)
         else:
             self.obs_dim = self.env.observation_space.shape[0]
             self.act_dim = self.env.action_space.n
 
             self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                            activations=self.pi_activations,
-                                           seed=self.seed,
-                                           optimizer=self.pi_optimizer,
-                                           lr=self.pi_lr)
+                                           seed=self.seed)
         self.policy.summary()
+
+        # Set Optimizer
+        if self.pi_optimizer == 'Adam':
+            self.pi_optim = torch.optim.Adam(self.policy.parameters(), lr=self.pi_lr)
+        elif self.pi_optimizer == 'RMSprop':
+            self.pi_optim = torch.optim.RMSprop(self.policy.parameters(), lr=self.pi_lr)
+        else:
+            raise NameError(str(self.pi_optimizer) + ' Optimizer not supported')
+
 
     def _build_value_function(self):
         self.value = MLP(layer_sizes=[self.obs_dim] + self.v_hidden_sizes,
                          activations=self.v_activations,
-                         seed=self.seed,
-                         optimizer=self.v_optimizer,
-                         lr=self.v_lr)
+                         seed=self.seed)
         self.value.summary()
+
+        # Set Optimizer
+        if self.v_optimizer == 'Adam':
+            self.v_optim = torch.optim.Adam(self.value.parameters(), lr=self.v_lr)
+        elif self.v_optimizer == 'RMSprop':
+            self.v_optim = torch.optim.RMSprop(self.value.parameters(), lr=self.v_lr)
+        else:
+            raise NameError(str(self.v_optimizer) + ' Optimizer not supported')
 
     def get_action(self, obs):
         return self.policy.get_action(obs)
@@ -155,9 +166,9 @@ class PPO:
             if logging_info["kl"] > 1.5 * self.kl_target:
                 break
 
-            self.policy.optimizer.zero_grad()
+            self.pi_optim.zero_grad()
             policy_loss.backward()
-            self.policy.optimizer.step()
+            self.pi_optim.step()
 
         self.logger.log(name='policy_updates', loss=policy_loss.item(), kl=logging_info["kl"], entropy=logging_info["entropy"])
 
@@ -171,8 +182,8 @@ class PPO:
 
             loss = F.mse_loss(val, ret)
 
-            self.value.optimizer.zero_grad()
+            self.v_optim.zero_grad()
             loss.backward()
-            self.value.optimizer.step()
+            self.v_optim.step()
 
         self.memory.reset_memory()
