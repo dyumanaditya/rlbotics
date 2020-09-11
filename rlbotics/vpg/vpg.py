@@ -11,8 +11,6 @@ from rlbotics.common.utils import GAE, get_expected_return
 class VPG:
     def __init__(self, args, env):
         self.env_name = env
-        self.obs_dim = env.observation_space.shape[0]
-        self.act_dim = env.action_space.n
 
         # General parameters
         self.gamma = args.gamma
@@ -48,9 +46,22 @@ class VPG:
         self.logger.log(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
     def _build_policy(self):
-        self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
-                                        activations=self.pi_activations,
-                                        seed=self.seed)
+        continuous = False if len(self.env.action_space.shape) == 0 else True
+
+        if continuous:
+            self.obs_dim = self.env.observation_space.shape[0]
+            self.act_dim = self.env.action_space.shape[0]
+
+            self.policy = MLPGaussianPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+                                           activations=self.pi_activations,
+                                           seed=self.seed)
+        else:
+            self.obs_dim = self.env.observation_space.shape[0]
+            self.act_dim = self.env.action_space.n
+
+            self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+                                           activations=self.pi_activations,
+                                           seed=self.seed)
         self.policy.summary()
 
         # Set Optimizer
