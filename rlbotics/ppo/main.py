@@ -63,7 +63,7 @@ def main():
 	ep_rew = 0
 
 	for epoch in range(args.max_epochs):
-		for iteration in range(h.max_iterations):
+		for iteration in range(args.max_iterations):
 			if h.render:
 				env.render()
 
