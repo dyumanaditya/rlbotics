@@ -48,7 +48,7 @@ class SAC:
         self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
         # Logger
-        self.logger = Logger('TD3', args.env_name, self.seed)
+        self.logger = Logger('SAC', args.env_name, self.seed)
 
         # Steps
         self.steps_done = 0
