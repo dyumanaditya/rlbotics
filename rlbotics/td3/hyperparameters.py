@@ -14,7 +14,7 @@ batch_size     = 256
 buffer_size    = 1e6
 polyak         = 0.005		  # Soft update for target network
 act_noise      = 0.1		  # Stddev for Gaussian exploration noise added to policy at training time
-random_steps   = 1e4		  # Random actions before training for exploration
+random_steps   = 25e3		  # Random actions before training for exploration
 update_after   = 1000		  # Number of env interactions to collect before training. Ensures replay buffer is full
 
 # Policy Network Parameters

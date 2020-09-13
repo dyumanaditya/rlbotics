@@ -30,7 +30,7 @@ class TD3:
 		self.save_freq = args.save_freq
 		self.use_grad_clip = args.use_grad_clip
 
-		# DDPG Specific Parameters
+		# TD3 Specific Parameters
 		self.batch_size = args.batch_size
 		self.buffer_size = args.buffer_size
 		self.polyak = args.polyak
@@ -150,7 +150,6 @@ class TD3:
 		# Build Target
 		self.q1_target = deepcopy(self.q1).to(self.device)
 		self.q2_target = deepcopy(self.q2).to(self.device)
-		self.q_targ_params = itertools.chain(self.q1_target.parameters(), self.q2_target.parameters())
 
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
 		for p1, p2 in zip(self.q1_target.parameters(), self.q2_target.parameters()):
@@ -175,7 +174,7 @@ class TD3:
 			# Target policy smoothing
 			noise = torch.randn_like(pi_targ) * self.noise(self.pi_targ_noise)
 			noise = torch.clamp(noise, -self.noise_clip, self.noise_clip)
-			pi_targ = pi_targ + noise
+			pi_targ += noise
 			pi_targ = torch.clamp(pi_targ, -self.act_lim, self.act_lim).float()
 
 			# Target Q-values
@@ -215,9 +214,8 @@ class TD3:
 		if self.steps_done % self.pi_update_delay == 0:
 			# Freeze Q-network so you don't waste computational effort
 			# computing gradients for it during the policy learning step.
-			for p1, p2 in zip(self.q1.parameters(), self.q2.parameters()):
-				p1.requires_grad = False
-				p2.requires_grad = False
+			for p in self.q_params:
+				p.requires_grad = False
 
 			# Update pi Network
 			pi_loss = self._compute_pi_loss(transition_batch)
@@ -228,10 +226,9 @@ class TD3:
 					param.grad.data.clamp_(self.grad_clip[0], self.grad_clip[1])
 			self.pi_optim.step()
 
-			# Unfreeze Q-network so you can optimize it at next DDPG step.
-			for p1, p2 in zip(self.q1.parameters(), self.q2.parameters()):
-				p1.requires_grad = True
-				p2.requires_grad = True
+			# Unfreeze Q-network so you can optimize it at next TD3 step.
+			for p in self.q_params:
+				p.requires_grad = True
 
 			# Update Target Networks
 			self._update_target_actor_critic()
@@ -254,8 +251,9 @@ class TD3:
 	def _update_target_actor_critic(self):
 		# Polyak averaging
 		with torch.no_grad():
-			for p, p_targ in zip(self.q_params, self.q_targ_params):
-				p_targ.data.copy_(self.polyak*p.data + (1-self.polyak)*p_targ.data)
+			for p1, p2, p1_targ, p2_targ in zip(self.q1.parameters(), self.q2.parameters(), self.q1_target.parameters(), self.q2_target.parameters()):
+				p1_targ.data.copy_(self.polyak*p1.data + (1-self.polyak)*p1_targ.data)
+				p2_targ.data.copy_(self.polyak*p2.data + (1-self.polyak)*p2_targ.data)
 			for p, p_targ in zip(self.pi.parameters(), self.pi_target.parameters()):
 				p_targ.data.copy_(self.polyak*p.data + (1-self.polyak)*p_targ.data)
 
@@ -265,12 +263,12 @@ class TD3:
 		action += self.noise(self.act_noise)
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
 
-	def store_transition(self, obs, act, rew, new_obs, done):
+	def store_transition(self, obs, act, rew, new_obs, done, log=True):
 		self.memory.add(obs, act, rew, new_obs, done)
 		self.steps_done += 1
 
 		# Log Done, reward data
-		if self.steps_done > self.update_after:
+		if self.steps_done > self.update_after and log:
 			self.logger.log(name='transitions', done=done, rewards=rew)
 
 	def resume_training(self):
@@ -294,3 +292,19 @@ class TD3:
 		log_file = os.path.join('experiments', 'logs', f'TD3_{self.env_name}_{self.seed}', 'transitions.csv')
 		log = pd.read_csv(log_file)
 		self.steps_done = len(log) + self.update_after
+		print(self.steps_done, log_file)
+
+		print('Filling replay buffer again...')
+
+		obs = self.env.reset()
+		self.env.seed(self.seed)
+		for i in range(self.steps_done):
+			act = self.get_action(obs) if i > self.random_steps else self.env.action_space.sample()
+			new_obs, rew, done, _ = self.env.step(act)
+			self.store_transition(obs, act, rew, new_obs, done, log=False)
+
+			obs = new_obs
+			if done:
+				obs = self.env.reset()
+
+

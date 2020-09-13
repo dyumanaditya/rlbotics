@@ -33,6 +33,10 @@ class Logger:
 
 		# Tensor Board
 		self.writer = SummaryWriter(log_dir=self.log_dir)
+		if algo_name.lower() in ['dqn', 'ddqn', 'ddpg', 'td3']:
+			self.mean = False
+		elif algo_name.lower() in ['vpg', 'trpo', 'ppo', 'sac']:
+			self.mean = True
 
 		# Counter to track number of policy updates
 		self.tensorboard_updated = 0
@@ -82,10 +86,14 @@ class Logger:
 				self.writer.add_scalar(key, value, self.tensorboard_updated)
 
 			if self.episode_returns:
-				self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
+				if self.mean:
+					self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
+					self.tensorboard_updated += 1
+				else:
+					for rew in self.episode_returns:
+						self.writer.add_scalar('reward/epoch', rew, self.tensorboard_updated)
+						self.tensorboard_updated += 1
 				self.episode_returns.clear()
-
-				self.tensorboard_updated += 1
 
 	def log_model(self, mlp, name=''):
 		file = os.path.join(self.model_dir, name + 'model.pth')

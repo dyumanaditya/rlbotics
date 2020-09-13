@@ -87,11 +87,12 @@ def main():
 
 			# Increment ep_counter after policy updates start
 			ep_rew = 0
-			if iteration > args.update_after:
+			if iteration > args.random_steps:
 				ep_counter += 1
 
 		# Update Actor Critic
-		agent.update_actor_critic()
+		if iteration > args.random_steps:
+			agent.update_actor_critic()
 
 	# End
 	env.close()
