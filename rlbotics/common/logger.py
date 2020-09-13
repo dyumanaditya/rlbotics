@@ -87,7 +87,7 @@ class Logger:
 
 			if self.episode_returns:
 				if self.mean:
-					self.writer.add_scalar("mean reward/epoch", np.mean(self.episode_returns), self.tensorboard_updated)
+					self.writer.add_scalar('mean reward/epoch', np.mean(self.episode_returns), self.tensorboard_updated)
 					self.tensorboard_updated += 1
 				else:
 					for rew in self.episode_returns:
