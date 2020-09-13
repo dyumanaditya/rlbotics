@@ -6,7 +6,7 @@ from copy import deepcopy
 from rlbotics.common.loss import losses
 from rlbotics.common.logger import Logger
 from rlbotics.sac.replay_buffer import ReplayBuffer
-from rlbotics.common.policies import SquashedGaussianMLPActor, MLPQFunctionContinuous
+from rlbotics.common.policies import MLPSquashedGaussianPolicy, MLPQFunctionContinuous
 
 class SAC:
     """
@@ -68,7 +68,7 @@ class SAC:
 
     def _build_policy(self):
         layer_sizes = [self.obs_dim] + self.pi_hidden_sizes + [self.act_dim]
-        self.pi = SquashedGaussianMLPActor(act_lim=self.act_lim,
+        self.pi = MLPSquashedGaussianPolicy(act_lim=self.act_lim,
                                            layer_sizes=layer_sizes,
                                            activations=self.pi_activations,
                                            seed=self.seed)

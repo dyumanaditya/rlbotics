@@ -63,7 +63,7 @@ class MLPGaussianPolicy(MLP):
 		return act_dist
 
 
-class SquashedGaussianMLPActor(MLP):
+class MLPSquashedGaussianPolicy(MLP):
 	def __init__(self, act_lim, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
 		super().__init__(layer_sizes=layer_sizes[:-1], activations=activations[:-1], seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		self.mu_layer = nn.Linear(layer_sizes[-2], layer_sizes[-1])
