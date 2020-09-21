@@ -34,16 +34,17 @@ class MLPSoftmaxPolicy(MLP):
 
 
 class MLPGaussianPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
+	def __init__(self, act_lim, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
 		torch.manual_seed(seed)
+		self.act_lim = act_lim
 
 		log_std = -0.5 * np.ones(layer_sizes[-1], dtype=np.float32)
 		self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			mu = self.forward(obs)
+			mu = self.forward(obs) * self.act_lim
 
 		std = torch.exp(self.log_std)
 		act_dist = Normal(mu, std)
