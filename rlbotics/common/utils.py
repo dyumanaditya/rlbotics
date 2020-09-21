@@ -4,14 +4,15 @@ from statistics import mean
 
 
 def get_latest_ep_return(log_file):
-    logs = pd.read_csv(log_file)
-    ep_return = 1
+    log = pd.read_csv(log_file)
+    l = len(log)
+    ep_return = log.loc[l-1, 'rewards']
 
-    for i in reversed(range(len(logs)-1)):
-        if logs.loc[i,'done'] == False:
-            ep_return += logs.loc[i, 'rewards']
+    for i in reversed(range(l-1)):
+        if log.loc[i,'done'] == False:
+            ep_return += log.loc[i, 'rewards']
 
-        elif logs.loc[i,'done'] == True:
+        elif log.loc[i,'done'] == True:
             break
 
     return ep_return

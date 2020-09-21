@@ -55,8 +55,10 @@ class TRPO:
         if continuous:
             self.obs_dim = self.env.observation_space.shape[0]
             self.act_dim = self.env.action_space.shape[0]
+            self.act_lim = self.env.action_space.high[0]
 
-            self.policy = MLPGaussianPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+            self.policy = MLPGaussianPolicy(act_lim=self.act_lim,
+                                           layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                            activations=self.pi_activations,
                                            seed=self.seed)
         else:

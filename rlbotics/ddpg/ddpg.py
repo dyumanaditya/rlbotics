@@ -233,12 +233,12 @@ class DDPG:
 		action += self.noise()
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
 
-	def store_transition(self, obs, act, rew, new_obs, done):
+	def store_transition(self, obs, act, rew, new_obs, done, log=True):
 		self.memory.add(obs, act, rew, new_obs, done)
 		self.steps_done += 1
 
 		# Log Done, reward data
-		if self.steps_done > self.update_after:
+		if self.steps_done > self.update_after and log:
 			self.logger.log(name='transitions', done=done, rewards=rew)
 
 	def resume_training(self):

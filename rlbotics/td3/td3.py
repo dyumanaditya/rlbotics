@@ -296,15 +296,15 @@ class TD3:
 
 		print('Filling replay buffer again...')
 
-		obs = self.env.reset()
-		self.env.seed(self.seed)
-		for i in range(self.steps_done):
-			act = self.get_action(obs) if i > self.random_steps else self.env.action_space.sample()
-			new_obs, rew, done, _ = self.env.step(act)
-			self.store_transition(obs, act, rew, new_obs, done, log=False)
-
-			obs = new_obs
-			if done:
-				obs = self.env.reset()
+		# obs = self.env.reset()
+		# self.env.seed(self.seed)
+		# for i in range(self.steps_done):
+		# 	act = self.get_action(obs) if i > self.random_steps else self.env.action_space.sample()
+		# 	new_obs, rew, done, _ = self.env.step(act)
+		# 	self.store_transition(obs, act, rew, new_obs, done, log=False)
+		#
+		# 	obs = new_obs
+		# 	if done:
+		# 		obs = self.env.reset()
 
 

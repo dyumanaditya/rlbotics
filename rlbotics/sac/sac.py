@@ -131,7 +131,7 @@ class SAC:
 
     def get_action(self, obs):
         self.pi.eval()
-        action = self.pi.get_action(obs).detach().numpy()
+        action = self.pi.get_action(obs)[0].detach().numpy()
         return np.clip(action, -self.act_lim, self.act_lim)[0]
 
     def _compute_q_loss(self, batch):
