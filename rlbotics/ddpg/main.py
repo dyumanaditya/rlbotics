@@ -72,7 +72,8 @@ def main():
 		new_obs, rew, done, _ = env.step(act)
 
 		# Store experience
-		agent.store_transition(obs, act, rew, new_obs, done)
+		log = True if iteration > args.random_steps else False
+		agent.store_transition(obs, act, rew, new_obs, done, log)
 		ep_rew += rew
 		obs = new_obs
 
@@ -85,11 +86,12 @@ def main():
 
 			# Increment ep_counter after policy updates start
 			ep_rew = 0
-			if iteration > args.update_after:
+			if iteration > args.random_steps:
 				ep_counter += 1
 
 		# Update Actor Critic
-		agent.update_actor_critic()
+		if iteration > args.random_steps:
+			agent.update_actor_critic()
 
 	# End
 	env.close()

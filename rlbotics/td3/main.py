@@ -74,7 +74,8 @@ def main():
 		new_obs, rew, done, _ = env.step(act)
 
 		# Store experience
-		agent.store_transition(obs, act, rew, new_obs, done)
+		log = True if iteration > args.random_steps else False
+		agent.store_transition(obs, act, rew, new_obs, done, log)
 		ep_rew += rew
 		obs = new_obs
 

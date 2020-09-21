@@ -1,5 +1,5 @@
 # General Parameters:
-env_name       = 'LunarLanderContinuous-v2'
+env_name       = 'Humanoid-v2'
 seed           = 0
 gamma          = 0.99
 max_iterations = 1500000
