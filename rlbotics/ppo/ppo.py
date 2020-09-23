@@ -110,10 +110,10 @@ class PPO:
         # get batches from memory
         transition_batch = self.memory.get_batch()
 
-        obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float32)
-        act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int32)
-        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
-        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
+        obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
+        act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int)
+        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float)
+        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int)
 
         log_prob = torch.cat(list(transition_batch.log_prob))
         values = torch.cat(transition_batch.val).squeeze(-1)

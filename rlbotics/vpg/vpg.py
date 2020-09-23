@@ -10,7 +10,7 @@ from rlbotics.common.utils import GAE, get_expected_return
 
 class VPG:
     def __init__(self, args, env):
-        self.env_name = env
+        self.env = env
 
         # General parameters
         self.gamma = args.gamma
@@ -104,10 +104,12 @@ class VPG:
         # get batches from memory
         transition_batch = self.memory.get_batch()
 
-        obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float32)
-        act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int32)
-        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float32)
-        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int32)
+        # print(len(self.memory))
+
+        obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
+        act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int)
+        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float)
+        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int)
 
         log_prob = torch.cat(list(transition_batch.log_prob))
         values = torch.cat(transition_batch.val).squeeze(-1)
