@@ -1,1 +1,1 @@
-from rlbotics.envs import register
+from gym.envs.registration import register

@@ -2,7 +2,7 @@
 # General Parameters:
 env_name       = 'LunarLanderContinuous-v2'
 gamma          = 0.99
-max_iterations = 500000
+max_iterations = 400000
 render         = False
 seed           = 0
 use_grad_clip  = False
