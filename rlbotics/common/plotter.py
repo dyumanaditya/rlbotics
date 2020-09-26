@@ -66,7 +66,7 @@ class Plotter:
 		y = pd.Series(y).rolling(5, min_periods=1).mean()
 
 		# Plot
-		ax = sns.lineplot(x=x, y=y)
+		ax = sns.lineplot(x=x, y=y, ci=95)
 		ax.axes.set_title(title, fontsize=20)
 		ax.set_xlabel(xlabel, fontsize=15)
 		ax.set_ylabel(ylabel, fontsize=15)
@@ -76,3 +76,6 @@ class Plotter:
 		# Display
 		if display:
 			plt.show()
+
+# p= Plotter()
+# p.plot_combined('LunarLander DDPG', 'epochs', 'rewards', 'DDPG', 'LunarLanderContinuous-v2', display=True)
