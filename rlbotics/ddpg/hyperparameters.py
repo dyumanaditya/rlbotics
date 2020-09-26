@@ -1,7 +1,7 @@
 # https://spinningup.openai.com/en/latest/algorithms/ddpg.html
 # General Parameters:
 env_name       = 'LunarLanderContinuous-v2'
-seed           = 1
+seed           = 0
 gamma          = 0.99
 max_iterations = 500000
 render         = False
@@ -12,7 +12,7 @@ resume         = False		  # Resume training
 # DDPG Specific:
 batch_size     = 128
 buffer_size    = 1e6
-polyak         = 0.001		  # Soft update for target network
+polyak         = 0.005		  # Soft update for target network
 act_noise      = 0.1		  # Stddev for Gaussian exploration noise added to policy at training time
 noise_type     = 'gaussian'   # Gaussian or ou noise
 random_steps   = 5e3		  # Random actions before training for exploration
@@ -33,5 +33,5 @@ q_loss_type     = 'mse'
 weight_decay    = 0				# L2 weight decay for the parameters
 
 # Both Networks
-weight_init     = 4e-4			# Initialise MLP params from (-x, x) either float or None
+weight_init     = None			# Initialise MLP params from (-x, x) either float or None
 batch_norm      = False
