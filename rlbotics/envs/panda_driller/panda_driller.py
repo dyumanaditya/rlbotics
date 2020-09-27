@@ -1,2 +1,2 @@
-class PandaDriller:
+class PandaDrillerEnv:
 	pass

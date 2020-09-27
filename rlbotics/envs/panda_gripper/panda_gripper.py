@@ -1,2 +1,2 @@
-class PandaGripper:
+class PandaGripperEnv:
 	pass
