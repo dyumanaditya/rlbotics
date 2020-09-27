@@ -234,7 +234,7 @@ class TD3:
 			self._update_target_actor_critic()
 
 			# Log pi loss
-			self.logger.log(name='policy_updates', pi_loss=pi_loss.item())
+			self.logger.log(name='policy_updates', pi_loss=pi_loss.item(), q_loss=q_loss.item())
 
 		# Log Model/Optimizer, Loss and # iterations and episodes
 		if self.steps_done % self.save_freq == 0:
@@ -246,7 +246,6 @@ class TD3:
 			self.logger.log_model(self.pi_target, name='pi_targ')
 			self.logger.log_state_dict(self.q_optim.state_dict(), name='q_optim')
 			self.logger.log_state_dict(self.pi_optim.state_dict(), name='pi_optim')
-		self.logger.log(name='policy_updates', q_loss=q_loss.item())
 
 	def _update_target_actor_critic(self):
 		# Polyak averaging
