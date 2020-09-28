@@ -109,3 +109,47 @@ class Logger:
 		for i in range(len(log)):
 			if log.loc[i, 'done']:
 				self.tensorboard_updated += 1
+
+class Loggerv2:
+    def __init__(self, algo_name, env_name, seed):
+        cur_dir = os.getcwd()
+        self.log_dir = os.path.join(cur_dir, 'experiments', 'logs', f'{algo_name}_{env_name}_{seed}')
+        self.model_dir = os.path.join(cur_dir, 'experiments', 'models', f'{algo_name}_{env_name}_{seed}')
+        if os.path.exists(self.log_dir):
+            shutil.rmtree(self.log_dir)
+        if os.path.exists(self.model_dir):
+            shutil.rmtree(self.model_dir)
+
+        os.makedirs(self.log_dir)
+        os.makedirs(self.model_dir)
+
+        self.writer = SummaryWriter(log_dir=self.log_dir)
+
+        # Counter to track number of policy updates
+        self.tensorboard_updated = 0
+
+        # Keeps track of returns from episodes for each epoch
+        self.episode_returns = []
+
+        # Keeps track of mean returns of episodes per epoch
+        self.mean_epoch_returns = []
+
+    def log(self, ep_ret=None, save=False):
+        if ep_ret == None:
+            # mean_return = sum(self.episode_returns)/len(self.episode_returns)
+            mean_return =  np.mean(self.episode_returns)
+
+            log_file = os.path.join(self.log_dir, 'return')
+            self.mean_epoch_returns.append(mean_return)
+
+            if save:
+                np.save(log_file, self.mean_epoch_returns)
+
+            self.episode_returns.clear()
+
+            self.writer.add_scalar('mean reward/epoch', mean_return, self.tensorboard_updated)
+            self.tensorboard_updated += 1
+            return mean_return
+        else:
+            self.episode_returns.append(ep_ret)
+            return None

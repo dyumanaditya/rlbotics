@@ -1,12 +1,6 @@
 import torch
-import torch.nn.functional as F
-
 from rlbotics.vpg.memory import Memory
-from rlbotics.common.policies import MLPSoftmaxPolicy
-from rlbotics.common.approximators import MLP
-from rlbotics.common.logger import Logger
-from rlbotics.common.utils import GAE, get_expected_return
-
+from rlbotics.common.policies import MLPSoftmaxPolicy, MLPGaussianPolicy, MLPCritic
 
 class VPG:
     def __init__(self, args, env):
@@ -16,34 +10,30 @@ class VPG:
         self.gamma = args.gamma
         self.lam = args.lam
         self.seed = args.seed
-        self.num_v_iters = args.num_v_iters
+        self.memory_size = args.memory_size
 
         # Policy Network
+        self.pi_lr = args.pi_lr
         self.pi_hidden_sizes = args.pi_hidden_sizes
         self.pi_activations = args.pi_activations
-        self.pi_lr = args.pi_lr
         self.pi_optimizer = args.pi_optimizer
 
         # Value Network
+        self.v_lr = args.v_lr
         self.v_hidden_sizes = args.v_hidden_sizes
         self.v_activations = args.v_activations
-        self.v_lr = args.v_lr
+        self.num_v_iters = args.num_v_iters
         self.v_optimizer = args.v_optimizer
 
-        # Replay buffer
-        self.memory = Memory()
-        self.data = None
+        self.obs_dim = env.observation_space.shape
+        self.act_dim = env.action_space.shape
 
-        # Logger
-        self.logger = Logger('VPG', args.env_name, self.seed)
+        # Replay buffer
+        self.memory = Memory(self.obs_dim, self.act_dim, self.memory_size, self.gamma, self.lam)
 
         self._build_policy()
         self._build_value_function()
 
-        # Log parameter data
-        total_params = sum(p.numel() for p in self.policy.parameters())
-        trainable_params = sum(p.numel() for p in self.policy.parameters() if p.requires_grad)
-        self.logger.log(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
     def _build_policy(self):
         continuous = False if len(self.env.action_space.shape) == 0 else True
@@ -51,10 +41,8 @@ class VPG:
         if continuous:
             self.obs_dim = self.env.observation_space.shape[0]
             self.act_dim = self.env.action_space.shape[0]
-            self.act_lim = self.env.action_space.high[0]
 
-            self.policy = MLPGaussianPolicy(act_lim=self.act_lim,
-                                           layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
+            self.policy = MLPGaussianPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                            activations=self.pi_activations,
                                            seed=self.seed)
         else:
@@ -64,7 +52,6 @@ class VPG:
             self.policy = MLPSoftmaxPolicy(layer_sizes=[self.obs_dim] + self.pi_hidden_sizes + [self.act_dim],
                                            activations=self.pi_activations,
                                            seed=self.seed)
-        self.policy.summary()
 
         # Set Optimizer
         if self.pi_optimizer == 'Adam':
@@ -75,10 +62,9 @@ class VPG:
             raise NameError(str(self.pi_optimizer) + ' Optimizer not supported')
 
     def _build_value_function(self):
-        self.value = MLP(layer_sizes=[self.obs_dim] + self.v_hidden_sizes,
+        self.value = MLPCritic(layer_sizes=[self.obs_dim] + self.v_hidden_sizes,
                          activations=self.v_activations,
                          seed=self.seed)
-        self.value.summary()
 
         # Set Optimizer
         if self.v_optimizer == 'Adam':
@@ -88,77 +74,41 @@ class VPG:
         else:
             raise NameError(str(self.v_optimizer) + ' Optimizer not supported')
 
-    def get_action(self, obs):
-        return self.policy.get_action(obs)
+    def store_transition(self, obs, act, rew):
+        value = self.value(torch.as_tensor(obs, dtype=torch.float32)).detach().numpy()
+        log_prob = self.policy._log_prob_from_distribution(torch.as_tensor(obs, dtype=torch.float32), torch.as_tensor(act, dtype=torch.float32)).detach().numpy()
 
-    def store_transition(self, obs, act, rew, new_obs, done):
-        value = self.value(obs)
-        log_prob = self.policy.get_log_prob(obs, torch.tensor(act))
+        self.memory.store(obs, act, rew, value, log_prob)
 
-        self.memory.add(obs, act, rew, new_obs, done, log_prob, value)
+    def compute_loss_pi(self, data):
+        obs, act, adv, logp_old = data['obs'], data['act'], data['adv'], data['logp']
 
-        # Log Done, reward
-        self.logger.log(name='transitions', done=done, rewards=rew)
+        # Policy loss
+        pi, logp = self.policy(obs, act)
+        loss_pi = -(logp * adv).mean()
 
-    def _get_data(self):
-        # get batches from memory
-        transition_batch = self.memory.get_batch()
+        # Useful extra info
+        approx_kl = (logp_old - logp).mean().item()
+        ent = pi.entropy().mean().item()
+        pi_info = dict(kl=approx_kl, ent=ent)
 
-        # print(len(self.memory))
+        return loss_pi, pi_info
 
-        obs_batch = torch.as_tensor(transition_batch.obs, dtype=torch.float)
-        act_batch = torch.as_tensor(transition_batch.act, dtype=torch.int)
-        rew_batch = torch.as_tensor(transition_batch.rew, dtype=torch.float)
-        done_batch = torch.as_tensor(transition_batch.done, dtype=torch.int)
-
-        log_prob = torch.cat(list(transition_batch.log_prob))
-        values = torch.cat(transition_batch.val).squeeze(-1)
-
-        expected_return = get_expected_return(rew_batch, done_batch, self.gamma)
-        adv_batch = GAE(rew_batch, done_batch, values, self.gamma, self.lam)
-
-        old_policy = self.policy.get_distribution(obs_batch)
-
-        data = dict(obs=obs_batch,
-                    act=act_batch,
-                    val=values,
-                    adv=adv_batch,
-                    ret=expected_return,
-                    old_log_prob=log_prob,
-                    old_policy=old_policy)
-        return data
-
-    def compute_policy_loss(self, log_prob_batch, adv_batch):
-        return -(log_prob_batch * adv_batch).mean()
+    def compute_loss_v(self, data):
+        obs, ret = data['obs'], data['ret']
+        return ((self.value(obs) - ret)**2).mean()
 
     def update_policy(self):
-        self.data = self._get_data()
+        self.data = self.memory.get()
 
-        adv = self.data["adv"]
-        log_prob = self.data["old_log_prob"]
-
-        loss = self.compute_policy_loss(log_prob, adv)
-
-        # update policy
         self.pi_optim.zero_grad()
-        loss.backward()
+        loss_pi, pi_info = self.compute_loss_pi(self.data)
+        loss_pi.backward()
         self.pi_optim.step()
 
-        self.logger.log(name='policy_updates', loss=loss.item())
-
-        # Log Model
-        self.logger.log_model(self.policy, name='pi')
-
     def update_value(self):
-        for _ in range(self.num_v_iters):
-            val = self.value(self.data["obs"]).squeeze(1)
-            ret = self.data["ret"]
-
-            loss = F.mse_loss(val, ret)
-
-            # update value
+        for i in range(self.num_v_iters):
             self.v_optim.zero_grad()
-            loss.backward()
+            loss_v = self.compute_loss_v(self.data)
+            loss_v.backward()
             self.v_optim.step()
-
-        self.memory.reset_memory()

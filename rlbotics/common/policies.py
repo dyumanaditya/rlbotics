@@ -9,59 +9,65 @@ from torch.distributions.normal import Normal
 from torch.distributions.categorical import Categorical
 
 
-class MLPSoftmaxPolicy(MLP):
-	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
-		torch.manual_seed(seed)
+class Actor(nn.Module):
+	def forward(self, obs, act=None):
+		pi = self._distribution(obs)
+		logp_a = None
+		if act is not None:
+			logp_a = self._log_prob_from_distribution(obs, act)
+		return pi, logp_a
+
+
+class MLPSoftmaxPolicy(Actor):
+	def __init__(self, layer_sizes, activations, seed):
+		super().__init__()
+		self.logits_net = MLP(layer_sizes, activations, seed)
+
+	def _distribution(self, obs):
+		logits = self.logits_net.mlp(obs)
+		return Categorical(logits=logits)
+
+	def _log_prob_from_distribution(self, obs, act):
+		pi = self._distribution(obs)
+		return pi.log_prob(act)
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			act_logits = self.forward(obs)
-
-		act_dist = Categorical(logits=act_logits)
-		return act_dist.sample().item()
-
-	def get_log_prob(self, obs, act):
-		act_logits = self.forward(obs)
-		act_dist = Categorical(logits=act_logits)
-		log_p = act_dist.log_prob(act)
-		return log_p
-
-	def get_distribution(self, obs):
-		act_logits = self.forward(obs)
-		act_dist = Categorical(logits=act_logits)
-		return act_dist
+			pi = self._distribution(obs)
+			a = pi.sample()
+		return a.numpy()
 
 
-class MLPGaussianPolicy(MLP):
-	def __init__(self, act_lim, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
-		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
-		torch.manual_seed(seed)
-		self.act_lim = act_lim
-
+class MLPGaussianPolicy(Actor):
+	def __init__(self,layer_sizes, activations, seed):
+		super().__init__()
 		log_std = -0.5 * np.ones(layer_sizes[-1], dtype=np.float32)
 		self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
+		self.mu_net = MLP(layer_sizes, activations, seed)
+
+	def _distribution(self, obs):
+		mu = self.mu_net.mlp(obs)
+		std = torch.exp(self.log_std)
+		return Normal(mu, std)
+
+	def _log_prob_from_distribution(self, obs, act):
+		pi = self._distribution(obs)
+		return pi.log_prob(act).sum(axis=-1)
 
 	def get_action(self, obs):
 		with torch.no_grad():
-			mu = self.forward(obs) * self.act_lim
+			pi = self._distribution(obs)
+			a = pi.sample()
+		return a.numpy()
 
-		std = torch.exp(self.log_std)
-		act_dist = Normal(mu, std)
-		return act_dist.sample().numpy()[0]
 
-	def get_log_prob(self, obs, act):
-		mu = self.forward(obs)
-		std = torch.exp(self.log_std)
-		act_dist = Normal(mu, std)
-		log_p = act_dist.log_prob(act).sum(axis=-1)
-		return log_p
+class MLPCritic(nn.Module):
+	def __init__(self, layer_sizes, activations, seed):
+		super().__init__()
+		self.v_net = MLP(layer_sizes, activations, seed)
 
-	def get_distribution(self, obs):
-		mu = self.forward(obs)
-		std = torch.exp(self.log_std)
-		act_dist = Normal(mu, std)
-		return act_dist
+	def forward(self, obs):
+		return torch.squeeze(self.v_net.mlp(obs), -1)
 
 
 class MLPSquashedGaussianPolicy(MLP):

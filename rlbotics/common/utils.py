@@ -1,6 +1,17 @@
 import torch
 import pandas as pd
 from statistics import mean
+import numpy as np
+import scipy.signal
+
+def combined_shape(length, shape=None):
+    if shape is None:
+        return (length,)
+    return (length, shape) if np.isscalar(shape) else (length, *shape)
+
+
+def discount_return(x, discount):
+    return scipy.signal.lfilter([1], [1, float(-discount)], x[::-1], axis=0)[::-1]
 
 
 def get_latest_ep_return(log_file):
