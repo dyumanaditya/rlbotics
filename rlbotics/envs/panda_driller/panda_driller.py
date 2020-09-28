@@ -38,7 +38,7 @@ class PandaDrillerEnv(gym.Env):
 
 		#p.setAdditionalSearchPath('/home/Documents/rlbotics/envs/panda_driller/drill')
 		self.drillVisualShapeId = p.createVisualShape(p.GEOM_MESH, fileName='drill/drill.obj')
-		self.drillCollisionShapeId = p.createCollisionShape(p.GEOM_MESH, fileName='drill.obj')
+		self.drillCollisionShapeId = p.createCollisionShape(p.GEOM_MESH, fileName='drill/drill.obj')
 		self.drillId = p.createMultiBody(baseVisualShapeIndex=self.drillVisualShapeId,
 										baseCollisionShapeIndex=self.drillCollisionShapeId)
 
