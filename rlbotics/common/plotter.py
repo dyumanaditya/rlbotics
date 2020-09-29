@@ -78,53 +78,64 @@ class Plotter:
 			plt.show()
 
 class Plotterv2:
-    def __init__(self):
-        sns.set()
-        self.cur_dir = os.getcwd()
-        self.plt_dir = os.path.join(self.cur_dir, 'experiments', 'plots')
-        if not os.path.exists(self.plt_dir):
-            os.makedirs(self.plt_dir)
+	def __init__(self):
+		sns.set()
+		self.cur_dir = os.getcwd()
+		self.plt_dir = os.path.join(self.cur_dir, 'experiments', 'plots')
+		if not os.path.exists(self.plt_dir):
+			os.makedirs(self.plt_dir)
 
-    def plot_individual(self, title, xlabel, ylabel, algo, env, seed, display=True):
-        file = os.path.join(self.cur_dir, 'experiments', 'logs', f'{algo}_{env}_{seed}', 'return.npy')
-        epoch_returns = np.load(file)
+	def plot_individual(self, title, xlabel, ylabel, algo, env, seed, display=True):
+		file = os.path.join(self.cur_dir, 'experiments', 'logs', f'{algo}_{env}_{seed}', 'returns.csv')
+		epoch_returns = self._get_returns_from_file(file)
 
-        epoch_returns = pd.Series(epoch_returns).rolling(10, min_periods=1).mean()
-        ax = sns.lineplot(x=list(range(len(epoch_returns))), y=epoch_returns)
-        ax.axes.set_title(title, fontsize=20)
-        ax.set_xlabel(xlabel, fontsize=15)
-        ax.set_ylabel(ylabel, fontsize=15)
+		epoch_returns = pd.Series(epoch_returns).rolling(10, min_periods=1).mean()
+		ax = sns.lineplot(x=list(range(len(epoch_returns))), y=epoch_returns)
+		ax.axes.set_title(title, fontsize=20)
+		ax.set_xlabel(xlabel, fontsize=15)
+		ax.set_ylabel(ylabel, fontsize=15)
 
-        filename = os.path.join(self.plt_dir, f'{algo}_{env}_{seed}_plt.png')
-        plt.savefig(filename)
+		filename = os.path.join(self.plt_dir, f'{algo}_{env}_{seed}_plt.png')
+		plt.savefig(filename)
 
-        if display:
-            plt.show()
+		if display:
+			plt.show()
 
-    def plot_all_seeds(self, title, xlabel, ylabel, algo, env, num_of_seeds=10, display=True):
-        x = []
-        y = []
+	def _get_returns_from_file(self, file):
+		epoch_returns = []
+		epoch_return_logs = pd.read_csv(file)
 
-        for seed in range(num_of_seeds):
-            file = os.path.join(self.cur_dir, 'experiments', 'logs', f'{algo}_{env}_{seed}', 'return.npy')
-            epoch_returns = np.load(file)
+		for i in range(len(epoch_return_logs)):
+			epoch_returns.append(epoch_return_logs.loc[i, 'returns'])
 
-            x += list(range(len(epoch_returns)))
-            y += list(epoch_returns)
+		return epoch_returns
 
-        y = pd.Series(y).rolling(5, min_periods=1).mean()
 
-        # Plot
-        ax = sns.lineplot(x=x, y=y, ci=95)
-        ax.axes.set_title(title, fontsize=20)
-        ax.set_xlabel(xlabel, fontsize=15)
-        ax.set_ylabel(ylabel, fontsize=15)
-        plt.legend([algo + '_' + env], loc='lower right')
-        plt.savefig('all_seeds_plt.png')
 
-        # Display
-        if display:
-            plt.show()
+    # def plot_all_seeds(self, title, xlabel, ylabel, algo, env, num_of_seeds=10, display=True):
+    #     x = []
+    #     y = []
+	#
+    #     for seed in range(num_of_seeds):
+    #         file = os.path.join(self.cur_dir, 'experiments', 'logs', f'{algo}_{env}_{seed}', 'return.npy')
+    #         epoch_returns = np.load(file)
+	#
+    #         x += list(range(len(epoch_returns)))
+    #         y += list(epoch_returns)
+	#
+    #     y = pd.Series(y).rolling(5, min_periods=1).mean()
+	#
+    #     # Plot
+    #     ax = sns.lineplot(x=x, y=y, ci=95)
+    #     ax.axes.set_title(title, fontsize=20)
+    #     ax.set_xlabel(xlabel, fontsize=15)
+    #     ax.set_ylabel(ylabel, fontsize=15)
+    #     plt.legend([algo + '_' + env], loc='lower right')
+    #     plt.savefig('all_seeds_plt.png')
+	#
+    #     # Display
+    #     if display:
+    #         plt.show()
 
 # p= Plotter()
 # p.plot_combined('LunarLander DDPG', 'epochs', 'rewards', 'DDPG', 'LunarLanderContinuous-v2', display=True)

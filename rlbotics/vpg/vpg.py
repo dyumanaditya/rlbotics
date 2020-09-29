@@ -105,6 +105,7 @@ class VPG:
         loss_pi, pi_info = self.compute_loss_pi(self.data)
         loss_pi.backward()
         self.pi_optim.step()
+        return loss_pi.item()
 
     def update_value(self):
         for i in range(self.num_v_iters):
@@ -112,3 +113,5 @@ class VPG:
             loss_v = self.compute_loss_v(self.data)
             loss_v.backward()
             self.v_optim.step()
+
+        return loss_v.item()

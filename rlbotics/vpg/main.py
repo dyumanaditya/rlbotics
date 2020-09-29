@@ -97,21 +97,22 @@ def main():
 				if done:
 					# log ony if episode complete
 					# print("total reward: {}".format(ep_ret))
-					logs.log(ep_rew)
+					logs.log_return(ep_rew)
 
 				obs = env.reset()
 				ep_rew = 0
 				ep_len = 0
 
 		# Update Policy
-		agent.update_policy()
-
+		loss_pi = agent.update_policy()
 		# Update Value
-		agent.update_value()
+		loss_val = agent.update_value()
+
+		logs.log_policy(loss_pi=loss_pi, loss_val=loss_val)
 
 		if epoch == args.max_epochs-1:
 			save = True
-		epoch_return = logs.log(save=save)
+		epoch_return = logs.log_return()
 		print("epoch: {}, average return: {}".format(epoch, epoch_return))
 
 	# End
