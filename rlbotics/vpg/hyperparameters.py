@@ -5,7 +5,7 @@ lam             = 0.95
 max_iterations  = 1000
 max_epochs      = 1000
 render          = False
-seed            = 2
+seed            = 9
 memory_size     = 1000
 
 # Policy Network:
