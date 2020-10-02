@@ -80,7 +80,7 @@ class VPG:
 
         self.memory.store(obs, act, rew, value, log_prob)
 
-    def compute_loss_pi(self, data):
+    def compute_policy_loss(self, data):
         obs, act, adv, logp_old = data['obs'], data['act'], data['adv'], data['logp']
 
         # Policy loss
@@ -94,7 +94,7 @@ class VPG:
 
         return loss_pi, pi_info
 
-    def compute_loss_v(self, data):
+    def compute_value_loss(self, data):
         obs, ret = data['obs'], data['ret']
         return ((self.value(obs) - ret)**2).mean()
 
@@ -102,7 +102,7 @@ class VPG:
         self.data = self.memory.get()
 
         self.pi_optim.zero_grad()
-        loss_pi, pi_info = self.compute_loss_pi(self.data)
+        loss_pi, pi_info = self.compute_policy_loss(self.data)
         loss_pi.backward()
         self.pi_optim.step()
         return loss_pi.item()
@@ -110,7 +110,7 @@ class VPG:
     def update_value(self):
         for i in range(self.num_v_iters):
             self.v_optim.zero_grad()
-            loss_v = self.compute_loss_v(self.data)
+            loss_v = self.compute_value_loss(self.data)
             loss_v.backward()
             self.v_optim.step()
 

@@ -4,7 +4,9 @@ import argparse
 
 from rlbotics.ppo.ppo import PPO
 import rlbotics.ppo.hyperparameters as h
-from rlbotics.common.plotter import Plotter
+from rlbotics.common.logger import Loggerv2
+from rlbotics.common.plotter import Plotterv2
+
 
 def argparser():
 	"""
@@ -21,26 +23,28 @@ def argparser():
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
 	parser.add_argument('--max_epochs', type=int, default=h.max_epochs)
 	parser.add_argument('--render', type=bool, default=h.render)
-	parser.add_argument('--num_value_iters', type=int, default=h.num_value_iters)
-	parser.add_argument('--num_policy_iters', type=int, default=h.num_policy_iters)
+	parser.add_argument('--memory_size', type=int, default=h.memory_size)
 
 	# PPO specific hyperparameters
 	parser.add_argument('--kl_target', type=float, default=h.kl_target)
 	parser.add_argument('--clip_ratio', type=float, default=h.clip_ratio)
 
 	# Policy Network:
+	parser.add_argument('--pi_lr', type=float, default=h.pi_lr)
 	parser.add_argument('--pi_hidden_sizes', nargs='+', type=int, default=h.pi_hidden_sizes)
 	parser.add_argument('--pi_activations', nargs='+', type=str, default=h.pi_activations)
-	parser.add_argument('--pi_lr', type=float, default=h.pi_lr)
+	parser.add_argument('--num_pi_iters', type=int, default=h.num_v_iters)
 	parser.add_argument('--pi_optimizer', type=str, default=h.pi_optimizer)
 
 	# Value Network:
+	parser.add_argument('--v_lr', type=float, default=h.v_lr)
 	parser.add_argument('--v_hidden_sizes', nargs='+', type=int, default=h.v_hidden_sizes)
 	parser.add_argument('--v_activations', nargs='+', type=str, default=h.v_activations)
-	parser.add_argument('--v_lr', type=float, default=h.v_lr)
+	parser.add_argument('--num_v_iters', type=int, default=h.num_v_iters)
 	parser.add_argument('--v_optimizer', type=str, default=h.v_optimizer)
 
 	return parser.parse_args()
+
 
 def main():
 	args = argparser()
@@ -56,6 +60,9 @@ def main():
 	env = gym.make(args.env_name)
 	env.seed(args.seed)
 	agent = PPO(args, env)
+
+	logs = Loggerv2('PPO', args.env_name, args.seed)
+
 	obs = env.reset()
 
 	# Episode related information
@@ -68,34 +75,48 @@ def main():
 				env.render()
 
 			# Take action
-			act = agent.get_action(obs)
+			act = agent.policy.get_action(torch.as_tensor(obs, dtype=torch.float32))
+
 			new_obs, rew, done, _ = env.step(act)
+			ep_rew += rew
 
 			# Store experience
-			agent.store_transition(obs, act, rew, new_obs, done)
+			agent.store_transition(obs, act, rew)
 
-			ep_rew += rew
 			obs = new_obs
 
-			# Episode done
-			if done:
-				obs = env.reset()
-				# Display results
-				print("epoch: {}, episode: {}, total reward: {}".format(epoch, ep_counter, ep_rew))
+			epoch_ended = iteration==args.max_iterations-1
 
-				ep_counter += 1
+			# Episode done or epoch terminated while episode not yet complete
+			if done or epoch_ended:
+				# calculate value of current state to estimate return if trajectory was cut halfway, else value = 0
+				if epoch_ended:
+					v = agent.value(torch.as_tensor(obs, dtype=torch.float32)).detach().numpy()
+				else:
+					v = 0
+				agent.memory.finish_path(v)
+				if done:
+					# log ony if episode complete
+					# print("total reward: {}".format(ep_ret))
+					logs.log_return(ep_rew)
+
+				obs = env.reset()
 				ep_rew = 0
 
 		# Update Policy
-		agent.update_policy()
-
+		loss_pi = agent.update_policy()
 		# Update Value
-		agent.update_value()
+		loss_val = agent.update_value()
+
+		logs.log_policy(loss_pi=loss_pi, loss_val=loss_val)
+
+		epoch_return = logs.log_return()
+		print("epoch: {}, average return: {}".format(epoch, epoch_return))
 
 	# End
 	env.close()
-	p = Plotter()
-	p.plot_individual('Epoch/Reward', 'epochs', 'rewards', 'PPO', args.env_name, args.seed, epoch_iter=args.max_iterations, display=True)
+	p = Plotterv2()
+	p.plot_individual('Mean return/Epoch', 'Epoch', 'Mean return', 'VPG', args.env_name, args.seed)
 
 
 if __name__ == '__main__':

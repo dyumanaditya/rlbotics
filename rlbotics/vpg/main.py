@@ -58,13 +58,10 @@ def main():
 
 	logs = Loggerv2('VPG', args.env_name, args.seed)
 
-	save = False
-
 	obs = env.reset()
 
 	# Episode related information
 	ep_counter = 0
-	ep_len = 0
 	ep_rew = 0
 
 	for epoch in range(args.max_epochs):
@@ -77,7 +74,6 @@ def main():
 
 			new_obs, rew, done, _ = env.step(act)
 			ep_rew += rew
-			ep_len += 1
 
 			# Store experience
 			agent.store_transition(obs, act, rew)
@@ -101,7 +97,6 @@ def main():
 
 				obs = env.reset()
 				ep_rew = 0
-				ep_len = 0
 
 		# Update Policy
 		loss_pi = agent.update_policy()
@@ -110,8 +105,6 @@ def main():
 
 		logs.log_policy(loss_pi=loss_pi, loss_val=loss_val)
 
-		if epoch == args.max_epochs-1:
-			save = True
 		epoch_return = logs.log_return()
 		print("epoch: {}, average return: {}".format(epoch, epoch_return))
 
