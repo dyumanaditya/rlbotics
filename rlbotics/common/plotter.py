@@ -140,4 +140,4 @@ class Plotterv2:
 
 
 # p = Plotterv2()
-# p.plot_combined('LunarLander VPG', 'Epochs', 'Mean Return', 'VPG', 'LunarLanderContinuous-v2', display=True)
+# p.plot_combined('LunarLander PPO', 'Epochs', 'Mean Return', 'PPO', 'LunarLanderContinuous-v2', num_of_seeds=7, display=True)

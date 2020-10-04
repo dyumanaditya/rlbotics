@@ -116,7 +116,7 @@ def main():
 	# End
 	env.close()
 	p = Plotterv2()
-	p.plot_individual('Mean return/Epoch', 'Epoch', 'Mean return', 'VPG', args.env_name, args.seed)
+	p.plot_individual('Mean return/Epoch', 'Epoch', 'Mean return', 'PPO', args.env_name, args.seed)
 
 
 if __name__ == '__main__':
