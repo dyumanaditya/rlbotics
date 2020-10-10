@@ -17,6 +17,13 @@ class PandaDrillerEnv(gym.Env):
 		self.seed()
 		self.reset()
 
+		# Initialise joint info
+		self.joints_min, self.joints_max = np.array(),
+		self.num_arm_joints = p.getNumJoints(self.arm_id)
+		for j in range(self.num_arm_joints):
+			self.joints_min.append(p.getJointInfo(self.arm_id, j)[8])
+			self.joints_max.append(p.getJointInfo(self.arm_id, j)[9])
+
 	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
 		return [seed]
@@ -38,8 +45,8 @@ class PandaDrillerEnv(gym.Env):
 
 		self.plane_id = p.loadURDF('plane.urdf')
 		self.arm_id = p.loadURDF('franka_panda/panda.urdf', [-0.6, 0, 0.93], useFixedBase=True)
-		self.drill_id = p.loadURDF(os.path.join(self.path, 'drill.urdf'), [-0.265, 0, 1.73], drillOrientation, globalScaling=0.013)
 		self.table_id = p.loadURDF('table/table.urdf', [0, 0, 0], tableOrientation, globalScaling=1.5, useFixedBase=True)
+		self.drill_id = p.loadURDF(os.path.join(self.path, 'drill.urdf'), [-0.265, 0, 1.73], drillOrientation, globalScaling=0.013)
 
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
@@ -150,20 +157,22 @@ class PandaDrillerEnv(gym.Env):
 			pass
 
 	def step(self, action):
-		pass
+		action = action[0]
+		action = np.clip(action, -1, 1).astype(np.float32)
 
+		# Map to appropriate range according to joint limits
+		for i in range(self.num_arm_joints):
+			action[i] = self._map_linear(action[i], self.joints_min[i], self.joints_max[i])
 
+		joint_ind = list(range(self.num_arm_joints))
+		p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=action)
 
+	def _map_linear(self, val, minimum, maximum):
+		old_range = 1 - (-1)
+		new_range = maximum - minimum
+		new_value = (((val - (-1)) * new_range) / old_range) + minimum
+		return new_value
 
-
-
-		# # Get joint info
-		# self.num_joints = p.getNumJoints(self.armId)
-
-	# def step(self, action):
-	# 	for joint in range(self.num_joints):
-	# 		p.setJointMotorControl2(self.armId, joint, controlMode=p.POSITION_CONTROL, targetPosition=action[joint])
-	# 		p.stepSimulation()
 
 
 
