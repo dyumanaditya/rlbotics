@@ -9,7 +9,7 @@ from gym.utils import seeding
 
 class PandaDrillerEnv(gym.Env):
 	metadata = {'render.modes': ['human', 'rgb_array'],
-				'video.frames_per_second': 60}
+				'video.frames_per_second': 50}
 
 	def __init__(self, render):
 		self.path = os.path.abspath(os.path.dirname(__file__))
@@ -29,7 +29,7 @@ class PandaDrillerEnv(gym.Env):
 			p.connect(p.DIRECT)
 
 		p.resetSimulation()
-		# p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 		# Load Robots
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -45,19 +45,19 @@ class PandaDrillerEnv(gym.Env):
 		self._grab_drill()
 		self._generate_plane()
 		self._get_camera_img()
-		# p.setRealTimeSimulation(0)
+		p.setRealTimeSimulation(0)
 
 	def _grab_drill(self):
 		time.sleep(0.5)
 		p.setJointMotorControl2(self.arm_id, 5, p.POSITION_CONTROL, targetPosition=1)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=-1)
 		p.setJointMotorControl2(self.arm_id, 6, p.POSITION_CONTROL, targetPosition=0.8)
-		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0.5)
-		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0.5)
+		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0.04)
+		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0.04)
 
 		time.sleep(0.5)
-		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=-0.5)
-		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=-0.5)
+		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0)
+		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0)
 
 		time.sleep(0.5)
 		p.setGravity(0, 0, -9.8)
@@ -91,9 +91,9 @@ class PandaDrillerEnv(gym.Env):
 
 		hole_visual = p.createVisualShape(
 			p.GEOM_MESH,
-			rgbaColor=[255, 0, 0, 1],
+			rgbaColor=[25, 0, 0, 1],
 			visualFramePosition=hole_position,
-			fileName=os.path.join(self.path, 'plane', 'targetHole0_01.obj')
+			fileName=os.path.join(self.path, 'plane', 'targetHole0_02.obj')
 		)
 
 		hole = p.createMultiBody(
@@ -103,24 +103,44 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 	def _get_camera_img(self):
-		view_matrix = p.computeViewMatrix(
-			cameraEyePosition=[0, 0, 3],
-			cameraTargetPosition=[0, 0, 1.3],
+		view_matrix1 = p.computeViewMatrix(
+			cameraEyePosition=[0, 0, 2.5],
+			cameraTargetPosition=[0, 0, 0],
+			cameraUpVector=[1, 0, 0]
+		)
+
+		view_matrix2 = p.computeViewMatrix(
+			cameraEyePosition=[-0.2, 1.5, 1.3],
+			cameraTargetPosition=[-0.2, 0, 1.4],
 			cameraUpVector=[0, 1, 0]
 		)
 
-		projection_matrix = p.computeProjectionMatrixFOV(
-			fov=45,
+		projection_matrix1 = p.computeProjectionMatrixFOV(
+			fov=30,
 			aspect=1.0,
-			nearVal=0.2,
-			farVal=1.5
+			nearVal=0.01,
+			farVal=2
 		)
 
-		width, height, rgb_img, depth_img, seg_img = p.getCameraImage(
-			width=1000,
-			height=1000,
-			viewMatrix=view_matrix,
-			projectionMatrix=projection_matrix
+		projection_matrix2 = p.computeProjectionMatrixFOV(
+			fov=40,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=2
+		)
+
+		width1, height1, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
+			width=200,
+			height=200,
+			viewMatrix=view_matrix1,
+			projectionMatrix=projection_matrix1
+		)
+
+		width2, height2, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
+			width=200,
+			height=200,
+			viewMatrix=view_matrix2,
+			projectionMatrix=projection_matrix2
 		)
 
 	def render(self, mode='human'):
@@ -150,9 +170,5 @@ class PandaDrillerEnv(gym.Env):
 env = PandaDrillerEnv(render=True)
 while 1:
 	time.sleep(0.1)
-	env._get_camera_img()
+	# env._get_camera_img()
 
-# act = [12, 20] * 6
-# for i in range(100):
-# 	time.sleep(0.1)
-# 	env.step(act)
