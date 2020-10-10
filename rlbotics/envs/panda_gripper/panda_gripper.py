@@ -53,6 +53,9 @@ class PandaGripperEnv(gym.Env):
 
 		self.numOfJoints = p.getNumJoints(self.armId)
 
+		for i in range(self.numOfJoints):
+			print(p.getJointInfo(self.armId, i))
+
 		self.init_up_vector = (1, 0, 0)
 		self.init_camera_vector = (0, 0, 1)
 
@@ -60,16 +63,7 @@ class PandaGripperEnv(gym.Env):
 		self.projection_matrix = p.computeProjectionMatrixFOV(fov, aspect, nearplane, farplane)
 
 		if self.firstPersonView:
-			com_p, com_o, _, _, _, _ = p.getLinkState(self.armId, 6, computeForwardKinematics=True)
-			rot_matrix = p.getMatrixFromQuaternion(com_o)
-			rot_matrix = np.array(rot_matrix).reshape(3, 3)
-
-			# Rotated vectors
-			camera_vector = rot_matrix.dot(self.init_camera_vector)
-			up_vector = rot_matrix.dot(self.init_up_vector)
-
-			view_matrix = p.computeViewMatrix(com_p, com_p + 0.1 * camera_vector, up_vector)
-			img = p.getCameraImage(1000, 1000, view_matrix, self.projection_matrix)
+			pass
 
 		else:
 			self.view_matrix = p.computeViewMatrix((0.5,0,2.5),(0.5,0,0.94), self.init_up_vector)
@@ -86,26 +80,16 @@ class PandaGripperEnv(gym.Env):
 			pass
 
 	def step(self, action):
-		reward = None
-		done = None
+		reward = 0
+		done = 0
 
 		for joint in range(self.numOfJoints):
 			p.setJointMotorControl2(self.armId, joint, controlMode=p.POSITION_CONTROL, targetPosition=action[joint])
 
 		if self.firstPersonView:
-			com_p, com_o, _, _, _, _ = p.getLinkState(self.armId, 6, computeForwardKinematics=True)
-			rot_matrix = p.getMatrixFromQuaternion(com_o)
-			rot_matrix = np.array(rot_matrix).reshape(3, 3)
-
-			# Rotated vectors
-			camera_vector = rot_matrix.dot(self.init_camera_vector)
-			up_vector = rot_matrix.dot(self.init_up_vector)
-
-			view_matrix = p.computeViewMatrix(com_p, com_p + 0.1 * camera_vector, up_vector)
-			img = p.getCameraImage(1000, 1000, view_matrix, self.projection_matrix)
+			pass
 
 		else:
-			#view_matrix = p.computeViewMatrix((0.5,0,2.5),(0.5,0,0.94), self.init_up_vector)
 			img = p.getCameraImage(1000, 1000, self.view_matrix, self.projection_matrix)
 
 
@@ -117,7 +101,7 @@ env = PandaGripperEnv(render=True)
 # 	time.sleep(0.1)
 
 
-for i in range(100):
-	act = np.random.rand(1, 12).squeeze(0)
-	time.sleep(0.1)
-	env.step(act)
+# for i in range(100):
+# 	act = np.random.rand(1, 12).squeeze(0)
+# 	time.sleep(0.1)
+# 	env.step(act)
