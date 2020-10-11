@@ -13,6 +13,7 @@ class PandaGripperEnv(gym.Env):
 		self.is_render = render
 		self.num_of_cubes = num_of_cubes
 		self.first_person_view = first_person_view
+		self.movement_penalty_constant = 10
 		self.seed()
 		self.reset()
 
@@ -42,6 +43,10 @@ class PandaGripperEnv(gym.Env):
 		self.from_tray_id = p.loadURDF('tray/traybox.urdf', [0.5, 0.4, 0.94])
 		self.to_tray_id = p.loadURDF('tray/traybox.urdf', [0.5, -0.4, 0.94])
 
+		# bounding box of from tray and to tray
+		self.from_tray_min_AABB, self.from_tray_max_AABB = p.getAABB(self.from_tray_id)
+		self.to_tray_min_AABB, self.to_tray_max_AABB = p.getAABB(self.to_tray_id)
+
 		self.cubes_id = []
 		self.other_id = [self.table_id, self.arm_id, self.from_tray_id, self.to_tray_id]
 
@@ -49,7 +54,7 @@ class PandaGripperEnv(gym.Env):
 		self.limits = self.get_limits()
 		p.setJointMotorControlArray(self.arm_id, list(range(self.num_of_joints)), controlMode=p.POSITION_CONTROL, targetPositions=[0]*self.num_of_joints)
 
-		time.sleep(20)
+		# time.sleep(20)
 
 		for i in range(self.num_of_cubes):
 			cubeOrientation = p.getQuaternionFromEuler([np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi)])
@@ -93,21 +98,30 @@ class PandaGripperEnv(gym.Env):
 			pass
 
 	def step(self, action):
-		reward = 0
-		done = 0
-
 		action = np.clip(action, -1, 1).astype(np.float32)
 
 		for i in range(self.num_of_joints):
 			action[i] = self._linear_map(action[i], -1, 1, self.limits[i][0], self.limits[i][1])
 
-		# bounding box of from tray and to tray
-		from_tray_min_AABB, from_tray_max_AABB = p.getAABB(self.from_tray_id)
-		to_tray_min_AABB, to_tray_max_AABB = p.getAABB(self.to_tray_id)
+		rew, done = self._compute_reward(action)
+
+		# execute action
+		p.setJointMotorControlArray(self.arm_id, list(range(self.num_of_joints)), controlMode=p.POSITION_CONTROL, targetPositions=action)
+		# time.sleep(1)
+
+		if self.first_person_view:
+			pass
+		else:
+			img = p.getCameraImage(100, 100, self.view_matrix, self.projection_matrix)
+
+		return img, rew, done
+
+	def _compute_reward(self, action):
+		done = 0
 
 		# ids of overlapping objects with from tray and to tray
-		overlapping_objects_with_from_tray = np.array(p.getOverlappingObjects(from_tray_min_AABB, from_tray_max_AABB))[:, 0]
-		overlapping_objects_with_to_tray = np.array(p.getOverlappingObjects(to_tray_min_AABB, to_tray_max_AABB))[:, 0]
+		overlapping_objects_with_from_tray = np.array(p.getOverlappingObjects(self.from_tray_min_AABB, self.from_tray_max_AABB))[:, 0]
+		overlapping_objects_with_to_tray = np.array(p.getOverlappingObjects(self.to_tray_min_AABB, self.to_tray_max_AABB))[:, 0]
 
 		# ids of overlapping cubes with from tray and to tray
 		overlapping_cubes_with_from_tray = [id for id in overlapping_objects_with_from_tray if id not in self.other_id]
@@ -122,15 +136,14 @@ class PandaGripperEnv(gym.Env):
 		if reward == 20:
 			done = 1
 
-		p.setJointMotorControlArray(self.arm_id, list(range(self.num_of_joints)), controlMode=p.POSITION_CONTROL, targetPositions=action)
-		# time.sleep(1)
+		current_joint_pos = np.array(p.getJointStates(self.arm_id, list(range(self.num_of_joints))))[:, 0]
 
-		if self.first_person_view:
-			pass
-		else:
-			img = p.getCameraImage(100, 100, self.view_matrix, self.projection_matrix)
+		movement_penalty = np.absolute(action - current_joint_pos).sum(axis=0) * self.movement_penalty_constant
 
-		return img, reward, done
+		reward -= movement_penalty
+
+		return reward, done
+
 
 	def _linear_map(self, x, in_min, in_max, out_min, out_max):
 		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
