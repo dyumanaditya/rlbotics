@@ -13,16 +13,16 @@ class PandaDrillerEnv(gym.Env):
 
 	def __init__(self, render):
 		self.path = os.path.abspath(os.path.dirname(__file__))
-		self.isRender = render
+		self.is_render = render
+		self.done = False
 		self.seed()
 		self.reset()
 
 		# Initialise joint info
-		self.joints_min, self.joints_max = np.array(),
+		self.limits = []
 		self.num_arm_joints = p.getNumJoints(self.arm_id)
 		for j in range(self.num_arm_joints):
-			self.joints_min.append(p.getJointInfo(self.arm_id, j)[8])
-			self.joints_max.append(p.getJointInfo(self.arm_id, j)[9])
+			self.limits.append(p.getJointInfo(self.arm_id, j)[8:10])
 
 	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
@@ -30,46 +30,47 @@ class PandaDrillerEnv(gym.Env):
 
 	def reset(self):
 		# Connect to physics client
-		if self.isRender:
+		if self.is_render:
 			p.connect(p.GUI)
 		else:
 			p.connect(p.DIRECT)
 
+		self.done = False
 		p.resetSimulation()
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 		# Load Robots
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
-		tableOrientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
-		drillOrientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
+		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
+		drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
 
-		self.plane_id = p.loadURDF('plane.urdf')
+		p.loadURDF('plane.urdf')
 		self.arm_id = p.loadURDF('franka_panda/panda.urdf', [-0.6, 0, 0.93], useFixedBase=True)
-		self.table_id = p.loadURDF('table/table.urdf', [0, 0, 0], tableOrientation, globalScaling=1.5, useFixedBase=True)
-		self.drill_id = p.loadURDF(os.path.join(self.path, 'drill.urdf'), [-0.265, 0, 1.73], drillOrientation, globalScaling=0.013)
+		self.table_id = p.loadURDF('table/table.urdf', [0, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
+		self.drill_id = p.loadURDF(os.path.join(self.path, 'drill.urdf'), [-0.265, 0, 1.73], drill_orientation, globalScaling=0.013)
 
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
 		self._generate_plane()
 		self._get_camera_img()
-		p.setRealTimeSimulation(0)
+		# p.setRealTimeSimulation(0)
 
 	def _grab_drill(self):
-		time.sleep(0.5)
+		time.sleep(0.08)
 		p.setJointMotorControl2(self.arm_id, 5, p.POSITION_CONTROL, targetPosition=1)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=-1)
 		p.setJointMotorControl2(self.arm_id, 6, p.POSITION_CONTROL, targetPosition=0.8)
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0.04)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0.04)
 
-		time.sleep(0.5)
+		time.sleep(0.08)
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0)
 
-		time.sleep(0.5)
+		time.sleep(0.08)
 		p.setGravity(0, 0, -9.8)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=1)
-		time.sleep(0.5)
+		time.sleep(0.08)
 
 	def _generate_plane(self):
 		# Min Max constraints for drilling on plane
@@ -85,7 +86,7 @@ class PandaDrillerEnv(gym.Env):
 			fileName=os.path.join(self.path, 'plane', 'plane.obj')
 		)
 
-		plane = p.createMultiBody(
+		self.plane = p.createMultiBody(
 			basePosition=[0, 0, 1.3],
 			baseVisualShapeIndex=plane_visual,
 			baseOrientation=plane_orientation,
@@ -94,7 +95,7 @@ class PandaDrillerEnv(gym.Env):
 
 		# Wood texture for plane
 		texture = p.loadTexture(os.path.join(self.path, 'plane', 'texture.jpeg'))
-		p.changeVisualShape(plane, -1, textureUniqueId=texture)
+		p.changeVisualShape(self.plane, -1, textureUniqueId=texture)
 
 		hole_visual = p.createVisualShape(
 			p.GEOM_MESH,
@@ -152,26 +153,55 @@ class PandaDrillerEnv(gym.Env):
 
 	def render(self, mode='human'):
 		if mode == 'human':
-			self.isRender = True
+			self.is_render = True
 		elif mode == 'rgb_array':
 			pass
 
 	def step(self, action):
+		print(action[0])
 		action = action[0]
 		action = np.clip(action, -1, 1).astype(np.float32)
 
 		# Map to appropriate range according to joint limits
+
 		for i in range(self.num_arm_joints):
-			action[i] = self._map_linear(action[i], self.joints_min[i], self.joints_max[i])
+			action[i] = self._map_linear(action[i], self.limits[i][0], self.limits[i][1])
 
 		joint_ind = list(range(self.num_arm_joints))
 		p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=action)
 
 	def _map_linear(self, val, minimum, maximum):
-		old_range = 1 - (-1)
-		new_range = maximum - minimum
-		new_value = (((val - (-1)) * new_range) / old_range) + minimum
-		return new_value
+		return (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+
+	def _compute_reward(self, action, sparse=False):
+		rew = 0
+
+		if sparse:
+			pass
+		else:
+			# Check if drill has dropped
+			if len(p.getContactPoints(self.arm_id, self.drill_id)) == 0:
+				self.done = True
+				rew -= 300
+			# Check if drill is touching the table
+			elif len(p.getContactPoints(self.drill_id, self.table_id)) != 0:
+				rew -= 200
+			# Check if Panda is touching the table
+			if len(p.getContactPoints(self.arm_id, self.table_id)) != 0:
+				rew -= 200
+
+			# Compute electricity cost
+			electricity_cost = sum(abs(action) * 10)
+
+			#
+
+
+	def close(self):
+		p.disconnect()
+
+
+
+
 
 
 
@@ -179,5 +209,7 @@ class PandaDrillerEnv(gym.Env):
 env = PandaDrillerEnv(render=True)
 while 1:
 	time.sleep(0.1)
+	act = np.random.randn(12,1)
+	env.step(act)
 	# env._get_camera_img()
 
