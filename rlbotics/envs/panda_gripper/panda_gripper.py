@@ -136,8 +136,10 @@ class PandaGripperEnv(gym.Env):
 		if reward == 20:
 			done = 1
 
+		# movement penalty
 		current_joint_pos = np.array(p.getJointStates(self.arm_id, list(range(self.num_of_joints))))[:, 0]
 
+		# penalty = sum(abs(current - target)) * some contstant
 		movement_penalty = np.absolute(action - current_joint_pos).sum(axis=0) * self.movement_penalty_constant
 
 		reward -= movement_penalty
