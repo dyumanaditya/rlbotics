@@ -166,10 +166,8 @@ class PandaDrillerEnv(gym.Env):
 
 		# Map to appropriate range according to joint joint_limits
 		# And get relative action
-		rel_action = np.zeros_like(action)
-		for i in range(self.num_arm_joints):
-			action[i] = self._map_linear(action[i], self.joint_limits[i][0], self.joint_limits[i][1])
-			rel_action[i] = action[i] - self.joint_states[i]
+		action = self._map_linear(action)
+		rel_action = (action.T - self.joint_states).T
 
 		# Compute max time needed to complete motion
 		TIME = np.max(rel_action.T / self.velocity_limits)
@@ -184,12 +182,17 @@ class PandaDrillerEnv(gym.Env):
 			p.stepSimulation()
 			time.sleep(1/240)
 
-		# Update states
-		for i in range(self.num_arm_joints):
-			self.joint_states[i] = action[i][0]
+		# Update joint states
+		for j in range(self.num_arm_joints):
+			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
 
-	def _map_linear(self, val, minimum, maximum):
-		return (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+	def _map_linear(self, action):
+		for i in range(self.num_arm_joints):
+			val = action[i]
+			minimum = self.joint_limits[i][0]
+			maximum = self.joint_limits[i][1]
+			action[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+		return action
 
 	def _compute_reward(self, action, sparse=False):
 		rew = 0
