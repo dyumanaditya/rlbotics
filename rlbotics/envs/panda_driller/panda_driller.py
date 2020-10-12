@@ -1,6 +1,7 @@
 import os
 import gym
 import time
+import math
 import numpy as np
 import pybullet as p
 import pybullet_data
@@ -19,10 +20,13 @@ class PandaDrillerEnv(gym.Env):
 		self.reset()
 
 		# Initialise joint info
-		self.joint_limits = []
+		self.joint_states, self.joint_limits, self.velocity_limits = [], [], []
 		self.num_arm_joints = p.getNumJoints(self.arm_id)
 		for j in range(self.num_arm_joints):
+			self.joint_states.append(p.getJointState(self.arm_id, j)[0])
 			self.joint_limits.append(p.getJointInfo(self.arm_id, j)[8:10])
+			v = p.getJointInfo(self.arm_id, j)[11]
+			self.velocity_limits.append(np.inf if v == 0 else v)
 
 	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
@@ -56,21 +60,21 @@ class PandaDrillerEnv(gym.Env):
 		p.setRealTimeSimulation(0)
 
 	def _grab_drill(self):
-		time.sleep(0.08)
+		time.sleep(0.1)
 		p.setJointMotorControl2(self.arm_id, 5, p.POSITION_CONTROL, targetPosition=1)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=-1)
 		p.setJointMotorControl2(self.arm_id, 6, p.POSITION_CONTROL, targetPosition=0.8)
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0.04)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0.04)
 
-		time.sleep(0.08)
+		time.sleep(0.1)
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0)
 
-		time.sleep(0.08)
+		time.sleep(0.1)
 		p.setGravity(0, 0, -9.8)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=1)
-		time.sleep(0.08)
+		time.sleep(0.1)
 
 	def _generate_plane(self):
 		# Min Max constraints for drilling on plane
@@ -138,15 +142,15 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 		width1, height1, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
-			width=200,
-			height=200,
+			width=224,
+			height=224,
 			viewMatrix=view_matrix1,
 			projectionMatrix=projection_matrix1
 		)
 
 		width2, height2, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
-			width=200,
-			height=200,
+			width=224,
+			height=224,
 			viewMatrix=view_matrix2,
 			projectionMatrix=projection_matrix2
 		)
@@ -161,14 +165,28 @@ class PandaDrillerEnv(gym.Env):
 		action = np.clip(action, -1, 1).astype(np.float32)
 
 		# Map to appropriate range according to joint joint_limits
+		# And get relative action
+		rel_action = np.zeros_like(action)
 		for i in range(self.num_arm_joints):
 			action[i] = self._map_linear(action[i], self.joint_limits[i][0], self.joint_limits[i][1])
+			rel_action[i] = action[i] - self.joint_states[i]
 
+		# Compute max time needed to complete motion
+		TIME = np.max(rel_action.T / self.velocity_limits)
+		TIME = math.ceil(TIME / (1/240))
+
+		sub_action = rel_action / TIME
 		joint_ind = list(range(self.num_arm_joints))
-		p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=action)
-		for _ in range(5):
+
+		for step in range(TIME):
+			target_pos = np.squeeze(self.joint_states + sub_action.T * step)
+			p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=target_pos)
 			p.stepSimulation()
-			time.sleep(0.1)
+			time.sleep(1/240)
+
+		# Update states
+		for i in range(self.num_arm_joints):
+			self.joint_states[i] = action[i][0]
 
 	def _map_linear(self, val, minimum, maximum):
 		return (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
@@ -207,9 +225,10 @@ class PandaDrillerEnv(gym.Env):
 
 
 env = PandaDrillerEnv(render=True)
+#time.sleep(10)
 while 1:
-	time.sleep(0.1)
-	act = np.random.uniform(-1, 1, 12)
+	#time.sleep(0.1)
+	act = np.random.uniform(-1, 1, (12,1))
 	env.step(act)
 	# env._get_camera_img()
 
