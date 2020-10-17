@@ -26,10 +26,10 @@ class PandaDrillerEnv(gym.Env):
 
 		# Load Robot and other objects
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
+		arm_base_pos = [-0.6, 0, 0.93]
 		self.drill_base_pos = [-0.24, 0, 1.69]
 		self.drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
 		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
-		arm_base_pos = [-0.6, 0, 0.93]
 
 		p.loadURDF('plane.urdf')
 		self.hole = -1
@@ -50,7 +50,11 @@ class PandaDrillerEnv(gym.Env):
 		# Initialise environment spaces
 		self.action_space = spaces.Box(-1, 1, (self.num_arm_joints,), dtype=np.float32)
 		if self.obs_mode == 'rgb':
-			self.observation_space = spaces.Box(0, 255, shape=(224, 224, 4), dtype=np.uint8)
+			self.observation_space = spaces.Box(0, 255, shape=(224, 224, 3), dtype=np.uint8)
+		elif self.obs_mode == 'rgbd':
+			self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 4), dtype=np.uint16)
+		elif self.obs_mode == 'rgbds':
+			self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 5), dtype=np.uint16)
 
 		# Initialise env
 		self.seed()
@@ -71,12 +75,12 @@ class PandaDrillerEnv(gym.Env):
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
 
-		# # Temp!!!
-		# self._generate_plane()
-		# print(p.getMatrixFromQuaternion(self.drill_orientation))
-		# print(p.getMatrixFromQuaternion(p.getQuaternionFromEuler([0,0,0])))
-		# print()
-		# time.sleep(1000)
+		# Temp!!!
+		self._generate_plane()
+		print(p.getMatrixFromQuaternion(self.drill_orientation))
+		print(p.getMatrixFromQuaternion(p.getQuaternionFromEuler([0,0,0])))
+		print()
+		time.sleep(1000)
 
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
@@ -106,10 +110,10 @@ class PandaDrillerEnv(gym.Env):
 		# max = [0.2, -0.2, 0]
 
 		plane_orientation = [0, 0, 0]
-		plane_orientation[0] = self.np_random.uniform(0, np.pi/4)
-		plane_orientation[1] = self.np_random.uniform(3*np.pi/4, np.pi)
-		plane_orientation[2] = self.np_random.uniform(0, np.pi/2)
-		plane_orientation = p.getQuaternionFromEuler(plane_orientation)
+		#plane_orientation[0] = self.np_random.uniform(0, np.pi/4)
+		#plane_orientation[1] = self.np_random.uniform(3*np.pi/4, np.pi)
+		#plane_orientation[2] = self.np_random.uniform(0, np.pi/2)
+		#plane_orientation = p.getQuaternionFromEuler(plane_orientation)
 		plane_scale = [self.np_random.uniform(1, 1.4), self.np_random.uniform(1, 1.4), 1]
 		hole_position = [self.np_random.uniform(-0.2, 0.2), self.np_random.uniform(-0.2, 0.2), 0]
 
