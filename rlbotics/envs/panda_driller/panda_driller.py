@@ -10,19 +10,18 @@ from gym.utils import seeding
 
 
 class PandaDrillerEnv(gym.Env):
-	metadata = {'render.modes': ['human', 'rgb'],
+	metadata = {'render.modes': ['human', 'rgb', 'rgbd', 'rgbds'],
 				'video.frames_per_second': 50}
 
 	def __init__(self, render=False, obs_mode='rgb'):
 		self.path = os.path.abspath(os.path.dirname(__file__))
-		self.is_render = render
 		self.obs_mode = obs_mode
 		self.max_timesteps = 1000
 		self.timesteps = 0
 		self.done = False
 
 		# Connect to physics client
-		p.connect(p.GUI) if self.is_render else p.connect(p.DIRECT)
+		p.connect(p.GUI) if render else p.connect(p.DIRECT)
 
 		# Load Robot and other objects
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -76,11 +75,11 @@ class PandaDrillerEnv(gym.Env):
 		p.removeBody(self.plane)
 
 		# Temp!!!
-		self._generate_plane()
-		print(p.getMatrixFromQuaternion(self.drill_orientation))
-		print(p.getMatrixFromQuaternion(p.getQuaternionFromEuler([0,0,0])))
-		print()
-		time.sleep(1000)
+		# self._generate_plane()
+		# print(p.getMatrixFromQuaternion(self.drill_orientation))
+		# print(p.getMatrixFromQuaternion(p.getQuaternionFromEuler([0,0,0])))
+		# print()
+		# time.sleep(1000)
 
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
@@ -182,27 +181,45 @@ class PandaDrillerEnv(gym.Env):
 			farVal=2
 		)
 
-		width1, height1, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
+		_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
 			width=224,
 			height=224,
 			viewMatrix=view_matrix1,
 			projectionMatrix=projection_matrix1
 		)
 
-		width2, height2, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
+		_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
 			width=224,
 			height=224,
 			viewMatrix=view_matrix2,
 			projectionMatrix=projection_matrix2
 		)
-		print(np.shape(seg_img1))
-		time.sleep(10)
+
+		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
 	def render(self, mode='human'):
 		if mode == 'human':
-			self.is_render = True
-		elif mode == 'rgb_array':
 			pass
+
+		elif mode == 'rgb':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			return img1[:, :, :3], img2[:, :, :3]
+
+		elif mode == 'rgbd':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			dep1, dep2 = img[1][0], img[1][1]
+			img1, img2 = img1[:, :, :3], img2[:, :, :3]
+			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
+
+		elif mode == 'rgbds':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			dep1, dep2 = img[1][0], img[1][1]
+			seg1, seg2 = img[2][0], img[2][1]
+			img1, img2 = img1[:, :, :3], img2[:, :, :3]
+			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
 
 	def step(self, action):
 		self.timesteps += 1
