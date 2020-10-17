@@ -2,6 +2,7 @@ import gym
 import time
 import pybullet as p
 import pybullet_data
+from gym import spaces
 from gym.utils import seeding
 import numpy as np
 import math
@@ -10,23 +11,18 @@ class PandaGripperEnv(gym.Env):
 	metadata = {'render.modes': ['human', 'rgb_array'],
 				'video.frames_per_second': 60}
 
-	def __init__(self, render, first_person_view=False, num_of_cubes=10):
+	def __init__(self, render, first_person_view=False, num_of_cubes=10, obs_mode='rgb'):
 		self.is_render = render
 		self.num_of_cubes = num_of_cubes
 		self.first_person_view = first_person_view
 		self.movement_penalty_constant = 10
 		self.steps_taken = 0
-		self.max_steps = 5
+		self.obs_mode = obs_mode
+		self.max_timesteps = 5
+		self.done = False
 
 		# Connect to physics client
-		if self.is_render:
-			p.connect(p.GUI)
-		else:
-			p.connect(p.DIRECT)
-
-		p.resetSimulation()
-		p.setGravity(0, 0, -9.8)
-		p.setRealTimeSimulation(True)
+		p.connect(p.GUI) if self.is_render else p.connect(p.DIRECT)
 
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
@@ -59,6 +55,16 @@ class PandaGripperEnv(gym.Env):
 			v = p.getJointInfo(self.arm_id, j)[11]
 			self.velocity_limits.append(np.inf if v == 0 else v)
 
+		# Initialise environment spaces
+		self.action_space = spaces.Box(-1, 1, (self.num_arm_joints,), dtype=np.float32)
+		if self.obs_mode == 'rgb':
+			self.observation_space = spaces.Box(0, 255, shape=(224, 224, 3), dtype=np.uint8)
+		elif self.obs_mode == 'rgbd':
+			self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 4), dtype=np.uint16)
+		elif self.obs_mode == 'rgbds':
+			self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 5), dtype=np.uint16)
+
+		# Initialise env
 		self.seed()
 		self.reset()
 
@@ -68,6 +74,10 @@ class PandaGripperEnv(gym.Env):
 
 	def reset(self):
 		self.steps_taken = 0
+		self.done = False
+
+		p.setGravity(0, 0, -9.8)
+		p.setRealTimeSimulation(True)
 
 		p.setJointMotorControlArray(self.arm_id, list(range(self.num_arm_joints)), controlMode=p.POSITION_CONTROL, targetPositions=[0]*self.num_arm_joints)
 
@@ -78,6 +88,7 @@ class PandaGripperEnv(gym.Env):
 			self.cubes_id.append(p.loadURDF('cube_small.urdf', [np.random.uniform(self.from_tray_pos[0] - 0.2, self.from_tray_pos[0] + 0.2), np.random.uniform(self.from_tray_pos[1] - 0.2, self.from_tray_pos[1] + 0.2), 2], cubeOrientation))
 
 		time.sleep(1)
+		p.setRealTimeSimulation(False)
 
 		img = self._get_camera_img()
 
@@ -97,14 +108,27 @@ class PandaGripperEnv(gym.Env):
 			farVal=100
 		)
 
-		width, height, rgb_img, depth_img, seg_img = p.getCameraImage(
+		width, height, rgba_img, depth_img, seg_img = p.getCameraImage(
 			width=224,
 			height=224,
 			viewMatrix=view_matrix,
 			projectionMatrix=projection_matrix
 		)
 
-		return rgb_img, depth_img, seg_img
+		# Remove alpha channel
+		rgb_img = rgba_img[:,:,:3]
+
+		if self.obs_mode == 'rgb':
+			obs = rgb_img
+		elif self.obs_mod == 'rgbd':
+			obs = np.dstack((rgb_img, depth_img))
+		elif self.obs_mod == 'rgbds':
+			obs = np.dstack((rgb_img, depth_img, seg_img))
+		else:
+			print("bad input")
+			obs = rgb_img
+
+		return obs
 
 	def render(self, mode='human'):
 		if mode == 'human':
@@ -118,7 +142,7 @@ class PandaGripperEnv(gym.Env):
 		action = np.clip(action, -1, 1).astype(np.float32)
 		action = self._map_linear(action)
 
-		rew, done = self._compute_reward(action)
+		rew, self.done = self._compute_reward(action)
 
 		# execute action in the next few lines
 		rel_action = (action.T - self.joint_states).T
@@ -140,19 +164,9 @@ class PandaGripperEnv(gym.Env):
 		for j in range(self.num_arm_joints):
 			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
 
-		rgb_img, depth_img, seg_img = self._get_camera_img()
+		obs = self._get_camera_img()
 
-		if camera_mode == 'rgb':
-			obs = [rgb_img]
-		elif camera_mode == 'rgbd':
-			obs = [rgb_img, depth_img]
-		elif camera_mode == 'all':
-			obs = [rgb_img, depth_img, seg_img]
-		else:
-			print("bad input")
-			obs = [rgb_img]
-
-		return obs, rew, done
+		return obs, rew, self.done
 
 	def _compute_reward(self, action):
 		done = 0
@@ -171,7 +185,7 @@ class PandaGripperEnv(gym.Env):
 		# reward = number of cubes outside from tray + number of cubes in to tray
 		reward = self.num_of_cubes - len(overlapping_cubes_with_from_tray) + len(overlapping_cubes_with_to_tray)
 
-		if reward == 20 or self.steps_taken >= self.max_steps:
+		if reward == 20 or self.steps_taken >= self.max_timesteps:
 			done = 1
 			# TODO: deduct large reard if max steps exceeded
 
@@ -220,4 +234,4 @@ env = PandaGripperEnv(render=True)
 for i in range(100):
 	act = np.random.uniform(-1, 1, 12)
 	obs, rew, done = env.step(act)
-	print(len(obs), rew, done)
+	print(obs.shape, rew, done)
