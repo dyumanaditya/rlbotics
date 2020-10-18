@@ -13,8 +13,9 @@ class PandaDrillerEnv(gym.Env):
 	metadata = {'render.modes': ['human', 'rgb', 'rgbd', 'rgbds'],
 				'video.frames_per_second': 50}
 
-	def __init__(self, render=False, obs_mode='rgb'):
+	def __init__(self, render=False, obs_mode='rgb', end_effector_cam=False):
 		self.path = os.path.abspath(os.path.dirname(__file__))
+		self.end_effector_cam = end_effector_cam
 		self.obs_mode = obs_mode
 		self.max_timesteps = 1000
 		self.timestep = 0
@@ -65,7 +66,7 @@ class PandaDrillerEnv(gym.Env):
 
 	def reset(self):
 		self.done = False
-		# p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 		# Reset joint states
 		for j in range(self.num_arm_joints):
@@ -74,18 +75,10 @@ class PandaDrillerEnv(gym.Env):
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
 
-		# Temp!!!
-		# self._generate_plane()
-		# a = p.multiplyTransforms([-0.24, 0, 1.69], self.drill_orientation, [0, 0, 1.4], p.getQuaternionFromEuler([0,0,0]))
-		# print(a[0])
-		# print(p.getEulerFromQuaternion(a[1]))
-		# print()
-		# time.sleep(1000)
-
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
 		self._generate_plane()
-		#p.setRealTimeSimulation(0)
+		p.setRealTimeSimulation(0)
 		p.setGravity(0, 0, -9.8)
 
 	def _grab_drill(self):
@@ -110,10 +103,10 @@ class PandaDrillerEnv(gym.Env):
 		# max = [0.2, -0.2, 0]
 
 		plane_orientation = [0, 0, 0]
-		#plane_orientation[0] = self.np_random.uniform(0, np.pi/4)
-		#plane_orientation[1] = self.np_random.uniform(3*np.pi/4, np.pi)
-		#plane_orientation[2] = self.np_random.uniform(0, np.pi/2)
-		#plane_orientation = p.getQuaternionFromEuler(plane_orientation)
+		plane_orientation[0] = self.np_random.uniform(0, np.pi/4)
+		plane_orientation[1] = self.np_random.uniform(3*np.pi/4, np.pi)
+		plane_orientation[2] = self.np_random.uniform(0, np.pi/2)
+		plane_orientation = p.getQuaternionFromEuler(plane_orientation)
 		plane_scale = [self.np_random.uniform(1, 1.4), self.np_random.uniform(1, 1.4), 1]
 		hole_position = [self.np_random.uniform(-0.2, 0.2), self.np_random.uniform(-0.2, 0.2), 0]
 
@@ -155,49 +148,50 @@ class PandaDrillerEnv(gym.Env):
 			baseOrientation=plane_orientation
 		)
 
-	def _get_camera_img(self, end_effector_cam=True):
-		view_matrix1 = p.computeViewMatrix(
-			cameraEyePosition=[0, 0, 2.5],
-			cameraTargetPosition=[0, 0, 0],
-			cameraUpVector=[1, 0, 0]
-		)
+	def _get_camera_img(self):
+		if not self.end_effector_cam:
+			view_matrix1 = p.computeViewMatrix(
+				cameraEyePosition=[0, 0, 2.5],
+				cameraTargetPosition=[0, 0, 0],
+				cameraUpVector=[1, 0, 0]
+			)
 
-		view_matrix2 = p.computeViewMatrix(
-			cameraEyePosition=[-0.2, 1.5, 1.3],
-			cameraTargetPosition=[-0.2, 0, 1.4],
-			cameraUpVector=[0, 1, 0]
-		)
+			view_matrix2 = p.computeViewMatrix(
+				cameraEyePosition=[-0.2, 1.5, 1.3],
+				cameraTargetPosition=[-0.2, 0, 1.4],
+				cameraUpVector=[0, 1, 0]
+			)
 
-		projection_matrix1 = p.computeProjectionMatrixFOV(
-			fov=30,
-			aspect=1.0,
-			nearVal=0.01,
-			farVal=2
-		)
+			projection_matrix1 = p.computeProjectionMatrixFOV(
+				fov=30,
+				aspect=1.0,
+				nearVal=0.01,
+				farVal=2
+			)
 
-		projection_matrix2 = p.computeProjectionMatrixFOV(
-			fov=40,
-			aspect=1.0,
-			nearVal=0.01,
-			farVal=2
-		)
+			projection_matrix2 = p.computeProjectionMatrixFOV(
+				fov=40,
+				aspect=1.0,
+				nearVal=0.01,
+				farVal=2
+			)
 
-		_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
-			width=224,
-			height=224,
-			viewMatrix=view_matrix1,
-			projectionMatrix=projection_matrix1
-		)
+			_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
+				width=224,
+				height=224,
+				viewMatrix=view_matrix1,
+				projectionMatrix=projection_matrix1
+			)
 
-		_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
-			width=224,
-			height=224,
-			viewMatrix=view_matrix2,
-			projectionMatrix=projection_matrix2
-		)
+			_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
+				width=224,
+				height=224,
+				viewMatrix=view_matrix2,
+				projectionMatrix=projection_matrix2
+			)
+			return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
-		if end_effector_cam:
-			# TODO: Find out the camera modes and return values accordingly
+		if self.end_effector_cam:
 			projection_matrix = p.computeProjectionMatrixFOV(
 				fov=60,
 				aspect=1.0,
@@ -229,32 +223,48 @@ class PandaDrillerEnv(gym.Env):
 				viewMatrix=view_matrix,
 				projectionMatrix=projection_matrix
 			)
-
-		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
+			return [rgb_img, depth_img, seg_img]
 
 	def render(self, mode='human'):
 		if mode == 'human':
 			pass
 
-		elif mode == 'rgb':
+		elif mode == 'rgb' and not self.end_effector_cam:
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			return img1[:, :, :3], img2[:, :, :3]
 
-		elif mode == 'rgbd':
+		elif mode == 'rgb' and self.end_effector_cam:
+			img = self._get_camera_img()
+			img = img[0]
+			return img[:, :, :3]
+
+		elif mode == 'rgbd' and not self.end_effector_cam:
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			dep1, dep2 = img[1][0], img[1][1]
 			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
 
-		elif mode == 'rgbds':
+		elif mode == 'rgbd' and self.end_effector_cam:
+			img = self._get_camera_img()
+			img, dep = img[0], img[1]
+			img = img[:, :, :3]
+			return np.dstack((img, dep))
+
+		elif mode == 'rgbds' and not self.end_effector_cam:
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			dep1, dep2 = img[1][0], img[1][1]
 			seg1, seg2 = img[2][0], img[2][1]
 			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
+
+		elif mode == 'rgbds' and self.end_effector_cam:
+			img = self._get_camera_img()
+			img, dep, seg = img[0], img[1], img[2]
+			img = img[:, :, :3]
+			return np.dstack((img, dep, seg))
 
 	def step(self, action):
 		self.timestep += 1
@@ -347,5 +357,5 @@ while 1:
 	# print(rew, done)
 	# if done:
 	# 	env.reset()
-	env._get_camera_img()
+	# env._get_camera_img()
 
