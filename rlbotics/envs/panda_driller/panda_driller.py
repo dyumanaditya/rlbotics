@@ -335,15 +335,10 @@ class PandaDrillerEnv(gym.Env):
 				self.timestep = 0
 				self.done = True
 
-			return rew
+		return rew
 
 	def close(self):
 		p.disconnect()
-
-
-
-
-
 
 
 
