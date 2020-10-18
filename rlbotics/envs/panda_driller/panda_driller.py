@@ -156,80 +156,80 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 	def _get_camera_img(self, end_effector_cam=True):
-		# view_matrix1 = p.computeViewMatrix(
-		# 	cameraEyePosition=[0, 0, 2.5],
-		# 	cameraTargetPosition=[0, 0, 0],
-		# 	cameraUpVector=[1, 0, 0]
-		# )
-		#
-		# view_matrix2 = p.computeViewMatrix(
-		# 	cameraEyePosition=[-0.2, 1.5, 1.3],
-		# 	cameraTargetPosition=[-0.2, 0, 1.4],
-		# 	cameraUpVector=[0, 1, 0]
-		# )
-		#
-		# projection_matrix1 = p.computeProjectionMatrixFOV(
-		# 	fov=30,
-		# 	aspect=1.0,
-		# 	nearVal=0.01,
-		# 	farVal=2
-		# )
-		#
-		# projection_matrix2 = p.computeProjectionMatrixFOV(
-		# 	fov=40,
-		# 	aspect=1.0,
-		# 	nearVal=0.01,
-		# 	farVal=2
-		# )
-		#
-		# _, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
-		# 	width=224,
-		# 	height=224,
-		# 	viewMatrix=view_matrix1,
-		# 	projectionMatrix=projection_matrix1
-		# )
-		#
-		# _, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
-		# 	width=224,
-		# 	height=224,
-		# 	viewMatrix=view_matrix2,
-		# 	projectionMatrix=projection_matrix2
-		# )
+		view_matrix1 = p.computeViewMatrix(
+			cameraEyePosition=[0, 0, 2.5],
+			cameraTargetPosition=[0, 0, 0],
+			cameraUpVector=[1, 0, 0]
+		)
+
+		view_matrix2 = p.computeViewMatrix(
+			cameraEyePosition=[-0.2, 1.5, 1.3],
+			cameraTargetPosition=[-0.2, 0, 1.4],
+			cameraUpVector=[0, 1, 0]
+		)
+
+		projection_matrix1 = p.computeProjectionMatrixFOV(
+			fov=30,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=2
+		)
+
+		projection_matrix2 = p.computeProjectionMatrixFOV(
+			fov=40,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=2
+		)
+
+		_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
+			width=224,
+			height=224,
+			viewMatrix=view_matrix1,
+			projectionMatrix=projection_matrix1
+		)
+
+		_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
+			width=224,
+			height=224,
+			viewMatrix=view_matrix2,
+			projectionMatrix=projection_matrix2
+		)
 
 		if end_effector_cam:
-			# pos, ori, _, _, _, _ = p.getLinkState(self.arm_id, 11, computeForwardKinematics=True)
-			# view_matrix = p.computeViewMatrix(
-			# 	cameraEyePosition=[i+0.2 for i in pos],
-			# 	cameraTargetPosition=[0, 0, 0],
-			# 	cameraUpVector=[1, 0, 0]
-			# )
-			# projection_matrix = p.computeProjectionMatrixFOV(
-			# 	fov=60,
-			# 	aspect=1.0,
-			# 	nearVal=0.01,
-			# 	farVal=100
-			# )
-			# _, _, rgb_img, depth_img, seg_img = p.getCameraImage(
-			# 	width=224,
-			# 	height=224,
-			# 	viewMatrix=view_matrix,
-			# 	projectionMatrix=projection_matrix
-			# )
-			fov, aspect, nearplane, farplane = 60, 1.0, 0.01, 100
-			projection_matrix = p.computeProjectionMatrixFOV(fov, aspect, nearplane, farplane)
-			# Center of mass position and orientation (of link-7)
-			com_p, com_o, _, _, _, _ = p.getLinkState(self.arm_id, 11, computeForwardKinematics=True)
-			rot_matrix = p.getMatrixFromQuaternion(com_o)
+			projection_matrix = p.computeProjectionMatrixFOV(
+				fov=60,
+				aspect=1.0,
+				nearVal=0.01,
+				farVal=100
+			)
+			pos, ori, _, _, _, _ = p.getLinkState(self.arm_id, 11, computeForwardKinematics=True)
+			pos = list(pos)
+			pos[2] -= 0.01
+			rot_matrix = p.getMatrixFromQuaternion(ori)
 			rot_matrix = np.array(rot_matrix).reshape(3, 3)
-			# Initial vectors
-			init_camera_vector = (0, 0, 1) # z-axis
-			init_up_vector = (0, 1, 0) # y-axis
+
+			# Initial vectors: z-axis, y-axis
+			init_camera_vector = (0, 0, 1)
+			init_up_vector = (0, 1, 0)
+
 			# Rotated vectors
-			camera_vector = rot_matrix.dot(init_camera_vector)
-			up_vector = rot_matrix.dot(init_up_vector)
-			view_matrix = p.computeViewMatrix(com_p, com_p + 0.1 * camera_vector, up_vector)
-			img = p.getCameraImage(224, 224, view_matrix, projection_matrix)
-		# return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
+			camera_vector = rot_matrix @ init_camera_vector
+			camera_up_vector = rot_matrix @ init_up_vector
+
+			view_matrix = p.computeViewMatrix(
+				cameraEyePosition=pos,
+				cameraTargetPosition=pos + 0.1 * camera_vector,
+				cameraUpVector=camera_up_vector
+			)
+			_, _, rgb_img, depth_img, seg_img = p.getCameraImage(
+				width=224,
+				height=224,
+				viewMatrix=view_matrix,
+				projectionMatrix=projection_matrix
+			)
+
+		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
 	def render(self, mode='human'):
 		if mode == 'human':
