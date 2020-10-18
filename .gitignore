@@ -2,3 +2,4 @@ __pycache__/
 .idea/
 /experiments/
 /tests/videos/
+/rlbotics/envs/panda_gripper/parts/
