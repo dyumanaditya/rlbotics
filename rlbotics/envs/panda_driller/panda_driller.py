@@ -197,6 +197,7 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 		if end_effector_cam:
+			# TODO: Find out the camera modes and return values accordingly
 			projection_matrix = p.computeProjectionMatrixFOV(
 				fov=60,
 				aspect=1.0,
