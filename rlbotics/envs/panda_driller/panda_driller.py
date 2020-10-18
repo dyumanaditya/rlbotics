@@ -40,15 +40,15 @@ class PandaDrillerEnv(gym.Env):
 
 		# Initialise joint info
 		self.joint_states, self.joint_limits, self.velocity_limits = [], [], []
-		self.num_arm_joints = p.getNumJoints(self.arm_id)
-		for j in range(self.num_arm_joints):
+		self.num_joints = p.getNumJoints(self.arm_id)
+		for j in range(self.num_joints):
 			self.joint_states.append(p.getJointState(self.arm_id, j)[0])
 			self.joint_limits.append(p.getJointInfo(self.arm_id, j)[8:10])
 			v = p.getJointInfo(self.arm_id, j)[11]
 			self.velocity_limits.append(np.inf if v == 0 else v)
 
 		# Initialise environment spaces
-		self.action_space = spaces.Box(-1, 1, (self.num_arm_joints,), dtype=np.float32)
+		self.action_space = spaces.Box(-1, 1, (self.num_joints,), dtype=np.float32)
 		if self.obs_mode == 'rgb':
 			self.observation_space = spaces.Box(0, 255, shape=(2, 224, 224, 3), dtype=np.uint8)
 		elif self.obs_mode == 'rgbd':
@@ -69,7 +69,7 @@ class PandaDrillerEnv(gym.Env):
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
 		# Reset joint states
-		for j in range(self.num_arm_joints):
+		for j in range(self.num_joints):
 			p.resetJointState(self.arm_id, j, 0)
 		p.resetBasePositionAndOrientation(self.drill_id, self.drill_base_pos, self.drill_orientation)
 		p.removeBody(self.hole)
@@ -131,8 +131,8 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 		# Random texture for plane
-		tex = self.np_random.randint(0, 20)
-		texture = p.loadTexture(os.path.join(self.path, 'plane', 'textures', str(tex)+'.jpg'))
+		texture_id = self.np_random.randint(0, 20)
+		texture = p.loadTexture(os.path.join(self.path, 'plane', 'textures', str(texture_id) + '.jpg'))
 		p.changeVisualShape(self.plane, -1, textureUniqueId=texture)
 
 		hole_visual = p.createVisualShape(
@@ -272,39 +272,39 @@ class PandaDrillerEnv(gym.Env):
 
 		# Map to appropriate range according to joint joint_limits
 		# And get relative action
-		action = self._map_linear(action)
-		rel_action = (action.T - self.joint_states).T
+		joint_angles = self._map_linear(action)
+		rel_joint_angles = (joint_angles.T - self.joint_states).T
 
 		# Compute max time needed to complete motion
-		TIME = np.max(rel_action.T / self.velocity_limits)
+		TIME = np.max(rel_joint_angles.T / self.velocity_limits)
 		TIME = math.ceil(TIME / (1/240))
 
-		sub_action = rel_action / TIME
-		joint_ind = list(range(self.num_arm_joints))
+		delta_joint_angle = rel_joint_angles / TIME
+		joint_idx = list(range(self.num_joints))
 
-		for step in range(TIME):
-			target_pos = np.squeeze(self.joint_states + sub_action.T * step)
-			p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=target_pos)
+		for t in range(TIME):
+			target_pos = np.squeeze(self.joint_states + delta_joint_angle.T * t)
+			p.setJointMotorControlArray(self.arm_id, joint_idx, p.POSITION_CONTROL, targetPositions=target_pos)
 			p.stepSimulation()
 			time.sleep(1/240)
 
 		# Update joint states
-		for j in range(self.num_arm_joints):
+		for j in range(self.num_joints):
 			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
 
-		reward = self._compute_reward(rel_action)
+		reward = self._compute_reward(rel_joint_angles)
 		new_obs = self.render(mode=self.obs_mode)
 		return new_obs, reward, self.done, {}
 
-	def _map_linear(self, action):
-		for i in range(self.num_arm_joints):
-			val = action[i]
+	def _map_linear(self, joint_angles):
+		for i in range(self.num_joints):
+			val = joint_angles[i]
 			minimum = self.joint_limits[i][0]
 			maximum = self.joint_limits[i][1]
-			action[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
-		return action
+			joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+		return joint_angles
 
-	def _compute_reward(self, rel_action, sparse=False):
+	def _compute_reward(self, rel_joint_angles, sparse=False):
 		rew = 0
 
 		if sparse:
@@ -325,8 +325,8 @@ class PandaDrillerEnv(gym.Env):
 				rew -= 200
 
 			# Compute electricity cost
-			scale_factor = 10
-			electricity_cost = np.sum(np.abs(rel_action) * scale_factor)
+			electricity_scale = 10
+			electricity_cost = np.sum(np.abs(rel_joint_angles) * electricity_scale)
 
 			# Compute final reward
 			rew = rew - electricity_cost
