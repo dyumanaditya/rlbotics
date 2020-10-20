@@ -13,9 +13,8 @@ class PandaDrillerEnv(gym.Env):
 	metadata = {'render.modes': ['human', 'rgb', 'rgbd', 'rgbds'],
 				'video.frames_per_second': 50}
 
-	def __init__(self, render=False, obs_mode='rgb', end_effector_cam=False):
+	def __init__(self, render=False, obs_mode='rgb'):
 		self.path = os.path.abspath(os.path.dirname(__file__))
-		self.end_effector_cam = end_effector_cam
 		self.obs_mode = obs_mode
 		self.max_timesteps = 1000
 		self.timestep = 0
@@ -65,6 +64,7 @@ class PandaDrillerEnv(gym.Env):
 		return [seed]
 
 	def reset(self):
+		p.setRealTimeSimulation(1)
 		self.done = False
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
@@ -72,9 +72,12 @@ class PandaDrillerEnv(gym.Env):
 		for j in range(self.num_joints):
 			p.resetJointState(self.arm_id, j, 0)
 		p.resetBasePositionAndOrientation(self.drill_id, self.drill_base_pos, self.drill_orientation)
+		time.sleep(1)
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
+		time.sleep(1)
 
+		p.setGravity(0, 0, 0)
 		p.setRealTimeSimulation(1)
 		self._grab_drill()
 		self._generate_plane()
@@ -149,122 +152,70 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 	def _get_camera_img(self):
-		if not self.end_effector_cam:
-			view_matrix1 = p.computeViewMatrix(
-				cameraEyePosition=[0, 0, 2.5],
-				cameraTargetPosition=[0, 0, 0],
-				cameraUpVector=[1, 0, 0]
-			)
+		view_matrix1 = p.computeViewMatrix(
+			cameraEyePosition=[0, 0, 2.5],
+			cameraTargetPosition=[0, 0, 0],
+			cameraUpVector=[1, 0, 0]
+		)
 
-			view_matrix2 = p.computeViewMatrix(
-				cameraEyePosition=[-0.2, 1.5, 1.3],
-				cameraTargetPosition=[-0.2, 0, 1.4],
-				cameraUpVector=[0, 1, 0]
-			)
+		view_matrix2 = p.computeViewMatrix(
+			cameraEyePosition=[-0.2, 1.5, 1.3],
+			cameraTargetPosition=[-0.2, 0, 1.4],
+			cameraUpVector=[0, 1, 0]
+		)
 
-			projection_matrix1 = p.computeProjectionMatrixFOV(
-				fov=30,
-				aspect=1.0,
-				nearVal=0.01,
-				farVal=2
-			)
+		projection_matrix1 = p.computeProjectionMatrixFOV(
+			fov=30,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=2
+		)
 
-			projection_matrix2 = p.computeProjectionMatrixFOV(
-				fov=40,
-				aspect=1.0,
-				nearVal=0.01,
-				farVal=2
-			)
+		projection_matrix2 = p.computeProjectionMatrixFOV(
+			fov=40,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=2
+		)
 
-			_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
-				width=224,
-				height=224,
-				viewMatrix=view_matrix1,
-				projectionMatrix=projection_matrix1
-			)
+		_, _, rgb_img1, depth_img1, seg_img1 = p.getCameraImage(
+			width=224,
+			height=224,
+			viewMatrix=view_matrix1,
+			projectionMatrix=projection_matrix1
+		)
 
-			_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
-				width=224,
-				height=224,
-				viewMatrix=view_matrix2,
-				projectionMatrix=projection_matrix2
-			)
-			return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
-
-		if self.end_effector_cam:
-			projection_matrix = p.computeProjectionMatrixFOV(
-				fov=60,
-				aspect=1.0,
-				nearVal=0.01,
-				farVal=100
-			)
-			pos, ori, _, _, _, _ = p.getLinkState(self.arm_id, 11, computeForwardKinematics=True)
-			pos = list(pos)
-			pos[2] -= 0.01
-			rot_matrix = p.getMatrixFromQuaternion(ori)
-			rot_matrix = np.array(rot_matrix).reshape(3, 3)
-
-			# Initial vectors: z-axis, y-axis
-			init_camera_vector = (0, 0, 1)
-			init_up_vector = (0, 1, 0)
-
-			# Rotated vectors
-			camera_vector = rot_matrix @ init_camera_vector
-			camera_up_vector = rot_matrix @ init_up_vector
-
-			view_matrix = p.computeViewMatrix(
-				cameraEyePosition=pos,
-				cameraTargetPosition=pos + 0.1 * camera_vector,
-				cameraUpVector=camera_up_vector
-			)
-			_, _, rgb_img, depth_img, seg_img = p.getCameraImage(
-				width=224,
-				height=224,
-				viewMatrix=view_matrix,
-				projectionMatrix=projection_matrix
-			)
-			return [rgb_img, depth_img, seg_img]
+		_, _, rgb_img2, depth_img2, seg_img2 = p.getCameraImage(
+			width=224,
+			height=224,
+			viewMatrix=view_matrix2,
+			projectionMatrix=projection_matrix2
+		)
+		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
 	def render(self, mode='human'):
 		if mode == 'human':
 			pass
 
-		elif mode == 'rgb' and not self.end_effector_cam:
+		elif mode == 'rgb':
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			return img1[:, :, :3], img2[:, :, :3]
 
-		elif mode == 'rgb' and self.end_effector_cam:
-			img = self._get_camera_img()
-			img = img[0]
-			return img[:, :, :3]
-
-		elif mode == 'rgbd' and not self.end_effector_cam:
+		elif mode == 'rgbd':
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			dep1, dep2 = img[1][0], img[1][1]
 			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
 
-		elif mode == 'rgbd' and self.end_effector_cam:
-			img = self._get_camera_img()
-			img, dep = img[0], img[1]
-			img = img[:, :, :3]
-			return np.dstack((img, dep))
-
-		elif mode == 'rgbds' and not self.end_effector_cam:
+		elif mode == 'rgbds':
 			img = self._get_camera_img()
 			img1, img2 = img[0][0], img[0][1]
 			dep1, dep2 = img[1][0], img[1][1]
 			seg1, seg2 = img[2][0], img[2][1]
 			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
-
-		elif mode == 'rgbds' and self.end_effector_cam:
-			img = self._get_camera_img()
-			img, dep, seg = img[0], img[1], img[2]
-			img = img[:, :, :3]
-			return np.dstack((img, dep, seg))
 
 	def step(self, action):
 		self.timestep += 1
@@ -276,23 +227,26 @@ class PandaDrillerEnv(gym.Env):
 		rel_joint_angles = (joint_angles.T - self.joint_states).T
 
 		# Compute max time needed to complete motion
-		TIME = np.max(rel_joint_angles.T / self.velocity_limits)
-		TIME = math.ceil(TIME / (1/240))
+		max_time = np.max(rel_joint_angles.T / self.velocity_limits)
+		max_time = math.ceil(max_time / (1 / 240))
 
-		delta_joint_angle = rel_joint_angles / TIME
+		delta_joint_angles = rel_joint_angles / max_time
 		joint_idx = list(range(self.num_joints))
 
-		for t in range(TIME):
-			target_pos = np.squeeze(self.joint_states + delta_joint_angle.T * t)
+		reward = 0
+		for t in range(max_time):
+			if self.done:
+				break
+			target_pos = np.squeeze(self.joint_states + delta_joint_angles.T * t)
 			p.setJointMotorControlArray(self.arm_id, joint_idx, p.POSITION_CONTROL, targetPositions=target_pos)
 			p.stepSimulation()
+			reward += self._compute_reward(delta_joint_angles)
 			time.sleep(1/240)
 
 		# Update joint states
 		for j in range(self.num_joints):
 			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
 
-		reward = self._compute_reward(rel_joint_angles)
 		new_obs = self.render(mode=self.obs_mode)
 		return new_obs, reward, self.done, {}
 
@@ -304,8 +258,8 @@ class PandaDrillerEnv(gym.Env):
 			joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
 		return joint_angles
 
-	def _compute_reward(self, rel_joint_angles, sparse=False):
-		rew = 0
+	def _compute_reward(self, delta_joint_angles, sparse=False):
+		reward = 0
 
 		if sparse:
 			pass
@@ -313,29 +267,29 @@ class PandaDrillerEnv(gym.Env):
 			# Check if drill has dropped
 			if len(p.getContactPoints(self.arm_id, self.drill_id)) == 0:
 				self.done = True
-				rew -= 300
+				reward -= 300
 			# Check if drill is touching the table
 			elif len(p.getContactPoints(self.drill_id, self.table_id)) != 0 and not self.done:
-				rew -= 200
+				reward -= 200
 			# Check if Panda is touching the table
 			if len(p.getContactPoints(self.arm_id, self.table_id)) != 0:
-				rew -= 200
+				reward -= 200
 			# Check if Panda is touching the plane
 			if len(p.getContactPoints(self.arm_id, self.plane)) != 0:
-				rew -= 200
+				reward -= 200
 
 			# Compute electricity cost
 			electricity_scale = 10
-			electricity_cost = np.sum(np.abs(rel_joint_angles) * electricity_scale)
+			electricity_cost = np.sum(np.abs(delta_joint_angles) * electricity_scale)
 
 			# Compute final reward
-			rew = rew - electricity_cost
+			reward = reward - electricity_cost
 
 			if self.timestep == self.max_timesteps:
 				self.timestep = 0
 				self.done = True
 
-		return rew
+		return reward
 
 	def close(self):
 		p.disconnect()
@@ -343,14 +297,13 @@ class PandaDrillerEnv(gym.Env):
 
 
 env = PandaDrillerEnv(render=True)
-#time.sleep(10)
 while 1:
 	# time.sleep(0.1)
 	#
 	act = env.action_space.sample()
-	# new_obs, rew, done, info = env.step(act)
-	# print(rew, done)
-	# if done:
-	# 	env.reset()
+	new_obs, rew, done, info = env.step(act)
+	print(rew, done)
+	if done:
+		env.reset()
 	# env._get_camera_img()
 
