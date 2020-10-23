@@ -14,15 +14,15 @@ class PandaGripperEnv(gym.Env):
 	metadata = {'render.modes': ['human', 'rgb_array'],
 				'video.frames_per_second': 60}
 
-	def __init__(self, render, first_person_view=True, num_of_parts=5, obs_mode='rgb'):
+	def __init__(self, render=False, num_of_parts=5, obs_mode='rgb'):
 		self.path = os.path.abspath(os.path.dirname(__file__))
-		self.num_of_parts = num_of_parts
-		self.first_person_view = first_person_view
-		self.movement_penalty_constant = 10
-		self.steps_taken = 0
 		self.obs_mode = obs_mode
 		self.max_timesteps = 5
+		self.timestep = 0
 		self.done = False
+
+		self.num_of_parts = num_of_parts
+		self.movement_penalty_constant = 10
 
 		# Connect to physics client
 		p.connect(p.GUI) if render else p.connect(p.DIRECT)
@@ -36,33 +36,33 @@ class PandaGripperEnv(gym.Env):
 		self.arm_id = p.loadURDF('franka_panda/panda.urdf', [0, 0, 0.94], useFixedBase=True)
 		self.table_id = p.loadURDF('table/table.urdf', [0.5, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
 
-		self.from_tray_pos = [0.5, 0.4, 0.94]
-		self.to_tray_pos = [0.5, -0.4, 0.94]
+		self.tray_1_pos = [0.5, 0.4, 0.94]
+		self.tray_2_pos = [0.5, -0.4, 0.94]
 
-		self.from_tray_id = p.loadURDF('tray/traybox.urdf', self.from_tray_pos)
-		self.to_tray_id = p.loadURDF('tray/traybox.urdf', self.to_tray_pos)
+		self.tray_1_id = p.loadURDF('tray/traybox.urdf', self.tray_1_pos)
+		self.tray_2_id = p.loadURDF('tray/traybox.urdf', self.tray_2_pos)
 
 		# bounding box of from tray and to tray
-		self.from_tray_min_AABB, self.from_tray_max_AABB = p.getAABB(self.from_tray_id)
-		self.to_tray_min_AABB, self.to_tray_max_AABB = p.getAABB(self.to_tray_id)
+		self.tray_1_min_AABB, self.from_tray_max_AABB = p.getAABB(self.tray_1_id)
+		self.tray_2_min_AABB, self.to_tray_max_AABB = p.getAABB(self.tray_2_id)
 
 		self.parts_id = []
-		self.other_id = [self.table_id, self.arm_id, self.from_tray_id, self.to_tray_id]
+		self.other_id = [self.table_id, self.arm_id, self.tray_1_id, self.tray_2_id]
 
 		# load data for parts (mass, scale)
 		self.parts_data = pd.read_csv(os.path.join(self.path, 'parts', 'parts_data.csv'))
 
 		# Initialise joint info
 		self.joint_states, self.joint_limits, self.velocity_limits = [], [], []
-		self.num_arm_joints = p.getNumJoints(self.arm_id)
-		for j in range(self.num_arm_joints):
+		self.num_joints = p.getNumJoints(self.arm_id)
+		for j in range(self.num_joints):
 			self.joint_states.append(p.getJointState(self.arm_id, j)[0])
 			self.joint_limits.append(p.getJointInfo(self.arm_id, j)[8:10])
 			v = p.getJointInfo(self.arm_id, j)[11]
 			self.velocity_limits.append(np.inf if v == 0 else v)
 
 		# Initialise environment spaces
-		self.action_space = spaces.Box(-1, 1, (self.num_arm_joints,), dtype=np.float32)
+		self.action_space = spaces.Box(-1, 1, (self.num_joints,), dtype=np.float32)
 		if self.obs_mode == 'rgb':
 			self.observation_space = spaces.Box(0, 255, shape=(224, 224, 3), dtype=np.uint8)
 		elif self.obs_mode == 'rgbd':
@@ -72,36 +72,111 @@ class PandaGripperEnv(gym.Env):
 
 		# Initialise env
 		self.seed()
-		self.reset()
+		#self.reset()
 
 	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
 		return [seed]
 
 	def reset(self):
-		self.steps_taken = 0
+		self.timestep = 0
 		self.done = False
+
+		# remove old parts
+		for part in self.parts_id:
+			p.removeBody(part)
+
+		self.parts_id = []
 
 		p.setGravity(0, 0, -9.8)
 		p.setRealTimeSimulation(True)
 
-		p.setJointMotorControlArray(self.arm_id, list(range(self.num_arm_joints)), controlMode=p.POSITION_CONTROL, targetPositions=[0]*self.num_arm_joints)
+		p.setJointMotorControlArray(self.arm_id, list(range(self.num_joints)), controlMode=p.POSITION_CONTROL, targetPositions=[0]*self.num_joints)
 
-		# time.sleep(20)
+		# add the random objects in tray 1
 		for i in range(self.num_of_parts):
 			self._add_random_object()
 			time.sleep(1)
 
+		# add cubes in tray 1
 		# for i in range(self.num_of_parts):
 		# 	cubeOrientation = p.getQuaternionFromEuler([np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi)])
-		# 	self.parts_id.append(p.loadURDF('cube_small.urdf', [np.random.uniform(self.from_tray_pos[0] - 0.2, self.from_tray_pos[0] + 0.2), np.random.uniform(self.from_tray_pos[1] - 0.2, self.from_tray_pos[1] + 0.2), 2], cubeOrientation))
+		# 	self.parts_id.append(p.loadURDF('cube_small.urdf', [np.random.uniform(self.tray_1_pos[0] - 0.2, self.tray_1_pos[0] + 0.2), np.random.uniform(self.tray_1_pos[1] - 0.2, self.tray_1_pos[1] + 0.2), 2], cubeOrientation))
 
-		time.sleep(1)
 		p.setRealTimeSimulation(False)
 
-		img = self._get_camera_img()
+		new_obs = self.render(mode=self.obs_mode)
 
-		return img
+		return new_obs
+
+	def step(self, action, camera_mode='rgb'):
+		self.timestep += 1
+		action = np.clip(action, -1, 1).astype(np.float32)
+
+		# Map to appropriate range according to joint joint_limits
+		# And get relative action
+		joint_angles = self._map_linear(action)
+
+		rew = self._compute_reward(joint_angles)
+
+		# execute action in the next few lines
+		rel_joint_angles = (joint_angles.T - self.joint_states).T
+
+		# Compute max time needed to complete motion
+		max_time = np.max(rel_joint_angles.T / self.velocity_limits)
+		max_time = math.ceil(max_time / (1 / 240))
+
+		delta_joint_angles = rel_joint_angles / max_time
+		joint_idx = list(range(self.num_joints))
+
+		for t in range(max_time):
+			target_pos = np.squeeze(self.joint_states + delta_joint_angles.T * t)
+			p.setJointMotorControlArray(self.arm_id, joint_idx, p.POSITION_CONTROL, targetPositions=target_pos)
+			p.stepSimulation()
+			time.sleep(1/240)
+
+		# Update joint states
+		for j in range(self.num_joints):
+			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
+
+		new_obs = self.render(mode=self.obs_mode)
+
+		return new_obs, rew, self.done
+
+	def render(self, mode='human'):
+		rgba_img, depth_img, seg_img = self._get_camera_img()
+
+		# remove alpha channel from rgba image
+		rgb_img = rgba_img[:,:,:3]
+
+		if mode == 'human':
+			pass
+
+		elif mode == 'rgb':
+			obs = rgb_img
+
+		elif mode == 'rgbd':
+			obs = np.dstack((rgb_img, depth_img))
+
+		elif mode == 'rgbds':
+			obs = np.dstack((rgb_img, depth_img, seg_img))
+
+		else:
+			print("bad input")
+			obs = rgb_img
+
+		return obs
+
+	def close(self):
+		p.disconnect()
+
+	def _map_linear(self, joint_angles):
+		for i in range(self.num_joints):
+			val = joint_angles[i]
+			minimum = self.joint_limits[i][0]
+			maximum = self.joint_limits[i][1]
+			joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+		return joint_angles
 
 	def _add_random_object(self):
 		object_num = np.random.randint(8)
@@ -125,7 +200,7 @@ class PandaGripperEnv(gym.Env):
 		)
 
 		self.parts_id.append(p.createMultiBody(
-			basePosition=[np.random.uniform(self.from_tray_pos[0] - 0.1, self.from_tray_pos[0] + 0.1), np.random.uniform(self.from_tray_pos[1] - 0.1, self.from_tray_pos[1] + 0.1), 1.5],
+			basePosition=[np.random.uniform(self.tray_1_pos[0] - 0.1, self.tray_1_pos[0] + 0.1), np.random.uniform(self.tray_1_pos[1] - 0.1, self.tray_1_pos[1] + 0.1), 1.5],
 			baseVisualShapeIndex=object_visual,
 			baseCollisionShapeIndex=object_collision,
 			baseOrientation=object_orientation,
@@ -133,179 +208,75 @@ class PandaGripperEnv(gym.Env):
 		))
 
 	def _get_camera_img(self):
-		if self.first_person_view:
-			# Center of mass position and orientation (of link-7)
-			pos, ori, _, _, _, _ = p.getLinkState(self.arm_id, 11, computeForwardKinematics=True)
+		view_matrix = p.computeViewMatrix(
+			cameraEyePosition=[0.5, 0, 2.5],
+			cameraTargetPosition=[0.5, 0, 0.94],
+			cameraUpVector=[1, 0, 0]
+		)
 
-			rot_matrix = p.getMatrixFromQuaternion(ori)
-			rot_matrix = np.array(rot_matrix).reshape(3, 3)
+		projection_matrix = p.computeProjectionMatrixFOV(
+			fov=60,
+			aspect=1.0,
+			nearVal=0.01,
+			farVal=100
+		)
 
-			# Initial vectors: z-axis, y-axis
-			init_camera_vector = (0, 0, 1)
-			init_camera_up_vector = (0, 1, 0)
+		_, _, rgba_img, depth_img, seg_img = p.getCameraImage(
+			width=224,
+			height=224,
+			viewMatrix=view_matrix,
+			projectionMatrix=projection_matrix
+		)
 
-			# Rotated vectors
-			camera_vector = rot_matrix.dot(init_camera_vector)
-			camera_up_vector = rot_matrix.dot(init_camera_up_vector)
-
-			projection_matrix = p.computeProjectionMatrixFOV(
-				fov=60,
-				aspect=1.0,
-				nearVal=0.01,
-				farVal=100
-			)
-
-			view_matrix = p.computeViewMatrix(
-				cameraEyePosition=pos,
-				cameraTargetPosition=pos + 0.1 * camera_vector,
-				cameraUpVector=camera_up_vector
-			)
-
-			_, _, rgba_img, depth_img, seg_img = p.getCameraImage(
-				width=224,
-				height=224,
-				viewMatrix=view_matrix,
-				projectionMatrix=projection_matrix
-			)
-
-		else:
-			view_matrix = p.computeViewMatrix(
-				cameraEyePosition=[0.5, 0, 2.5],
-				cameraTargetPosition=[0.5, 0, 0.94],
-				cameraUpVector=[1, 0, 0]
-			)
-
-			projection_matrix = p.computeProjectionMatrixFOV(
-				fov=60,
-				aspect=1.0,
-				nearVal=0.01,
-				farVal=100
-			)
-
-			_, _, rgba_img, depth_img, seg_img = p.getCameraImage(
-				width=224,
-				height=224,
-				viewMatrix=view_matrix,
-				projectionMatrix=projection_matrix
-			)
-
-		# Remove alpha channel
-		rgb_img = rgba_img[:,:,:3]
-
-		if self.obs_mode == 'rgb':
-			obs = rgb_img
-		elif self.obs_mod == 'rgbd':
-			obs = np.dstack((rgb_img, depth_img))
-		elif self.obs_mod == 'rgbds':
-			obs = np.dstack((rgb_img, depth_img, seg_img))
-		else:
-			print("bad input")
-			obs = rgb_img
-
-		return obs
-
-	def render(self, mode='human'):
-		if mode == 'human':
-			self.is_render = True
-		elif mode == 'rgb_array':
-			pass
-
-	def step(self, action, camera_mode='rgb'):
-		self.steps_taken += 1
-
-		action = np.clip(action, -1, 1).astype(np.float32)
-		action = self._map_linear(action)
-
-		rew, self.done = self._compute_reward(action)
-
-		# execute action in the next few lines
-		rel_action = (action.T - self.joint_states).T
-
-		# Compute max time needed to complete motion
-		TIME = np.max(rel_action.T / self.velocity_limits)
-		TIME = math.ceil(TIME / (1/240))
-
-		sub_action = rel_action / TIME
-		joint_ind = list(range(self.num_arm_joints))
-
-		for step in range(TIME):
-			target_pos = np.squeeze(self.joint_states + sub_action.T * step)
-			p.setJointMotorControlArray(self.arm_id, joint_ind, p.POSITION_CONTROL, targetPositions=target_pos)
-			p.stepSimulation()
-			time.sleep(1/240)
-
-		# Update joint states
-		for j in range(self.num_arm_joints):
-			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
-
-		obs = self._get_camera_img()
-
-		return obs, rew, self.done
+		return rgba_img, depth_img, seg_img
 
 	def _compute_reward(self, action):
-		done = 0
+		# idxs of all overlapping objects with from tray and to tray including arm etc
+		all_overlapping_objects_with_tray_1 = np.array(p.getOverlappingObjects(self.tray_1_min_AABB, self.from_tray_max_AABB))[:, 0]
+		all_overlapping_objects_with_tray_2 = np.array(p.getOverlappingObjects(self.tray_2_min_AABB, self.to_tray_max_AABB))[:, 0]
 
-		# ids of overlapping objects with from tray and to tray
-		overlapping_objects_with_from_tray = np.array(p.getOverlappingObjects(self.from_tray_min_AABB, self.from_tray_max_AABB))[:, 0]
-		overlapping_objects_with_to_tray = np.array(p.getOverlappingObjects(self.to_tray_min_AABB, self.to_tray_max_AABB))[:, 0]
+		# idxs of overlapping object with from tray and to tray
+		overlapping_objects_with_tray_1 = [id for id in all_overlapping_objects_with_tray_1 if id not in self.other_id]
+		overlapping_objects_with_tray_2 = [id for id in all_overlapping_objects_with_tray_2 if id not in self.other_id]
 
-		# ids of overlapping cubes with from tray and to tray
-		overlapping_cubes_with_from_tray = [id for id in overlapping_objects_with_from_tray if id not in self.other_id]
-		overlapping_cubes_with_to_tray = [id for id in overlapping_objects_with_to_tray if id not in self.other_id]
-
-		# print("num of cubes in from tray is ", len(overlapping_cubes_with_from_tray))
-		# print("num of cubes in to tray is ", len(overlapping_cubes_with_to_tray))
+		# print("num of cubes in from tray is ", len(overlapping_objects_with_tray_1))
+		# print("num of cubes in to tray is ", len(overlapping_objects_with_tray_2))
 
 		# reward = number of cubes outside from tray + number of cubes in to tray
-		reward = self.num_of_parts - len(overlapping_cubes_with_from_tray) + len(overlapping_cubes_with_to_tray)
+		reward = self.num_of_parts - len(overlapping_objects_with_tray_1) + len(overlapping_objects_with_tray_2)
 
-		if reward == 20 or self.steps_taken >= self.max_timesteps:
-			done = 1
-			# TODO: deduct large reard if max steps exceeded
+		if reward == self.num_of_parts * 2 or self.timestep >= self.max_timesteps:
+			self.done = True
+
+			# deduct big amount if max_timesteps exceeded
+			if self.timestep >= self.max_timesteps:
+				reward -= 200
 
 		# movement penalty
-		current_joint_pos = np.array(p.getJointStates(self.arm_id, list(range(self.num_arm_joints))))[:, 0]
+		current_joint_pos = np.array(p.getJointStates(self.arm_id, list(range(self.num_joints))))[:, 0]
 
 		# penalty = sum(abs(current - target)) * some contstant
 		movement_penalty = np.absolute(action - current_joint_pos).sum(axis=0) * self.movement_penalty_constant
 
 		reward -= movement_penalty
 
-		return reward, done
+		return reward
 
-
-	def _map_linear(self, action):
-		for i in range(self.num_arm_joints):
-			val = action[i]
-			minimum = self.joint_limits[i][0]
-			maximum = self.joint_limits[i][1]
-			action[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
-		return action
 
 env = PandaGripperEnv(render=True)
 
-# while 1:
-# 	time.sleep(0.1)
+for epoch in range(5):
+	print("epoch : ", epoch)
+	print("resetting")
+	obs = env.reset()
 
-# for i in range(12):
-# 	positionMin = [0] * 12
-# 	positionMin[i] = env.limits[i][0]
-# 	img, rew, done = env.step(positionMin)
-# 	time.sleep(1)
-# 	print(rew, done)
-#
-# 	positionMax = [0] * 12
-# 	positionMax[i] = env.limits[i][1]
-# 	img, rew, done = env.step(positionMax)
-# 	time.sleep(1)
-# 	print(rew, done)
-#
-# 	positionZero = [0] * 12
-# 	img, rew, done = env.step(positionZero)
-# 	time.sleep(1)
-# 	print(rew, done)
+	for i in range(100):
+		# act = np.random.uniform(-1, 1, 12)
+		act = env.action_space.sample()
+		obs, rew, done = env.step(act)
+		print(obs.shape, rew, done)
+		if done == True:
+			print("done")
+			break
 
-for i in range(100):
-	act = np.random.uniform(-1, 1, 12)
-	obs, rew, done = env.step(act)
-	print(obs.shape, rew, done)
+env.close()
