@@ -82,6 +82,74 @@ class PandaDrillerEnv(gym.Env):
 		p.setRealTimeSimulation(0)
 		p.setGravity(0, 0, -9.8)
 
+	def step(self, action):
+		self.timestep += 1
+		action = np.clip(action, -1, 1).astype(np.float32)
+
+		# Map to appropriate range according to joint joint_limits
+		# And get relative action
+		joint_angles = self._map_linear(action)
+		rel_joint_angles = (joint_angles.T - self.joint_states).T
+
+		# Compute max time needed to complete motion
+		max_time = np.max(rel_joint_angles.T / self.velocity_limits)
+		max_time = math.ceil(max_time / (1 / 240))
+
+		delta_joint_angles = rel_joint_angles / max_time
+		joint_idx = list(range(self.num_joints))
+
+		reward = 0
+		for t in range(max_time):
+			if self.done:
+				break
+			target_pos = np.squeeze(self.joint_states + delta_joint_angles.T * t)
+			p.setJointMotorControlArray(self.arm_id, joint_idx, p.POSITION_CONTROL, targetPositions=target_pos)
+			p.stepSimulation()
+			reward += self._compute_reward(delta_joint_angles)
+			time.sleep(1/240)
+
+		# Update joint states
+		for j in range(self.num_joints):
+			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
+
+		new_obs = self.render(mode=self.obs_mode)
+		return new_obs, reward, self.done, {}
+
+	def render(self, mode='human'):
+		if mode == 'human':
+			pass
+
+		elif mode == 'rgb':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			return img1[:, :, :3], img2[:, :, :3]
+
+		elif mode == 'rgbd':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			dep1, dep2 = img[1][0], img[1][1]
+			img1, img2 = img1[:, :, :3], img2[:, :, :3]
+			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
+
+		elif mode == 'rgbds':
+			img = self._get_camera_img()
+			img1, img2 = img[0][0], img[0][1]
+			dep1, dep2 = img[1][0], img[1][1]
+			seg1, seg2 = img[2][0], img[2][1]
+			img1, img2 = img1[:, :, :3], img2[:, :, :3]
+			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
+
+	def close(self):
+		p.disconnect()
+
+	def _map_linear(self, joint_angles):
+		for i in range(self.num_joints):
+			val = joint_angles[i]
+			minimum = self.joint_limits[i][0]
+			maximum = self.joint_limits[i][1]
+			joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+		return joint_angles
+
 	def _grab_drill(self):
 		time.sleep(0.1)
 		p.setJointMotorControl2(self.arm_id, 5, p.POSITION_CONTROL, targetPosition=1)
@@ -201,71 +269,6 @@ class PandaDrillerEnv(gym.Env):
 		)
 		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
-	def render(self, mode='human'):
-		if mode == 'human':
-			pass
-
-		elif mode == 'rgb':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			return img1[:, :, :3], img2[:, :, :3]
-
-		elif mode == 'rgbd':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			dep1, dep2 = img[1][0], img[1][1]
-			img1, img2 = img1[:, :, :3], img2[:, :, :3]
-			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
-
-		elif mode == 'rgbds':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			dep1, dep2 = img[1][0], img[1][1]
-			seg1, seg2 = img[2][0], img[2][1]
-			img1, img2 = img1[:, :, :3], img2[:, :, :3]
-			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
-
-	def step(self, action):
-		self.timestep += 1
-		action = np.clip(action, -1, 1).astype(np.float32)
-
-		# Map to appropriate range according to joint joint_limits
-		# And get relative action
-		joint_angles = self._map_linear(action)
-		rel_joint_angles = (joint_angles.T - self.joint_states).T
-
-		# Compute max time needed to complete motion
-		max_time = np.max(rel_joint_angles.T / self.velocity_limits)
-		max_time = math.ceil(max_time / (1 / 240))
-
-		delta_joint_angles = rel_joint_angles / max_time
-		joint_idx = list(range(self.num_joints))
-
-		reward = 0
-		for t in range(max_time):
-			if self.done:
-				break
-			target_pos = np.squeeze(self.joint_states + delta_joint_angles.T * t)
-			p.setJointMotorControlArray(self.arm_id, joint_idx, p.POSITION_CONTROL, targetPositions=target_pos)
-			p.stepSimulation()
-			reward += self._compute_reward(delta_joint_angles)
-			time.sleep(1/240)
-
-		# Update joint states
-		for j in range(self.num_joints):
-			self.joint_states[j] = p.getJointState(self.arm_id, j)[0]
-
-		new_obs = self.render(mode=self.obs_mode)
-		return new_obs, reward, self.done, {}
-
-	def _map_linear(self, joint_angles):
-		for i in range(self.num_joints):
-			val = joint_angles[i]
-			minimum = self.joint_limits[i][0]
-			maximum = self.joint_limits[i][1]
-			joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
-		return joint_angles
-
 	def _compute_reward(self, delta_joint_angles, sparse=False):
 		reward = 0
 
@@ -333,9 +336,6 @@ class PandaDrillerEnv(gym.Env):
 				self.done = True
 
 		return reward
-
-	def close(self):
-		p.disconnect()
 
 
 
