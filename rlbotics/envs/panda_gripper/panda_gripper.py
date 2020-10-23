@@ -11,7 +11,7 @@ from gym.utils import seeding
 
 
 class PandaGripperEnv(gym.Env):
-	metadata = {'render.modes': ['human', 'rgb_array'],
+	metadata = {'render.modes': ['human', 'rgb', 'rgbd', 'rgbds'],
 				'video.frames_per_second': 60}
 
 	def __init__(self, render=False, num_of_parts=5, obs_mode='rgb'):
