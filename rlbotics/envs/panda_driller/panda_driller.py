@@ -26,8 +26,10 @@ class PandaDrillerEnv(gym.Env):
 		# Load Robot and other objects
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		arm_base_pos = [-0.6, 0, 0.93]
-		self.drill_base_pos = [-0.24, 0, 1.69]
+		self.drill_base_pos = [-0.15, 0, 1.6]
+		# self.drill_base_pos = [0.2, 0.2, 1.501]
 		self.drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
+		self.drill_bit_vector = np.array([0, 0, -1])
 		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
 
 		p.loadURDF('plane.urdf')
@@ -64,24 +66,21 @@ class PandaDrillerEnv(gym.Env):
 		return [seed]
 
 	def reset(self):
-		p.setRealTimeSimulation(1)
 		self.done = False
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+		p.setRealTimeSimulation(1)
+		p.setGravity(0, 0, 0)
 
 		# Reset joint states
-		for j in range(self.num_joints):
-			p.resetJointState(self.arm_id, j, 0)
+		p.setJointMotorControlArray(self.arm_id, list(range(self.num_joints)), controlMode=p.POSITION_CONTROL, targetPositions=[0]*self.num_joints)
 		p.resetBasePositionAndOrientation(self.drill_id, self.drill_base_pos, self.drill_orientation)
-		time.sleep(1)
+		time.sleep(0.1)
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
-		time.sleep(1)
 
-		p.setGravity(0, 0, 0)
-		p.setRealTimeSimulation(1)
 		self._grab_drill()
 		self._generate_plane()
-		p.setRealTimeSimulation(0)
+		#p.setRealTimeSimulation(0)
 		p.setGravity(0, 0, -9.8)
 
 	def _grab_drill(self):
@@ -100,6 +99,12 @@ class PandaDrillerEnv(gym.Env):
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=1)
 		time.sleep(0.1)
 
+	def _update_drill_vector(self):
+		current_drill_orientation = np.array(p.getEulerFromQuaternion(p.getBasePositionAndOrientation(self.drill_id)[1]))
+		current_drill_orientation = current_drill_orientation - np.array(p.getEulerFromQuaternion(self.drill_orientation))
+		rotation_matrix = np.array(p.getMatrixFromQuaternion(p.getQuaternionFromEuler(current_drill_orientation))).reshape(3, 3)
+		self.drill_bit_vector = np.dot(rotation_matrix, np.array([0, 0, -1]))
+
 	def _generate_plane(self):
 		# Min Max constraints for drilling on plane
 		# min = [-0.2, 0.2, 0]
@@ -111,7 +116,13 @@ class PandaDrillerEnv(gym.Env):
 		plane_orientation[2] = self.np_random.uniform(0, np.pi/2)
 		plane_orientation = p.getQuaternionFromEuler(plane_orientation)
 		plane_scale = [self.np_random.uniform(1, 1.4), self.np_random.uniform(1, 1.4), 1]
-		hole_position = [self.np_random.uniform(-0.2, 0.2), self.np_random.uniform(-0.2, 0.2), 0]
+		hole_relative_pos = [self.np_random.uniform(-0.2, 0.2), self.np_random.uniform(-0.2, 0.2), 0]
+		# hole_relative_pos = [0.2, 0.2, 0]
+		self.hole_pos = np.array(p.multiplyTransforms([0, 0, 1.4], plane_orientation, hole_relative_pos, plane_orientation)[0])
+
+		# Compute plane normal
+		rotation_matrix = np.array(p.getMatrixFromQuaternion(plane_orientation)).reshape(3, 3)
+		self.plane_normal = np.dot(rotation_matrix, np.array([0, 0, -1]))
 
 		plane_visual = p.createVisualShape(
 			p.GEOM_MESH,
@@ -129,8 +140,7 @@ class PandaDrillerEnv(gym.Env):
 			basePosition=[0, 0, 1.4],
 			baseVisualShapeIndex=plane_visual,
 			baseCollisionShapeIndex=plane_collision,
-			baseOrientation=plane_orientation,
-			baseInertialFramePosition=[0.6, 0, 1.3]
+			baseOrientation=plane_orientation
 		)
 
 		# Random texture for plane
@@ -141,7 +151,7 @@ class PandaDrillerEnv(gym.Env):
 		hole_visual = p.createVisualShape(
 			p.GEOM_MESH,
 			rgbaColor=[25, 0, 0, 1],
-			visualFramePosition=hole_position,
+			visualFramePosition=hole_relative_pos,
 			fileName=os.path.join(self.path, 'plane', 'targetHole.obj')
 		)
 
@@ -262,12 +272,21 @@ class PandaDrillerEnv(gym.Env):
 		reward = 0
 
 		if sparse:
-			pass
+			# Check if drilling task is complete
+			self._update_drill_vector()
+			cos_theta = np.dot(self.drill_bit_vector, self.plane_normal)/(np.linalg.norm(self.drill_bit_vector)*np.linalg.norm(self.plane_normal))
+			theta = math.degrees(math.acos(cos_theta))
+
+			drill_pos = np.array(p.getBasePositionAndOrientation(self.drill_id)[0])
+			targ_dist = drill_pos - self.hole_pos
+			if theta < 1 and np.linalg.norm(targ_dist) <= 0.101:
+				reward = 1
+				self.done = True
 		else:
 			# Check if drill has dropped
-			if len(p.getContactPoints(self.arm_id, self.drill_id)) == 0:
-				self.done = True
-				reward -= 300
+			if len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=9)) == 0:
+				#self.done = True
+				reward -= 200
 			# Check if drill is touching the table
 			elif len(p.getContactPoints(self.drill_id, self.table_id)) != 0 and not self.done:
 				reward -= 200
@@ -278,14 +297,31 @@ class PandaDrillerEnv(gym.Env):
 			if len(p.getContactPoints(self.arm_id, self.plane)) != 0:
 				reward -= 200
 
+			# Check angle between drill bit and plane normal
+			angle_scale = 2
+			self._update_drill_vector()
+			cos_theta = np.dot(self.drill_bit_vector, self.plane_normal)/(np.linalg.norm(self.drill_bit_vector)*np.linalg.norm(self.plane_normal))
+			theta = math.degrees(math.acos(cos_theta))
+			reward -= theta * angle_scale
+
+			# Check if drilling task is complete
+			dist_scale = 10
+			drill_pos = np.array(p.getBasePositionAndOrientation(self.drill_id)[0])
+			targ_dist = np.linalg.norm(drill_pos - self.hole_pos)
+			reward -= targ_dist * dist_scale
+			if theta < 1 and targ_dist <= 0.102:
+				reward += 500
+				self.done = True
+
 			# Compute electricity cost
-			electricity_scale = 10
+			electricity_scale = 1
 			electricity_cost = np.sum(np.abs(delta_joint_angles) * electricity_scale)
 
 			# Compute final reward
 			reward = reward - electricity_cost
 
 			if self.timestep == self.max_timesteps:
+				reward = -1 if sparse and not self.done else reward
 				self.timestep = 0
 				self.done = True
 
@@ -300,10 +336,12 @@ env = PandaDrillerEnv(render=True)
 while 1:
 	# time.sleep(0.1)
 	#
-	act = env.action_space.sample()
-	new_obs, rew, done, info = env.step(act)
-	print(rew, done)
-	if done:
-		env.reset()
+	#act = env.action_space.sample()
+	act = np.zeros((12,1))
+
+	#new_obs, rew, done, info = env.step(act)
+	#print(rew, done)
+	# if done:
+	# 	env.reset()
 	# env._get_camera_img()
 
