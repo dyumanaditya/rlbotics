@@ -26,8 +26,7 @@ class PandaDrillerEnv(gym.Env):
 		# Load Robot and other objects
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		arm_base_pos = [-0.6, 0, 0.93]
-		self.drill_base_pos = [-0.15, 0, 1.6]
-		# self.drill_base_pos = [0.2, 0.2, 1.501]
+		self.drill_base_pos = [-0.12, 0, 1.6]
 		self.drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
 		self.drill_bit_vector = np.array([0, 0, -1])
 		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
@@ -80,7 +79,7 @@ class PandaDrillerEnv(gym.Env):
 
 		self._grab_drill()
 		self._generate_plane()
-		#p.setRealTimeSimulation(0)
+		p.setRealTimeSimulation(0)
 		p.setGravity(0, 0, -9.8)
 
 	def _grab_drill(self):
@@ -91,7 +90,7 @@ class PandaDrillerEnv(gym.Env):
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0.04)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0.04)
 
-		time.sleep(0.1)
+		time.sleep(0.2)
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0)
 
@@ -117,7 +116,6 @@ class PandaDrillerEnv(gym.Env):
 		plane_orientation = p.getQuaternionFromEuler(plane_orientation)
 		plane_scale = [self.np_random.uniform(1, 1.4), self.np_random.uniform(1, 1.4), 1]
 		hole_relative_pos = [self.np_random.uniform(-0.2, 0.2), self.np_random.uniform(-0.2, 0.2), 0]
-		# hole_relative_pos = [0.2, 0.2, 0]
 		self.hole_pos = np.array(p.multiplyTransforms([0, 0, 1.4], plane_orientation, hole_relative_pos, plane_orientation)[0])
 
 		# Compute plane normal
@@ -272,6 +270,13 @@ class PandaDrillerEnv(gym.Env):
 		reward = 0
 
 		if sparse:
+			# Check if drill has dropped
+			c1 = len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=9))
+			c2 = len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=10))
+			if c1 + c2 == 0:
+				self.done = True
+				reward = -1
+
 			# Check if drilling task is complete
 			self._update_drill_vector()
 			cos_theta = np.dot(self.drill_bit_vector, self.plane_normal)/(np.linalg.norm(self.drill_bit_vector)*np.linalg.norm(self.plane_normal))
@@ -284,8 +289,10 @@ class PandaDrillerEnv(gym.Env):
 				self.done = True
 		else:
 			# Check if drill has dropped
-			if len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=9)) == 0:
-				#self.done = True
+			c1 = len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=9))
+			c2 = len(p.getContactPoints(self.arm_id, self.drill_id, linkIndexA=10))
+			if c1 + c2 == 0:
+				self.done = True
 				reward -= 200
 			# Check if drill is touching the table
 			elif len(p.getContactPoints(self.drill_id, self.table_id)) != 0 and not self.done:
@@ -336,11 +343,11 @@ env = PandaDrillerEnv(render=True)
 while 1:
 	# time.sleep(0.1)
 	#
-	#act = env.action_space.sample()
-	act = np.zeros((12,1))
+	act = env.action_space.sample()
+	#act = np.zeros((12,1))
 
-	#new_obs, rew, done, info = env.step(act)
-	#print(rew, done)
+	# new_obs, rew, done, info = env.step(act)
+	# print(rew, done)
 	# if done:
 	# 	env.reset()
 	# env._get_camera_img()
