@@ -2,6 +2,7 @@ import os
 import gym
 import time
 import math
+import cv2 as cv
 import numpy as np
 import pybullet as p
 import pybullet_data
@@ -66,6 +67,7 @@ class PandaDrillerEnv(gym.Env):
 
 	def reset(self):
 		self.done = False
+		self.timestep = 0
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 		p.setRealTimeSimulation(1)
 		p.setGravity(0, 0, 0)
@@ -81,6 +83,9 @@ class PandaDrillerEnv(gym.Env):
 		self._generate_plane()
 		p.setRealTimeSimulation(0)
 		p.setGravity(0, 0, -9.8)
+
+		obs = self.render(mode=self.obs_mode)
+		return obs
 
 	def step(self, action):
 		self.timestep += 1
@@ -227,7 +232,7 @@ class PandaDrillerEnv(gym.Env):
 			baseOrientation=plane_orientation
 		)
 
-	def _get_camera_img(self):
+	def _get_camera_img(self, random_lighting=True):
 		view_matrix1 = p.computeViewMatrix(
 			cameraEyePosition=[0, 0, 2.5],
 			cameraTargetPosition=[0, 0, 0],
@@ -337,6 +342,30 @@ class PandaDrillerEnv(gym.Env):
 
 		return reward
 
+	def _randomize_lighting(self, img):
+		# Function for domain randomization of lighting
+		# Adjust brightness and contrast (beta, alpha)
+		# 		alpha 1  beta 0      --> no change
+		# 		0 < alpha < 1        --> lower contrast
+		# 		alpha > 1            --> higher contrast
+		# 		-127 < beta < +127   --> good range for brightness values
+		contrast = 1
+		brightness = self.np_random.randint(-80, 60)
+		img = cv.addWeighted(img, contrast, img, 0, brightness)
+
+		# Adjust hue, saturation and lightness
+		hue = self.np_random.randint(0, 256)
+		saturation = self.np_random.randint(0, 30)
+		lightness = 0
+		hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+		h, s, v = cv.split(hsv)
+		h += hue
+		s += saturation
+		v += lightness
+
+		# Merge channels
+		img = cv.merge((h, s, v))
+		img = cv.cvtColor(img, cv.COLOR_HSV2RGB)
 
 
 env = PandaDrillerEnv(render=True)
