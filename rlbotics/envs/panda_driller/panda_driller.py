@@ -2,12 +2,13 @@ import os
 import gym
 import time
 import math
-import cv2 as cv
 import numpy as np
 import pybullet as p
 import pybullet_data
 from gym import spaces
 from gym.utils import seeding
+
+from rlbotics.envs.common.domain_randomizer import DomainRandomizer
 
 
 class PandaDrillerEnv(gym.Env):
@@ -59,6 +60,7 @@ class PandaDrillerEnv(gym.Env):
 
 		# Initialise env
 		self.seed()
+		self.domain_randomizer = DomainRandomizer(self.np_random)
 		self.reset()
 
 	def seed(self, seed=None):
@@ -121,27 +123,19 @@ class PandaDrillerEnv(gym.Env):
 		return new_obs, reward, self.done, {}
 
 	def render(self, mode='human'):
+		img = self._get_camera_img()
+		img1, img2, dep1, dep2, seg1, seg2 = img[0][0], img[0][1], img[1][0], img[1][1], img[2][0], img[2][1]
+
 		if mode == 'human':
 			pass
 
 		elif mode == 'rgb':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			return img1[:, :, :3], img2[:, :, :3]
+			return img1, img2
 
 		elif mode == 'rgbd':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			dep1, dep2 = img[1][0], img[1][1]
-			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1)), np.dstack((img2, dep2))
 
 		elif mode == 'rgbds':
-			img = self._get_camera_img()
-			img1, img2 = img[0][0], img[0][1]
-			dep1, dep2 = img[1][0], img[1][1]
-			seg1, seg2 = img[2][0], img[2][1]
-			img1, img2 = img1[:, :, :3], img2[:, :, :3]
 			return np.dstack((img1, dep1, seg1)), np.dstack((img2, dep2, seg2))
 
 	def close(self):
@@ -232,7 +226,7 @@ class PandaDrillerEnv(gym.Env):
 			baseOrientation=plane_orientation
 		)
 
-	def _get_camera_img(self, random_lighting=True):
+	def _get_camera_img(self, domain_randomization=True):
 		view_matrix1 = p.computeViewMatrix(
 			cameraEyePosition=[0, 0, 2.5],
 			cameraTargetPosition=[0, 0, 0],
@@ -272,6 +266,12 @@ class PandaDrillerEnv(gym.Env):
 			viewMatrix=view_matrix2,
 			projectionMatrix=projection_matrix2
 		)
+
+		# Remove alpha channel
+		rgb_img1, rgb_img2 = rgb_img1[:, :, :3], rgb_img2[:, :, :3]
+		if domain_randomization:
+			rgb_img1, rgb_img2 = self.domain_randomizer.randomize_lighting(rgb_img1, rgb_img2)
+
 		return [(rgb_img1, rgb_img2), (depth_img1, depth_img2), (seg_img1, seg_img2)]
 
 	def _compute_reward(self, delta_joint_angles, sparse=False):
@@ -342,30 +342,6 @@ class PandaDrillerEnv(gym.Env):
 
 		return reward
 
-	def _randomize_lighting(self, img):
-		# Function for domain randomization of lighting
-		# Adjust brightness and contrast (beta, alpha)
-		# 		alpha 1  beta 0      --> no change
-		# 		0 < alpha < 1        --> lower contrast
-		# 		alpha > 1            --> higher contrast
-		# 		-127 < beta < +127   --> good range for brightness values
-		contrast = 1
-		brightness = self.np_random.randint(-80, 60)
-		img = cv.addWeighted(img, contrast, img, 0, brightness)
-
-		# Adjust hue, saturation and lightness
-		hue = self.np_random.randint(0, 256)
-		saturation = self.np_random.randint(0, 30)
-		lightness = 0
-		hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-		h, s, v = cv.split(hsv)
-		h += hue
-		s += saturation
-		v += lightness
-
-		# Merge channels
-		img = cv.merge((h, s, v))
-		img = cv.cvtColor(img, cv.COLOR_HSV2RGB)
 
 
 env = PandaDrillerEnv(render=True)
