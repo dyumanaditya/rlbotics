@@ -2,12 +2,15 @@ import os
 import gym
 import time
 import math
+import cv2 as cv
 import numpy as np
 import pandas as pd
 import pybullet as p
 import pybullet_data
 from gym import spaces
 from gym.utils import seeding
+
+from rlbotics.envs.common.domain_randomizer import DomainRandomizer
 
 
 class PandaGripperEnv(gym.Env):
@@ -17,7 +20,7 @@ class PandaGripperEnv(gym.Env):
 	def __init__(self, render=False, num_of_parts=5, obs_mode='rgb'):
 		self.path = os.path.abspath(os.path.dirname(__file__))
 		self.obs_mode = obs_mode
-		self.max_timesteps = 5
+		self.max_timesteps = 1000
 		self.timestep = 0
 		self.done = False
 
@@ -32,22 +35,15 @@ class PandaGripperEnv(gym.Env):
 		# load urdfs
 		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
 
+		self.tray_1_id = None
+		self.tray_2_id = None
+
 		self.plane_id = p.loadURDF('plane.urdf')
 		self.arm_id = p.loadURDF('franka_panda/panda.urdf', [0, 0, 0.94], useFixedBase=True)
 		self.table_id = p.loadURDF('table/table.urdf', [0.5, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
 
-		self.tray_1_pos = [0.5, 0.4, 0.94]
-		self.tray_2_pos = [0.5, -0.4, 0.94]
-
-		self.tray_1_id = p.loadURDF('tray/traybox.urdf', self.tray_1_pos)
-		self.tray_2_id = p.loadURDF('tray/traybox.urdf', self.tray_2_pos)
-
-		# bounding box of from tray and to tray
-		self.tray_1_min_AABB, self.from_tray_max_AABB = p.getAABB(self.tray_1_id)
-		self.tray_2_min_AABB, self.to_tray_max_AABB = p.getAABB(self.tray_2_id)
-
 		self.parts_id = []
-		self.other_id = [self.table_id, self.arm_id, self.tray_1_id, self.tray_2_id]
+		self.other_id = [self.table_id, self.arm_id]
 
 		# load data for parts (mass, scale)
 		self.parts_data = pd.read_csv(os.path.join(self.path, 'parts', 'parts_data.csv'))
@@ -72,6 +68,7 @@ class PandaGripperEnv(gym.Env):
 
 		# Initialise env
 		self.seed()
+		self.domain_randomizer = DomainRandomizer(self.np_random)
 		#self.reset()
 
 	def seed(self, seed=None):
@@ -83,10 +80,33 @@ class PandaGripperEnv(gym.Env):
 		self.done = False
 
 		# remove old parts
+		if self.tray_1_id is not None:
+			p.removeBody(self.tray_1_id)
+		if self.tray_2_id is not None:
+			p.removeBody(self.tray_2_id)
+
+		# self.tray_1_pos = [0.5, 0.4, 0.94]
+		# self.tray_2_pos = [0.5, -0.4, 0.94]
+
+		self.tray_1_pos = [np.random.uniform(0.1, 0.9), np.random.uniform(0.3, 0.7), 0.94]
+		self.tray_2_pos = [np.random.uniform(0.1, 0.9), np.random.uniform(-0.3, -0.7), 0.94]
+
+		self.tray_1_id = p.loadURDF('tray/traybox.urdf', self.tray_1_pos)
+		self.tray_2_id = p.loadURDF('tray/traybox.urdf', self.tray_2_pos)
+
+		p.changeVisualShape(self.tray_1_id, -1, rgbaColor=np.hstack((np.random.rand(3), 1)))
+		p.changeVisualShape(self.tray_2_id, -1, rgbaColor=np.hstack((np.random.rand(3), 1)))
+
+		# bounding box of from tray and to tray
+		self.tray_1_min_AABB, self.from_tray_max_AABB = p.getAABB(self.tray_1_id)
+		self.tray_2_min_AABB, self.to_tray_max_AABB = p.getAABB(self.tray_2_id)
+
 		for part in self.parts_id:
 			p.removeBody(part)
 
 		self.parts_id = []
+		self.other_id.append(self.tray_1_id)
+		self.other_id.append(self.tray_2_id)
 
 		p.setGravity(0, 0, -9.8)
 		p.setRealTimeSimulation(True)
@@ -96,7 +116,7 @@ class PandaGripperEnv(gym.Env):
 		# add the random objects in tray 1
 		for i in range(self.num_of_parts):
 			self._add_random_object()
-			time.sleep(1)
+			time.sleep(0.1)
 
 		# add cubes in tray 1
 		# for i in range(self.num_of_parts):
@@ -144,10 +164,9 @@ class PandaGripperEnv(gym.Env):
 		return new_obs, rew, self.done
 
 	def render(self, mode='human'):
-		rgba_img, depth_img, seg_img = self._get_camera_img()
+		rgb_img, depth_img, seg_img = self._get_camera_img()
 
 		# remove alpha channel from rgba image
-		rgb_img = rgba_img[:,:,:3]
 
 		if mode == 'human':
 			pass
@@ -179,7 +198,7 @@ class PandaGripperEnv(gym.Env):
 		return joint_angles
 
 	def _add_random_object(self):
-		object_num = np.random.randint(8)
+		object_num = np.random.randint(7)
 		# object_num = 0
 
 		object_scale = self.parts_data.loc[object_num, 'scale']
@@ -207,7 +226,7 @@ class PandaGripperEnv(gym.Env):
 			baseMass=object_mass
 		))
 
-	def _get_camera_img(self):
+	def _get_camera_img(self, domain_randomization=True):
 		view_matrix = p.computeViewMatrix(
 			cameraEyePosition=[0.5, 0, 2.5],
 			cameraTargetPosition=[0.5, 0, 0.94],
@@ -215,7 +234,7 @@ class PandaGripperEnv(gym.Env):
 		)
 
 		projection_matrix = p.computeProjectionMatrixFOV(
-			fov=60,
+			fov=70,
 			aspect=1.0,
 			nearVal=0.01,
 			farVal=100
@@ -228,7 +247,15 @@ class PandaGripperEnv(gym.Env):
 			projectionMatrix=projection_matrix
 		)
 
-		return rgba_img, depth_img, seg_img
+		rgb_img = rgba_img[:,:,:3]
+
+		if domain_randomization:
+			rgb_img = self.domain_randomizer.randomize_lighting(rgb_img)
+
+		# cv.imshow("img", rgb_img)
+		# cv.waitKey(0)
+
+		return rgb_img, depth_img, seg_img
 
 	def _compute_reward(self, action):
 		# idxs of all overlapping objects with from tray and to tray including arm etc
@@ -265,7 +292,7 @@ class PandaGripperEnv(gym.Env):
 
 env = PandaGripperEnv(render=True)
 
-for epoch in range(5):
+for epoch in range(10):
 	print("epoch : ", epoch)
 	print("resetting")
 	obs = env.reset()
@@ -274,7 +301,8 @@ for epoch in range(5):
 		# act = np.random.uniform(-1, 1, 12)
 		act = env.action_space.sample()
 		obs, rew, done = env.step(act)
-		print(obs.shape, rew, done)
+
+		print(obs[0].shape, rew, done)
 		if done == True:
 			print("done")
 			break

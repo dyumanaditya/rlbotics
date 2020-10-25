@@ -356,4 +356,3 @@ while 1:
 	# if done:
 	# 	env.reset()
 	# env._get_camera_img()
-
