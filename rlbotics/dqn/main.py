@@ -74,7 +74,7 @@ def main():
 	agent = DQN(args, env)
 	obs = env.reset()
 
-	# Episode related information (resume if necessary)
+	# Episode related information
 	ep_counter = 0
 	ep_rew = 0
 
