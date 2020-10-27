@@ -3,11 +3,11 @@ env_name       = 'CartPole-v1'
 gamma          = 1.0
 lr             = 1e-4
 max_iterations = 350000
+eval_freq	   = 2000	# Has to divide max_iterations
 render         = False
-seed           = 0
+seed           = 1
 use_grad_clip  = False
 save_freq      = 2000
-resume         = False
 
 # DQN Specific:
 batch_size    = 512
@@ -28,4 +28,4 @@ optimizer      = 'Adam'
 loss_type      = 'mse'
 
 # Policy Target Network:
-update_target_freq = 3	# Update target network per _ episodes
+update_target_freq = 450	# Update target network per _ iterations
