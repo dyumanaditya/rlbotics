@@ -97,7 +97,7 @@ def main():
 	# Log hyperparameters and MLP details
 	total_params = sum(p.numel() for p in agent.pi.parameters()) + sum(p.numel() for p in agent.q.parameters())
 	trainable_params = sum(p.numel() for p in agent.pi.parameters() if p.requires_grad)\
-					   + sum(p.numel() for p in agent.pi.parameters() if p.requires_grad)
+					   + sum(p.numel() for p in agent.q.parameters() if p.requires_grad)
 	logger.log_params(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
 	for iteration in range(args.max_iterations):
@@ -135,7 +135,7 @@ def main():
 			logger.log_return(iteration=iteration+1, avg_return=avg_return)
 
 		# Log Model and Loss
-		if iteration % args.save_freq == 0:
+		if iteration % args.save_freq == 0 or iteration+1 == args.max_iterations:
 			logger.log_model(agent.q, name='q')
 			logger.log_model(agent.pi, name='pi')
 			logger.log_model(agent.q_target, name='q_targ')
