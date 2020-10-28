@@ -140,5 +140,5 @@ class Plotterv2:
 		return epoch_returns
 
 
-p = Plotter()
-p.plot_combined('CartPole-v1 DQN', 'Timesteps', 'Mean Return', 'DQN', 'CartPole-v1', display=True)
+# p = Plotter()
+# p.plot_combined('CartPole-v1 DQN', 'Timesteps', 'Mean Return', 'DQN', 'CartPole-v1', display=True)

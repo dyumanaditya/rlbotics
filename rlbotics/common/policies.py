@@ -106,6 +106,7 @@ class MLPSquashedGaussianPolicy(MLP):
 
 		return pi_action, logp_pi
 
+
 class MLPEpsilonGreedy(MLP):
 	def __init__(self, layer_sizes, activations, seed, batch_norm=False, weight_init=None):
 		super().__init__(layer_sizes=layer_sizes, activations=activations, seed=seed, batch_norm=batch_norm, weight_init=weight_init)
