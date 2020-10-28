@@ -20,6 +20,7 @@ def argparser():
 	parser.add_argument('--gamma', type=float, default=h.gamma)
 	parser.add_argument('--lr', type=float, default=h.lr)
 	parser.add_argument('--max_iterations', type=int, default=h.max_iterations)
+	parser.add_argument('--eval_freq', type=int, default=h.eval_freq)
 	parser.add_argument('--render', type=int, default=h.render)
 	parser.add_argument('--use_grad_clip', type=int, default=h.use_grad_clip)
 	parser.add_argument('--save_freq', type=int, default=h.save_freq)
@@ -131,7 +132,7 @@ def main():
 	# End
 	env.close()
 	p = Plotter()
-	p.plot_individual('Episode/Reward', 'episodes', 'rewards', 'DDQN', args.env_name, args.seed, False)
+	p.plot_individual('Avg. Return/Timestep', 'Timesteps', 'Return', 'DDQN', args.env_name, args.seed, False)
 
 
 if __name__ == '__main__':

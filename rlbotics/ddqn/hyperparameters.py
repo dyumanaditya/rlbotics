@@ -2,8 +2,8 @@
 env_name       = 'CartPole-v1'
 gamma          = 1.0
 lr             = 1e-4
-max_iterations = 340000
-eval_freq	   = 2000	# Has to divide max_iterations
+max_iterations = 350000
+eval_freq	   = 1000	# Has to divide max_iterations
 render         = False
 seed           = 0
 use_grad_clip  = False
