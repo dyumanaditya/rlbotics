@@ -132,7 +132,7 @@ def main():
 	# End
 	env.close()
 	p = Plotter()
-	p.plot_individual('Episode/Reward', 'episodes', 'rewards', 'DQN', args.env_name, args.seed, False)
+	p.plot_individual('Avg. Return/Timestep', 'Timesteps', 'Return', 'DQN', args.env_name, args.seed, False)
 
 
 if __name__ == '__main__':
