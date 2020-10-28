@@ -1,13 +1,13 @@
 # https://spinningup.openai.com/en/latest/algorithms/td3.html
 # General Parameters:
 env_name       = 'LunarLanderContinuous-v2'
-gamma          = 0.99
-max_iterations = 400000
-render         = False
 seed           = 0
+gamma          = 0.99
+max_iterations = 500000
+eval_freq      = 1000		  # Has to divide max_iterations
+render         = False
 use_grad_clip  = False
 save_freq      = 5000		  # Freq to save policy and q models
-resume         = False
 
 # TD3 Specific:
 batch_size     = 100

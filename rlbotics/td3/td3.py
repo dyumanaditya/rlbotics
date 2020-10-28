@@ -1,12 +1,9 @@
-import os
 import torch
 import itertools
 import numpy as np
-import pandas as pd
 from copy import deepcopy
 
 from rlbotics.common.loss import losses
-from rlbotics.common.logger import Logger
 from rlbotics.td3.utils import GaussianNoise
 from rlbotics.td3.replay_buffer import ReplayBuffer
 from rlbotics.common.policies import MLPActorContinuous, MLPQFunctionContinuous
@@ -25,7 +22,6 @@ class TD3:
 		self.env = env
 		self.seed = args.seed
 		self.gamma = args.gamma
-		self.resume = args.resume
 		self.env_name = args.env_name
 		self.save_freq = args.save_freq
 		self.use_grad_clip = args.use_grad_clip
@@ -69,9 +65,6 @@ class TD3:
 		# Replay buffer
 		self.memory = ReplayBuffer(self.buffer_size, self.seed)
 
-		# Logger
-		self.logger = Logger('TD3', args.env_name, self.seed, resume=self.resume)
-
 		# Gradient clipping
 		if self.use_grad_clip:
 			self.grad_clip = (-1, 1)
@@ -79,22 +72,14 @@ class TD3:
 			self.grad_clip = None
 
 		# Steps
-		self.steps_done = 0
+		self.iteration = 0
 
 		# Loss function
 		self.q_criterion = losses(self.q_loss_type)
 
 		# Build pi and q Networks
-		# Resume training if necessary
 		self._build_policy()
 		self._build_q_function()
-		if self.resume:
-			self.resume_training()
-
-		# Log parameter data
-		total_params = sum(p.numel() for p in self.pi.parameters())
-		trainable_params = sum(p.numel() for p in self.pi.parameters() if p.requires_grad)
-		self.logger.log(hyperparameters=vars(args), total_params=total_params, trainable_params=trainable_params)
 
 	def _build_policy(self):
 		layer_sizes = [self.obs_dim] + self.pi_hidden_sizes + [self.act_dim]
@@ -195,7 +180,7 @@ class TD3:
 		return -q.mean()
 
 	def update_actor_critic(self):
-		if self.steps_done < self.update_after or len(self.memory) < self.batch_size:
+		if self.iteration < self.update_after or len(self.memory) < self.batch_size:
 			return
 
 		# Sample batch of transitions
@@ -211,7 +196,7 @@ class TD3:
 		self.q_optim.step()
 
 		# If it's time to update policy and target networks
-		if self.steps_done % self.pi_update_delay == 0:
+		if self.iteration % self.pi_update_delay == 0:
 			# Freeze Q-network so you don't waste computational effort
 			# computing gradients for it during the policy learning step.
 			for p in self.q_params:
@@ -233,19 +218,7 @@ class TD3:
 			# Update Target Networks
 			self._update_target_actor_critic()
 
-			# Log pi loss
-			self.logger.log(name='policy_updates', pi_loss=pi_loss.item(), q_loss=q_loss.item())
-
-		# Log Model/Optimizer, Loss and # iterations and episodes
-		if self.steps_done % self.save_freq == 0:
-			self.logger.log_model(self.q1, name='q1')
-			self.logger.log_model(self.q2, name='q2')
-			self.logger.log_model(self.pi, name='pi')
-			self.logger.log_model(self.q1_target, name='q1_targ')
-			self.logger.log_model(self.q2_target, name='q2_targ')
-			self.logger.log_model(self.pi_target, name='pi_targ')
-			self.logger.log_state_dict(self.q_optim.state_dict(), name='q_optim')
-			self.logger.log_state_dict(self.pi_optim.state_dict(), name='pi_optim')
+			return q_loss.item(), pi_loss.item()
 
 	def _update_target_actor_critic(self):
 		# Polyak averaging
@@ -262,48 +235,6 @@ class TD3:
 		action += self.noise(self.act_noise)
 		return np.clip(action, -self.act_lim, self.act_lim)[0]
 
-	def store_transition(self, obs, act, rew, new_obs, done, log=True):
+	def store_transition(self, obs, act, rew, new_obs, done):
 		self.memory.add(obs, act, rew, new_obs, done)
-		self.steps_done += 1
-
-		# Log Done, reward data
-		if self.steps_done > self.update_after and log:
-			self.logger.log(name='transitions', done=done, rewards=rew)
-
-	def resume_training(self):
-		print('Resuming training...')
-		print('Loading previously saved models...')
-
-		# Load saved models
-		model_file = os.path.join('experiments', 'models', f'TD3_{self.env_name}_{self.seed}')
-		self.q1 = torch.load(os.path.join(model_file, 'q1model.pth'))
-		self.q2 = torch.load(os.path.join(model_file, 'q2model.pth'))
-		self.pi = torch.load(os.path.join(model_file, 'pimodel.pth'))
-		self.q1_target = torch.load(os.path.join(model_file, 'q1_targmodel.pth'))
-		self.q2_target = torch.load(os.path.join(model_file, 'q2_targmodel.pth'))
-		self.pi_target = torch.load(os.path.join(model_file, 'pi_targmodel.pth'))
-
-		# Load optimizer state_dicts
-		self.q_optim.load_state_dict(torch.load(os.path.join(model_file, 'q_optim')))
-		self.pi_optim.load_state_dict(torch.load(os.path.join(model_file, 'pi_optim')))
-
-		# Start where we left off
-		log_file = os.path.join('experiments', 'logs', f'TD3_{self.env_name}_{self.seed}', 'transitions.csv')
-		log = pd.read_csv(log_file)
-		self.steps_done = len(log) + self.update_after
-		print(self.steps_done, log_file)
-
-		print('Filling replay buffer again...')
-
-		# obs = self.env.reset()
-		# self.env.seed(self.seed)
-		# for i in range(self.steps_done):
-		# 	act = self.get_action(obs) if i > self.random_steps else self.env.action_space.sample()
-		# 	new_obs, rew, done, _ = self.env.step(act)
-		# 	self.store_transition(obs, act, rew, new_obs, done, log=False)
-		#
-		# 	obs = new_obs
-		# 	if done:
-		# 		obs = self.env.reset()
-
-
+		self.iteration += 1
