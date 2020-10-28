@@ -4,10 +4,10 @@ env_name       = 'LunarLanderContinuous-v2'
 seed           = 0
 gamma          = 0.99
 max_iterations = 500000
+eval_freq      = 1000		  # Has to divide max_iterations
 render         = False
 use_grad_clip  = False
 save_freq      = 2000		  # Freq to save policy and q models
-resume         = False		  # Resume training
 
 # DDPG Specific:
 batch_size     = 128
