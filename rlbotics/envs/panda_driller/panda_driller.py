@@ -83,6 +83,7 @@ class PandaDrillerEnv(gym.Env):
 
 		# Randomize physics constraints and drill color
 		self.domain_randomizer.randomize_physics_constraints(self.drill_id)
+		self.domain_randomizer.randomize_color(self.drill_id)
 
 		self._grab_drill()
 		self._generate_plane()

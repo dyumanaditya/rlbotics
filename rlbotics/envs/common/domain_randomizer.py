@@ -1,5 +1,6 @@
 import os
 import cv2 as cv
+import numpy as np
 import pybullet as p
 
 
@@ -70,3 +71,11 @@ class DomainRandomizer:
 		texture = p.loadTexture(os.path.join(path, str(texture_id) + '.jpg'))
 		p.changeVisualShape(body_id, link, textureUniqueId=texture)
 
+	def randomize_color(self, body_id, link=-1):
+		"""
+		Randomize color of body
+		:param body_id: Unique body id
+		:param link: -1 is base link
+		"""
+		rgba = np.append(self.np_random.rand(3), 1)
+		p.changeVisualShape(body_id, link, rgbaColor=rgba)
