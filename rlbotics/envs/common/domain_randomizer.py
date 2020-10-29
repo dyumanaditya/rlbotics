@@ -57,8 +57,3 @@ class DomainRandomizer:
 		friction = self.np_random.uniform(*friction_range)
 
 		p.changeDynamics(body_id, link, mass=mass, lateralFriction=friction)
-
-
-
-
-

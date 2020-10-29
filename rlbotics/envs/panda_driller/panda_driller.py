@@ -213,7 +213,8 @@ class PandaDrillerEnv(gym.Env):
 
 		# Random texture for plane
 		texture_id = self.np_random.randint(0, 20)
-		texture = p.loadTexture(os.path.join(self.path, 'plane', 'textures', str(texture_id) + '.jpg'))
+		path = os.path.dirname(self.path)
+		texture = p.loadTexture(os.path.join(path, 'common', 'textures', str(texture_id) + '.jpg'))
 		p.changeVisualShape(self.plane, -1, textureUniqueId=texture)
 
 		hole_visual = p.createVisualShape(
