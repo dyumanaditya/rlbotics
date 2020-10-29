@@ -1,18 +1,19 @@
 import cv2 as cv
+import pybullet as p
 
 
 class DomainRandomizer:
 	def __init__(self, np_random):
 		self.np_random = np_random
 
-	def randomize_lighting(self, *args):
+	def randomize_lighting(self, *imgs):
 		"""
 		Function for domain randomization of environment lighting
-		:param args: images with rgb channels only
+		:param imgs: images with rgb channels only
 		:return modified_imgs: rgb images with modified colors and brightness
 		"""
 		modified_imgs = []
-		for img in args:
+		for img in imgs:
 			# Adjust brightness and contrast (beta, alpha)
 			# 		alpha 1  beta 0      --> no change
 			# 		0 < alpha < 1        --> lower contrast
@@ -42,3 +43,22 @@ class DomainRandomizer:
 			modified_imgs.append(img)
 
 		return modified_imgs
+
+	def randomize_physics_constraints(self, body_id, link=-1, mass_range=(0.5, 4), friction_range=(20, 200)):
+		"""
+		Randomizes mass and friction of a body or link
+		:param body_id: Unique body id
+		:param link: -1 is base link
+		:param mass_range: random number in this range
+		:param friction_range: random number in this range
+		"""
+		# Randomize mass of object and lateral friction
+		mass = self.np_random.uniform(*mass_range)
+		friction = self.np_random.uniform(*friction_range)
+
+		p.changeDynamics(body_id, link, mass=mass, lateralFriction=friction)
+
+
+
+
+

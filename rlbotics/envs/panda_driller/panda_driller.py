@@ -28,7 +28,7 @@ class PandaDrillerEnv(gym.Env):
 		# Load Robot and other objects
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		arm_base_pos = [-0.6, 0, 0.93]
-		self.drill_base_pos = [-0.12, 0, 1.6]
+		self.drill_base_pos = [-0.12, 0, 1.601]
 		self.drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
 		self.drill_bit_vector = np.array([0, 0, -1])
 		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
@@ -80,6 +80,9 @@ class PandaDrillerEnv(gym.Env):
 		time.sleep(0.1)
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
+
+		# Randomize physics constraints
+		self.domain_randomizer.randomize_physics_constraints(self.drill_id)
 
 		self._grab_drill()
 		self._generate_plane()
@@ -161,7 +164,7 @@ class PandaDrillerEnv(gym.Env):
 		p.setJointMotorControl2(self.arm_id, 9, p.POSITION_CONTROL, targetPosition=0)
 		p.setJointMotorControl2(self.arm_id, 10, p.POSITION_CONTROL, targetPosition=0)
 
-		time.sleep(0.1)
+		time.sleep(0.2)
 		p.setJointMotorControl2(self.arm_id, 3, p.POSITION_CONTROL, targetPosition=1)
 		time.sleep(0.1)
 
@@ -349,9 +352,14 @@ while 1:
 	# time.sleep(0.1)
 	#
 	act = env.action_space.sample()
+	# print(p.getDynamicsInfo(env.drill_id, -1)[0])
+	# env.domain_randomizer.randomize_physics_constraints(env.drill_id)
+	# #p.changeDynamics(env.drill_id, -1, 3)
+	# print(p.getDynamicsInfo(env.drill_id, -1)[0])
+	# time.sleep(10)
 	#act = np.zeros((12,1))
 
-	# new_obs, rew, done, info = env.step(act)
+	#new_obs, rew, done, info = env.step(act)
 	# print(rew, done)
 	# if done:
 	# 	env.reset()
