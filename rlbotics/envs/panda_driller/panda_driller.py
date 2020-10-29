@@ -81,7 +81,7 @@ class PandaDrillerEnv(gym.Env):
 		p.removeBody(self.hole)
 		p.removeBody(self.plane)
 
-		# Randomize physics constraints
+		# Randomize physics constraints and drill color
 		self.domain_randomizer.randomize_physics_constraints(self.drill_id)
 
 		self._grab_drill()
@@ -212,10 +212,8 @@ class PandaDrillerEnv(gym.Env):
 		)
 
 		# Random texture for plane
-		texture_id = self.np_random.randint(0, 20)
-		path = os.path.dirname(self.path)
-		texture = p.loadTexture(os.path.join(path, 'common', 'textures', str(texture_id) + '.jpg'))
-		p.changeVisualShape(self.plane, -1, textureUniqueId=texture)
+		path = os.path.join(os.path.dirname(self.path), 'common', 'textures')
+		self.domain_randomizer.randomize_texture(path, self.plane)
 
 		hole_visual = p.createVisualShape(
 			p.GEOM_MESH,

@@ -1,3 +1,4 @@
+import os
 import cv2 as cv
 import pybullet as p
 
@@ -57,3 +58,15 @@ class DomainRandomizer:
 		friction = self.np_random.uniform(*friction_range)
 
 		p.changeDynamics(body_id, link, mass=mass, lateralFriction=friction)
+
+	def randomize_texture(self, path, body_id, link=-1):
+		"""
+		Randomizes texture from common texture folder
+		:param path: path to textures
+		:param body_id: Unique body id
+		:param link: -1 is base link
+		"""
+		texture_id = self.np_random.randint(0, 20)
+		texture = p.loadTexture(os.path.join(path, str(texture_id) + '.jpg'))
+		p.changeVisualShape(body_id, link, textureUniqueId=texture)
+
