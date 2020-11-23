@@ -99,7 +99,7 @@ class Panda:
         # Extract camera image
         w, h, rgba_img, depth_img, seg_img = p.getCameraImage(width=width, height=height, viewMatrix=view_matrix,
                                                               projectionMatrix=self.projection_matrix)
-        rgb_img = rgba_img[:3]
+        rgb_img = rgba_img[:, :, :3]
         return rgb_img, depth_img, seg_img
 
     def set_cartesian_pose(self, pose):
