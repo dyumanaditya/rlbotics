@@ -1,6 +1,5 @@
-import pybullet as p
-import pybullet_data
 import numpy as np
+import pybullet as p
 
 
 def draw_frame(pos, orn, line_length=0.1, replacement_ids=(-1, -1, -1)):

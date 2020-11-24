@@ -116,6 +116,7 @@ class Panda:
         pos = pose[:3]
         roll, pitch, yaw = pose[3:]
 
+        # TODO: Change this to not truncate but calculate angle
         eul_orn = [min(math.pi, max(-math.pi, roll)),
                    min(math.pi, max(-math.pi, pitch)),
                    min(math.pi, max(-math.pi, yaw))]
@@ -219,9 +220,11 @@ def main():
     panda.get_image()
 
     # Target pose
-    target_cart_pose = [0.5, 0.0, 0.13, 0.0, -math.pi, -0.0]
+    target_cart_pose = [0.5, 0.0, 0.08, 0.0, -math.pi, -0.0]
+    time.sleep(4)
     panda.set_cartesian_pose(target_cart_pose)
     time.sleep(3)
+    print(panda.get_cartesian_pose())
 
     # Open gripper
     panda.open_gripper()

@@ -1,24 +1,24 @@
-import pybullet as p
-import pybullet_data
 import time
 import math
 import numpy as np
+import pybullet as p
+import pybullet_data
 
 from rlbotics.envs.common.utils import draw_frame
 
 
 class Panda:
-    def __init__(self, physics_client):
-        # TODO: Add base position and orientation and adapt code to different base
+    def __init__(self, physics_client, base_pos, base_orn):
         self.physics_client = physics_client
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
-        self.robot_id = p.loadURDF('franka_panda/panda.urdf', [0.0, 0.0, 0.0], useFixedBase=True, flags=flags,
+        self.robot_id = p.loadURDF('franka_panda/panda.urdf', base_pos, base_orn, useFixedBase=True, flags=flags,
                                    physicsClientId=self.physics_client)
 
         # 7 Revolute, 2 Prismatic, 3 Fixed
-        self.num_joints = p.getNumJoints(self.robot_id)
         self.num_dofs = 7
         self.end_effector_idx = 11
+        self.num_joints = p.getNumJoints(self.robot_id)
 
         # Initialize position and velocity limits
         self.joint_lower_limits, self.joint_upper_limits, self.joint_range, self.velocity_limits = [], [], [], []
@@ -30,27 +30,18 @@ class Panda:
             max_velocity = joint_info[11]
             self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
 
-        # initial pose
+        # Initial pose
         self.initial_joint_positions = [0.0, 0.54, 0.0, -1.6, 0.0, 2.0, 0.0, 0.02, 0.02]
-        self.t = 0
-
-        # Camera parameters and projection matrix
-        fov, aspect, near_plane, far_plane = 70, 1.0, 0.01, 100
-        self.projection_matrix = p.computeProjectionMatrixFOV(fov, aspect, near_plane, far_plane)
-
-        # Camera frame w.r.t end-effector
-        self.cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -math.pi/2])
-        self.cam_pos = [-0.02, 0.0, 0.0]
 
         # Add debugging frame on the end effector
-        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
+        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                  physicsClientId=self.physics_client)[4:6]
         self.ee_ids = draw_frame(pos, orn)
 
     def reset(self):
         joint_idx = 0
         for i in range(self.num_joints):
-            info = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)
-            joint_type = info[2]
+            joint_type = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)[2]
             if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
                 p.resetJointState(self.robot_id, i, self.initial_joint_positions[joint_idx],
                                   physicsClientId=self.physics_client)
@@ -75,15 +66,18 @@ class Panda:
 
     def get_image(self, view_dist=0.5, width=224, height=224):
         # Get end-effector pose
-        com_pos, com_orn, _, _, w_pos, w_orn = p.getLinkState(self.robot_id, self.end_effector_idx,
-                                                              computeForwardKinematics=True,
-                                                              physicsClientId=self.physics_client)
+        _, _, _, _, w_pos, w_orn = p.getLinkState(self.robot_id, self.end_effector_idx,
+                                                  computeForwardKinematics=True,
+                                                  physicsClientId=self.physics_client)
+        # Camera frame w.r.t end-effector
+        cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client)
+        cam_pos = [-0.02, 0.0, 0.0]
 
         # Compute camera frame from end effector frame
-        pos, orn = p.multiplyTransforms(w_pos, w_orn, self.cam_pos, self.cam_orn)
+        pos, orn = p.multiplyTransforms(w_pos, w_orn, cam_pos, cam_orn, physicsClientId=self.physics_client)
 
         # Get camera frame rotation matrix from quaternion
-        rot_mat = p.getMatrixFromQuaternion(orn)
+        rot_mat = p.getMatrixFromQuaternion(orn, physicsClientId=self.physics_client)
         rot_mat = np.array(rot_mat).reshape(3, 3)
 
         # Initial camera view direction and up direction
@@ -94,11 +88,31 @@ class Panda:
         view_vec = rot_mat.dot(init_view_vec)
         up_vec = rot_mat.dot(init_up_vec)
 
-        view_matrix = p.computeViewMatrix(pos, pos + view_dist * view_vec, up_vec)
+        view_matrix = p.computeViewMatrix(
+            cameraEyePosition=pos,
+            cameraTargetPosition=pos + view_dist * view_vec,
+            cameraUpVector=up_vec,
+            physicsClientId=self.physics_client
+        )
+
+        # Camera parameters and projection matrix
+        fov, aspect, near_plane, far_plane = 70, 1.0, 0.01, 100
+        projection_matrix = p.computeProjectionMatrixFOV(
+            fov=fov,
+            aspect=aspect,
+            nearVal=near_plane,
+            farVal=far_plane,
+            physicsClientId=self.physics_client
+        )
 
         # Extract camera image
-        w, h, rgba_img, depth_img, seg_img = p.getCameraImage(width=width, height=height, viewMatrix=view_matrix,
-                                                              projectionMatrix=self.projection_matrix)
+        w, h, rgba_img, depth_img, seg_img = p.getCameraImage(
+            width=width,
+            height=height,
+            viewMatrix=view_matrix,
+            projectionMatrix=projection_matrix,
+            physicsClientId=self.physics_client
+        )
         rgb_img = rgba_img[:, :, :3]
         return rgb_img, depth_img, seg_img
 
@@ -106,16 +120,16 @@ class Panda:
         pos = pose[:3]
         roll, pitch, yaw = pose[3:]
 
-        eul_orn = [min(math.pi, max(-math.pi, roll)),
-                   min(math.pi, max(-math.pi, pitch)),
-                   min(math.pi, max(-math.pi, yaw))]
+        eul_orn = [min(np.pi, max(-np.pi, roll)),
+                   min(np.pi, max(-np.pi, pitch)),
+                   min(np.pi, max(-np.pi, yaw))]
 
-        orn = p.getQuaternionFromEuler(eul_orn)
+        orn = p.getQuaternionFromEuler(eul_orn, physicsClientId=self.physics_client)
 
         joint_positions = p.calculateInverseKinematics(self.robot_id, self.end_effector_idx, pos, orn,
                                                        self.joint_lower_limits, self.joint_upper_limits,
                                                        self.joint_range, self.initial_joint_positions,
-                                                       maxNumIterations=500, physicsClientId=self.physics_client)
+                                                       maxNumIterations=100, physicsClientId=self.physics_client)
         target_joint_positions = np.zeros(self.num_joints)
         joint_idx = 0
         for i in range(self.num_joints):
@@ -142,7 +156,8 @@ class Panda:
                                         targetPositions=joint_positions, physicsClientId=self.physics_client)
 
             # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
+            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                      physicsClientId=self.physics_client)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
             p.stepSimulation(self.physics_client)
@@ -155,7 +170,8 @@ class Panda:
                                     physicsClientId=self.physics_client)
 
             # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
+            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                      physicsClientId=self.physics_client)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
     def close_gripper(self, width=0.0):
@@ -165,6 +181,7 @@ class Panda:
                                     physicsClientId=self.physics_client)
 
             # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
+            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                      physicsClientId=self.physics_client)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
