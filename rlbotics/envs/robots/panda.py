@@ -55,7 +55,8 @@ class Panda:
                                                         physicsClientId=self.physics_client)])
 
     def get_cartesian_pose(self, orientation_format="euler"):
-        state = p.getLinkState(self.robot_id, self.end_effector_idx, physicsClientId=self.physics_client)
+        state = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                               physicsClientId=self.physics_client)
         pos = list(state[0])
         if orientation_format == "euler":
             orn = list(p.getEulerFromQuaternion(state[1], physicsClientId=self.physics_client))
@@ -118,11 +119,12 @@ class Panda:
 
     def set_cartesian_pose(self, pose):
         pos = pose[:3]
-        roll, pitch, yaw = pose[3:]
+        roll, pitch, yaw = list(map(lambda x: x % 2*np.pi, pose[3:]))
 
-        eul_orn = [min(np.pi, max(-np.pi, roll)),
-                   min(np.pi, max(-np.pi, pitch)),
-                   min(np.pi, max(-np.pi, yaw))]
+        # Map RPY : -pi < RPY <= pi
+        eul_orn = [-(2*np.pi - roll) if roll > np.pi else roll,
+                   -(2*np.pi - pitch) if pitch > np.pi else pitch,
+                   -(2*np.pi - yaw) if yaw > np.pi else yaw]
 
         orn = p.getQuaternionFromEuler(eul_orn, physicsClientId=self.physics_client)
 
@@ -135,7 +137,7 @@ class Panda:
         for i in range(self.num_joints):
             info = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)
             joint_type = info[2]
-            if joint_type == p.JOINT_REVOLUTE:
+            if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
                 target_joint_positions[i] = joint_positions[joint_idx]
                 joint_idx += 1
         self.set_joint_positions(target_joint_positions)
@@ -173,6 +175,7 @@ class Panda:
             pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                       physicsClientId=self.physics_client)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        time.sleep(1)
 
     def close_gripper(self, width=0.0):
         width = max(width, 0.0)
@@ -184,4 +187,4 @@ class Panda:
             pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                       physicsClientId=self.physics_client)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
-
+        time.sleep(1)

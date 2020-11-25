@@ -132,7 +132,7 @@ class Panda:
         for i in range(self.num_joints):
             info = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)
             joint_type = info[2]
-            if joint_type == p.JOINT_REVOLUTE:
+            if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
                 target_joint_positions[i] = joint_positions[joint_idx]
                 joint_idx += 1
         self.set_joint_positions(target_joint_positions)
@@ -162,22 +162,24 @@ class Panda:
     def open_gripper(self, width=0.8):
         width = min(width, 0.8)
         for i in [9, 10]:
-            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=10,
+            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=50,
                                     physicsClientId=self.physics_client)
 
             # Update end effector frame display
             pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        time.sleep(1)
 
     def close_gripper(self, width=0.0):
         width = max(width, 0.0)
         for i in [9, 10]:
-            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=10,
+            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=50,
                                     physicsClientId=self.physics_client)
 
             # Update end effector frame display
             pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        time.sleep(1)
 
 
 class PickingEnv:
@@ -224,11 +226,11 @@ def main():
     time.sleep(4)
     panda.set_cartesian_pose(target_cart_pose)
     time.sleep(3)
-    print(panda.get_cartesian_pose())
+    #print(panda.get_cartesian_pose())
 
     # Open gripper
     panda.open_gripper()
-    time.sleep(3)
+    #time.sleep(3)
     panda.close_gripper()
 
     # Get final image
