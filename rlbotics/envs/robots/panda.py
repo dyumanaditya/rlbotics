@@ -119,7 +119,7 @@ class Panda:
 
     def set_cartesian_pose(self, pose):
         pos = pose[:3]
-        roll, pitch, yaw = list(map(lambda x: x % 2*np.pi, pose[3:]))
+        roll, pitch, yaw = list(map(lambda x: x % (2*np.pi), pose[3:]))
 
         # Map RPY : -pi < RPY <= pi
         eul_orn = [-(2*np.pi - roll) if roll > np.pi else roll,

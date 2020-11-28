@@ -114,19 +114,19 @@ class Panda:
 
     def set_cartesian_pose(self, pose):
         pos = pose[:3]
-        roll, pitch, yaw = pose[3:]
+        roll, pitch, yaw = list(map(lambda x: x % (2*np.pi), pose[3:]))
 
-        # TODO: Change this to not truncate but calculate angle
-        eul_orn = [min(math.pi, max(-math.pi, roll)),
-                   min(math.pi, max(-math.pi, pitch)),
-                   min(math.pi, max(-math.pi, yaw))]
+        # Map RPY : -pi < RPY <= pi
+        eul_orn = [-(2*np.pi - roll) if roll > np.pi else roll,
+                   -(2*np.pi - pitch) if pitch > np.pi else pitch,
+                   -(2*np.pi - yaw) if yaw > np.pi else yaw]
 
         orn = p.getQuaternionFromEuler(eul_orn)
 
         joint_positions = p.calculateInverseKinematics(self.robot_id, self.end_effector_idx, pos, orn,
                                                        self.joint_lower_limits, self.joint_upper_limits,
                                                        self.joint_range, self.initial_joint_positions,
-                                                       maxNumIterations=500, physicsClientId=self.physics_client)
+                                                       maxNumIterations=100, physicsClientId=self.physics_client)
         target_joint_positions = np.zeros(self.num_joints)
         joint_idx = 0
         for i in range(self.num_joints):
@@ -147,7 +147,15 @@ class Panda:
         num_timesteps = math.ceil(max_total_time / control_freq)
         delta_joint_positions = joint_positions_diff / num_timesteps
 
-        for t in range(num_timesteps):
+        # p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
+        #                             targetPositions=target_joint_positions)
+        # for i in range(num_timesteps):
+        #     p.stepSimulation()
+        #     time.sleep(1./240)
+        # pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True)[4:6]
+        # self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
+        for t in range(1, num_timesteps+1):
             joint_positions = current_joint_positions + delta_joint_positions * t
             p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
                                         targetPositions=joint_positions, physicsClientId=self.physics_client)
@@ -210,7 +218,7 @@ class PickingEnv:
 def main():
     physics_client = p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    p.setRealTimeSimulation(1)
+    #p.setRealTimeSimulation(1)
     p.setGravity(0, 0, -0.98)
 
     # Create plane and cube
@@ -222,11 +230,11 @@ def main():
     panda.get_image()
 
     # Target pose
-    target_cart_pose = [0.5, 0.0, 0.08, 0.0, -math.pi, -0.0]
-    time.sleep(4)
+    target_cart_pose = [0.5, 0.0, 0.08, 0.0, np.pi, -0.0]
+    time.sleep(2)
     panda.set_cartesian_pose(target_cart_pose)
-    time.sleep(3)
-    #print(panda.get_cartesian_pose())
+    time.sleep(2)
+    print(panda.get_cartesian_pose())
 
     # Open gripper
     panda.open_gripper()
