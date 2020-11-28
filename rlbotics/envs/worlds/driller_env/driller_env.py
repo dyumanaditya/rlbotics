@@ -7,7 +7,7 @@ from rlbotics.envs.robots.panda import Panda
 
 
 class DrillerEnv:
-	def __init__(self, render, robot):
+	def __init__(self, robot, render):
 		self.physics_client = p.connect(p.GUI) if render else p.connect(p.DIRECT)
 		self.path = os.path.abspath(os.path.dirname(__file__))
 
