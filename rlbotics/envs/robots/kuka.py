@@ -30,11 +30,14 @@ class Kuka:
             self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
 
         # Initial pose
-        self.initial_joint_positions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        self.initial_joint_positions = [0.0, 0.5, 0.0, -1, 0.0, 1.6, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Add debugging frame on the end effector
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                   physicsClientId=self.physics_client)[4:6]
+
+        new_pos = self.transform(pos, orn)
+
         self.ee_ids = draw_frame(pos, orn)
 
     def reset(self):
@@ -45,6 +48,14 @@ class Kuka:
                 p.resetJointState(self.robot_id, i, self.initial_joint_positions[joint_idx],
                                   physicsClientId=self.physics_client)
                 joint_idx += 1
+
+        # Add debugging frame on the end effector
+        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                  physicsClientId=self.physics_client)[4:6]
+
+        new_pos = self.transform(pos, orn)
+
+        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
     def get_joint_limits(self):
         return self.joint_lower_limits, self.joint_upper_limits
@@ -159,6 +170,9 @@ class Kuka:
             # Update end effector frame display
             pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                       physicsClientId=self.physics_client)[4:6]
+
+            new_pos = self.transform(pos, orn)
+
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
             p.stepSimulation(self.physics_client)
@@ -174,6 +188,9 @@ class Kuka:
         # Update end effector frame display
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                     physicsClientId=self.physics_client)[4:6]
+
+        new_pos = self.transform(pos, orn)
+        
         self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
         time.sleep(1)
 
@@ -188,8 +205,27 @@ class Kuka:
         # Update end effector frame display
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                     physicsClientId=self.physics_client)[4:6]
+
+        new_pos = self.transform(pos, orn)
+
         self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
         time.sleep(1)
+
+    def transform(self, pos, orn):
+        pos_4d = np.ones((4))
+        pos_4d[0:3] = pos
+
+        orn_matrix = p.getMatrixFromQuaternion(orn, self.physics_client)
+        orn_matrix = np.reshape(orn_matrix, (3, 3))
+
+        transformation_matrix = np.zeros((4,4))
+        transformation_matrix[0:3, 0:3] = orn_matrix
+        transformation_matrix[2, 3] = 0.2
+        transformation_matrix[3, 3] = 1
+
+        new_pos = np.dot(transformation_matrix, pos_4d)[0:3]
+
+        return new_pos
 
 
 def main():
@@ -204,7 +240,7 @@ def main():
     kuka.get_image()
 
     # Target pose
-    target_cart_pose = [0.3, 0.0, 0.8, 0.0, 0.0, 0.0]
+    target_cart_pose = [0.3, 0.0, 0.08, 0.0, np.pi, 0.0]
     time.sleep(2)
     kuka.set_cartesian_pose(target_cart_pose)
     time.sleep(2)
