@@ -3,10 +3,10 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 
-from rlbotics.envs.robots.panda import Panda
+from rlbotics.envs.models.robots.panda import Panda
 
 
-class DrillerEnv:
+class DrillerWorld:
 	def __init__(self, robot, render):
 		self.physics_client = p.connect(p.GUI) if render else p.connect(p.DIRECT)
 		self.path = os.path.abspath(os.path.dirname(__file__))
