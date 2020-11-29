@@ -6,7 +6,7 @@ from gym import spaces
 from gym.utils import seeding
 
 from rlbotics.envs.common.domain_randomizer import DomainRandomizer
-from rlbotics.envs.worlds.driller_world.driller_world import DrillerWorld
+from rlbotics.envs.worlds.driller_world import DrillerWorld
 
 
 class DrillerGym(DrillerWorld, gym.Env):

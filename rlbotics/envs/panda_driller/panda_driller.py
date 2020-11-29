@@ -39,6 +39,7 @@ class PandaDrillerEnv(gym.Env):
 		self.arm_id = p.loadURDF('franka_panda/panda.urdf', arm_base_pos, useFixedBase=True)
 		self.table_id = p.loadURDF('table/table.urdf', [0, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
 		self.drill_id = p.loadURDF(os.path.join(self.path, 'drill', 'drill.urdf'), self.drill_base_pos, self.drill_orientation, globalScaling=0.013)
+		self.drill_id2 = p.loadURDF(os.path.join(self.path, 'drill', 'drill3.urdf'), [0.3, 0, 1.801], self.drill_orientation)
 
 		# Initialise joint info
 		self.joint_states, self.joint_limits, self.velocity_limits = [], [], []
@@ -85,10 +86,10 @@ class PandaDrillerEnv(gym.Env):
 		self.domain_randomizer.randomize_physics_constraints(self.drill_id)
 		self.domain_randomizer.randomize_color(self.drill_id)
 
-		self._grab_drill()
+		#self._grab_drill()
 		self._generate_plane()
 		p.setRealTimeSimulation(0)
-		p.setGravity(0, 0, -9.8)
+		#p.setGravity(0, 0, -9.8)
 
 		obs = self.render(mode=self.obs_mode)
 		return obs
