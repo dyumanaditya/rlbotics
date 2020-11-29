@@ -1,8 +1,8 @@
-from rlbotics.envs.worlds.bin_picking_world import BinPickingWorld
+from rlbotics.envs.gym.bin_picking_gym import BinPickingGym
 import time
 
 def main():
-    env = BinPickingWorld('kuka', render=True)
+    env = BinPickingGym('kuka', render=True)
     env.reset()
     time.sleep(10)
 

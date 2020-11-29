@@ -48,6 +48,8 @@ class BinPickingGym(BinPickingWorld, gym.Env):
         self.timestep = 0
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
+        self.reset_world()
+
         # TODO: reset world
 
     def step(self, action):

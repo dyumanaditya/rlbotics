@@ -7,7 +7,7 @@ import pybullet_data
 from rlbotics.envs.common.utils import draw_frame
 
 
-class Kuka:
+class KukaIiwa:
     def __init__(self, physics_client, base_pos, base_orn):
         self.physics_client = physics_client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())

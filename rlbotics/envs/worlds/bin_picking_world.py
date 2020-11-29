@@ -6,7 +6,7 @@ import pybullet_data
 import pandas as pd
 
 from rlbotics.envs.robots.panda import Panda
-from rlbotics.envs.robots.kuka import Kuka
+from rlbotics.envs.robots.kuka_iiwa import KukaIiwa
 
 class BinPickingWorld:
     def __init__(self, robot, render, num_of_parts=5):
@@ -30,7 +30,7 @@ class BinPickingWorld:
             self.arm = Panda(self.physics_client, arm_base_pos, arm_base_orn)
 
         elif robot == 'kuka':
-            self.arm = Kuka(self.physics_client, arm_base_pos, arm_base_orn)
+            self.arm = KukaIiwa(self.physics_client, arm_base_pos, arm_base_orn)
 
         self.tray_1_id = None
         self.tray_2_id = None
@@ -44,7 +44,7 @@ class BinPickingWorld:
         self.parts_data = pd.read_csv(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', 'parts_data.csv'))
 
 
-    def reset(self):
+    def reset_world(self):
         if self.tray_1_id is not None:
             p.removeBody(self.tray_1_id)
         if self.tray_2_id is not None:
