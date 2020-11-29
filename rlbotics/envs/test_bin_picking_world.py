@@ -2,7 +2,7 @@ from rlbotics.envs.worlds.bin_picking_world.bin_picking_world import BinPickingW
 import time
 
 def main():
-    env = BinPickingWorld('panda', render=True)
+    env = BinPickingWorld('kuka', render=True)
     env.reset()
     time.sleep(10)
 

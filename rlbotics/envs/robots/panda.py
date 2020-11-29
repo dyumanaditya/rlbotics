@@ -47,6 +47,10 @@ class Panda:
                                   physicsClientId=self.physics_client)
                 joint_idx += 1
 
+        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
+                                  physicsClientId=self.physics_client)[4:6]
+        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
     def get_joint_limits(self):
         return self.joint_lower_limits, self.joint_upper_limits
 
