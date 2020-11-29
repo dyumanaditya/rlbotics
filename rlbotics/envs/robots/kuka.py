@@ -30,7 +30,7 @@ class Kuka:
             self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
 
         # Initial pose
-        self.initial_joint_positions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,0.0 ,0.0]
+        self.initial_joint_positions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         # Add debugging frame on the end effector
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
@@ -38,11 +38,13 @@ class Kuka:
         self.ee_ids = draw_frame(pos, orn)
 
     def reset(self):
+        joint_idx = 0
         for i in range(self.num_joints):
             joint_type = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)[2]
             if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
-                p.resetJointState(self.robot_id, i, self.initial_joint_positions[i],
+                p.resetJointState(self.robot_id, i, self.initial_joint_positions[joint_idx],
                                   physicsClientId=self.physics_client)
+                joint_idx += 1
 
     def get_joint_limits(self):
         return self.joint_lower_limits, self.joint_upper_limits
