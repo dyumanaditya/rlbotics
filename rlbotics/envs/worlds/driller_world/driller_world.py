@@ -3,7 +3,7 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 
-from rlbotics.envs.models.robots.panda import Panda
+from rlbotics.envs.robots.panda import Panda
 
 
 class DrillerWorld:
