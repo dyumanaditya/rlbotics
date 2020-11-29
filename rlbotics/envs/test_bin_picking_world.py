@@ -1,4 +1,4 @@
-from rlbotics.envs.worlds.bin_picking_world.bin_picking_world import BinPickingWorld
+from rlbotics.envs.worlds.bin_picking_world import BinPickingWorld
 import time
 
 def main():

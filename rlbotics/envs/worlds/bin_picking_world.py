@@ -41,7 +41,7 @@ class BinPickingWorld:
         self.parts_id = []
         self.other_id = [self.table_id, self.arm]
 
-        self.parts_data = pd.read_csv(os.path.join(self.path, 'parts', 'parts_data.csv'))
+        self.parts_data = pd.read_csv(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', 'parts_data.csv'))
 
 
     def reset(self):
@@ -85,14 +85,14 @@ class BinPickingWorld:
         object_visual = p.createVisualShape(
             p.GEOM_MESH,
             meshScale=[object_scale] * 3,
-            fileName=os.path.join(self.path, 'parts', str(object_num) + '.obj'),
+            fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', str(object_num) + '.obj'),
             rgbaColor=np.hstack((np.random.rand(3), 1))
         )
 
         object_collision = p.createCollisionShape(
             p.GEOM_MESH,
             meshScale=[object_scale] * 3,
-            fileName=os.path.join(self.path, 'parts', str(object_num) + '.obj')
+            fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', str(object_num) + '.obj'),
         )
 
         self.parts_id.append(p.createMultiBody(
