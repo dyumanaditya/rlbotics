@@ -6,6 +6,7 @@ import pybullet_data
 import pandas as pd
 
 from rlbotics.envs.robots.panda import Panda
+from rlbotics.envs.robots.kuka import Kuka
 
 class BinPickingWorld:
     def __init__(self, robot, render, num_of_parts=5):
@@ -20,7 +21,7 @@ class BinPickingWorld:
         self.num_of_parts = num_of_parts
 
         # Load Robot and other objects
-        arm_base_pos = [-0.6, 0, 0.93]
+        arm_base_pos = [0, 0, 0.94]
         arm_base_orn = p.getQuaternionFromEuler([0, 0, 0])
 
         table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
@@ -28,11 +29,14 @@ class BinPickingWorld:
         if robot == 'panda':
             self.arm = Panda(self.physics_client, arm_base_pos, arm_base_orn)
 
+        elif robot == 'kuka':
+            self.arm = Kuka(self.physics_client, arm_base_pos, arm_base_orn)
+
         self.tray_1_id = None
         self.tray_2_id = None
 
         self.plane_id = p.loadURDF('plane.urdf')
-        self.table_id = p.loadURDF('table/table.urdf', [0, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
+        self.table_id = p.loadURDF('table/table.urdf', [0.5, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True)
 
         self.parts_id = []
         self.other_id = [self.table_id, self.arm]
@@ -46,8 +50,8 @@ class BinPickingWorld:
         if self.tray_2_id is not None:
             p.removeBody(self.tray_2_id)
 
-        self.tray_1_pos = [np.random.uniform(0.1, 0.9), np.random.uniform(0.3, 0.7), 0.94]
-        self.tray_2_pos = [np.random.uniform(0.1, 0.9), np.random.uniform(-0.3, -0.7), 0.94]
+        self.tray_1_pos = [np.random.uniform(0.4, 0.9), np.random.uniform(0.3, 0.7), 0.94]
+        self.tray_2_pos = [np.random.uniform(0.4, 0.9), np.random.uniform(-0.3, -0.7), 0.94]
 
         self.tray_1_id = p.loadURDF('tray/traybox.urdf', self.tray_1_pos)
         self.tray_2_id = p.loadURDF('tray/traybox.urdf', self.tray_2_pos)

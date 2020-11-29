@@ -14,6 +14,8 @@ class Kuka:
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
         self.robot_id = p.loadSDF('kuka_iiwa/kuka_with_gripper.sdf', physicsClientId=self.physics_client)[0]
 
+        p.resetBasePositionAndOrientation(self.robot_id, base_pos, base_orn)
+
         # 7 Revolute for arm, 4 Revolute for gripper, 3 Fixed
         self.num_dofs = 7
         self.end_effector_idx = 7
@@ -228,38 +230,38 @@ class Kuka:
         return new_pos
 
 
-def main():
-    physics_client = p.connect(p.GUI)
-    p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    p.setRealTimeSimulation(1)
-    p.setGravity(0, 0, -0.98)
+# def main():
+#     physics_client = p.connect(p.GUI)
+#     p.setAdditionalSearchPath(pybullet_data.getDataPath())
+#     p.setRealTimeSimulation(1)
+#     p.setGravity(0, 0, -0.98)
 
-    # Create kuka
-    kuka = Kuka(physics_client, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0])
-    kuka.reset()
-    kuka.get_image()
+#     # Create kuka
+#     kuka = Kuka(physics_client, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0])
+#     kuka.reset()
+#     kuka.get_image()
 
-    # Target pose
-    target_cart_pose = [0.3, 0.0, 0.08, 0.0, np.pi, 0.0]
-    time.sleep(2)
-    kuka.set_cartesian_pose(target_cart_pose)
-    time.sleep(2)
-    print(kuka.get_cartesian_pose())
+#     # Target pose
+#     target_cart_pose = [0.3, 0.0, 0.08, 0.0, np.pi, 0.0]
+#     time.sleep(2)
+#     kuka.set_cartesian_pose(target_cart_pose)
+#     time.sleep(2)
+#     print(kuka.get_cartesian_pose())
 
-    # Open gripper
-    kuka.open_gripper()
-    #time.sleep(3)
-    kuka.close_gripper()
+#     # Open gripper
+#     kuka.open_gripper()
+#     #time.sleep(3)
+#     kuka.close_gripper()
 
-    # Get final image
-    rgb, _, _ = kuka.get_image()
+#     # Get final image
+#     rgb, _, _ = kuka.get_image()
 
-    # dummy to keep window open
-    while(1):
-        time.sleep(0.01)
+#     # dummy to keep window open
+#     while(1):
+#         time.sleep(0.01)
 
-    physics_client.disconnect()
+#     physics_client.disconnect()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
