@@ -8,7 +8,7 @@ from rlbotics.envs.common.utils import draw_frame
 
 
 class Panda:
-    def __init__(self, physics_client, base_pos, base_orn):
+    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None):
         self.physics_client = physics_client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
@@ -31,7 +31,10 @@ class Panda:
             self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
 
         # Initial pose
-        self.initial_joint_positions = [0.0, 0.54, 0.0, -1.6, 0.0, 2.0, 0.0, 0.02, 0.02]
+        if initial_joint_positions is not None:
+            self.initial_joint_positions = initial_joint_positions
+        else:
+            self.initial_joint_positions = [0.0, 0.54, 0.0, -1.6, 0.0, 2.0, 0.0, 0.02, 0.02]
 
         # Add debugging frame on the end effector
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
