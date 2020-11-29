@@ -9,16 +9,17 @@ from rlbotics.envs.robots.panda import Panda
 class DrillerWorld:
 	def __init__(self, robot, render):
 		self.physics_client = p.connect(p.GUI) if render else p.connect(p.DIRECT)
-		self.path = os.path.abspath(os.path.dirname(__file__))
+		self.drill_path = os.path.abspath(os.path.join('..', 'models', 'misc', 'drill'))
+		self.plane_path = os.path.abspath(os.path.join('..', 'models', 'misc', 'plane'))
+		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
 		# Load Robot and other objects
-		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		arm_base_pos = [-0.6, 0, 0.93]
 		arm_base_orn = p.getQuaternionFromEuler([0, 0, 0])
+		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
 		self.drill_base_pos = [-0.12, 0, 1.601]
 		self.drill_orientation = p.getQuaternionFromEuler([0, -np.pi/2, np.pi])
 		self.drill_bit_vector = np.array([0, 0, -1])
-		table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
 
 		p.loadURDF('plane.urdf')
 		if robot == 'panda':

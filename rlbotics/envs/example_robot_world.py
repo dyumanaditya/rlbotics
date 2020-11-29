@@ -41,7 +41,7 @@ class Panda:
             self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
 
         # initial pose
-        self.initial_joint_positions = [0.0, 0.54, 0.0, -1.6, 0.0, 2.0, 0.0, 0.02, 0.02]
+        self.initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0, 0.02, 0.02]
         self.t = 0
 
         # Camera parameters and projection matrix
@@ -218,7 +218,7 @@ class PickingEnv:
 def main():
     physics_client = p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    #p.setRealTimeSimulation(1)
+    p.setRealTimeSimulation(1)
     p.setGravity(0, 0, -0.98)
 
     # Create plane and cube

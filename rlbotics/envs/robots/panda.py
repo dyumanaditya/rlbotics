@@ -34,7 +34,7 @@ class Panda:
         if initial_joint_positions is not None:
             self.initial_joint_positions = initial_joint_positions
         else:
-            self.initial_joint_positions = [0.0, 0.54, 0.0, -1.6, 0.0, 2.0, 0.0, 0.02, 0.02]
+            self.initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0, 0.02, 0.02]
 
         # Add debugging frame on the end effector
         pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
