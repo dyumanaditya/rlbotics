@@ -8,11 +8,11 @@ import pandas as pd
 from rlbotics.envs.robots.panda import Panda
 from rlbotics.envs.robots.kuka_iiwa import KukaIiwa
 
+
 class BinPickingWorld:
     def __init__(self, robot, render, num_of_parts=5):
         self.physics_client = p.connect(p.GUI) if render else p.connect(p.DIRECT)
         self.path = os.path.abspath(os.path.dirname(__file__))
-    
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setRealTimeSimulation(True)
@@ -42,7 +42,6 @@ class BinPickingWorld:
         self.other_id = [self.table_id, self.arm]
 
         self.parts_data = pd.read_csv(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', 'parts_data.csv'))
-
 
     def reset_world(self):
         if self.tray_1_id is not None:
