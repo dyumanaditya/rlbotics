@@ -25,19 +25,19 @@
 
     <link name="grip_bone">
       <inertial>
-        <origin xyz="0 -0.06823 0" rpy="0 0 0"/>
+        <origin xyz="0 -0.05012 -4e-05" rpy="0 0 0"/>
         <mass value="1.5"/>
         <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
       </inertial>
       <visual name="body1">
-        <origin xyz="0.11413 -0.12082 -0.01876" rpy="1.5708 0 0"/>
+        <origin xyz="0.11413 -0.12082 -0.01599" rpy="1.5708 0 0"/>
         <geometry>
           <mesh filename="meshes/dae/g_g_carcaza_carcaza001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="mango"/>
       </visual>
       <collision name="body1.000">
-        <origin xyz="0.11469 -0.12057 -0.01763" rpy="1.5708 0 0"/>
+        <origin xyz="0.11469 -0.12057 -0.01487" rpy="1.5708 0 0"/>
         <geometry>
           <mesh filename="meshes/dae/g_g_carcaza_carcaza001.001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
@@ -98,7 +98,7 @@
     </joint>
 
     <joint name="grip_bone" type="fixed">
-      <origin xyz="0.00063 0.03195 -0.02401" rpy="1.5708 0 0"/>
+      <origin xyz="0.00063 0.03473 -0.02401" rpy="1.5708 0 0"/>
       <parent link="root"/>
       <child link="grip_bone"/>
     </joint>
