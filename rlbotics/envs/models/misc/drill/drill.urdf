@@ -11,7 +11,7 @@
       <visual name="drillbit">
         <origin xyz="-0.00014 0.00027 0.0006" rpy="0 0 3.14159"/>
         <geometry>
-          <mesh filename="meshes/dae/g_Drillbit_01.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/g_Drillbit_01.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="mecha"/>
       </visual>
@@ -25,21 +25,21 @@
 
     <link name="grip_bone">
       <inertial>
-        <origin xyz="0 -0.06823 0" rpy="0 0 0"/>
+        <origin xyz="0 -0.05012 -4e-05" rpy="0 0 0"/>
         <mass value="1.5"/>
         <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
       </inertial>
       <visual name="body1">
-        <origin xyz="0.11413 -0.12082 -0.01876" rpy="1.5708 0 0"/>
+        <origin xyz="0.11413 -0.12082 -0.01599" rpy="1.5708 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/g_g_carcaza_carcaza001.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/g_g_carcaza_carcaza001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="mango"/>
       </visual>
       <collision name="body1.000">
-        <origin xyz="0.11469 -0.12057 -0.01763" rpy="1.5708 0 0"/>
+        <origin xyz="0.11469 -0.12057 -0.01487" rpy="1.5708 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/g_g_carcaza_carcaza001.001.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/g_g_carcaza_carcaza001.001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
       </collision>
     </link>
@@ -53,21 +53,21 @@
       <visual name="body2">
         <origin xyz="0.11475 0.05071 -0.1449" rpy="-3.14159 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/g_g_soporte_del_taladro_soporte_del_taladro001.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/g_g_soporte_del_taladro_soporte_del_taladro001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="soporte__del_taladro"/>
       </visual>
       <visual name="body3">
         <origin xyz="0.11475 0.05071 -0.1449" rpy="-3.14159 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/g_g_taladro_taladro001.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/g_g_taladro_taladro001.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="taladro"/>
       </visual>
       <visual name="body4">
         <origin xyz="0.11475 0.05071 -0.1449" rpy="-3.14159 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/meshId5_name.dae" scale="0.07123 0.07123 0.07123"/>
+          <mesh filename="meshes/meshId5_name.dae" scale="0.07123 0.07123 0.07123"/>
         </geometry>
         <material name="Carcasa"/>
       </visual>
@@ -80,13 +80,13 @@
       <collision name="body3.000">
         <origin xyz="0.11451 0.05079 -0.14454" rpy="-3.14159 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/g_g_taladro_taladro001.001.dae" scale="0.24711 0.24711 0.24711"/>
+          <mesh filename="meshes/g_g_taladro_taladro001.001.dae" scale="0.24711 0.24711 0.24711"/>
         </geometry>
       </collision>
       <collision name="body4.000">
         <origin xyz="0.11523 0.05135 -0.14442" rpy="-3.14159 0 0"/>
         <geometry>
-          <mesh filename="meshes/dae/meshId5_name.001.dae" scale="0.24711 0.24711 0.24711"/>
+          <mesh filename="meshes/meshId5_name.001.dae" scale="0.24711 0.24711 0.24711"/>
         </geometry>
       </collision>
     </link>
@@ -98,7 +98,7 @@
     </joint>
 
     <joint name="grip_bone" type="fixed">
-      <origin xyz="0.00063 0.03195 -0.02401" rpy="1.5708 0 0"/>
+      <origin xyz="0.00063 0.03473 -0.02401" rpy="1.5708 0 0"/>
       <parent link="root"/>
       <child link="grip_bone"/>
     </joint>
