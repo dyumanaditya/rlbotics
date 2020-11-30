@@ -9,6 +9,7 @@ from rlbotics.envs.common.utils import draw_frame
 
 class Panda:
     def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None):
+        p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
         self.physics_client = physics_client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
