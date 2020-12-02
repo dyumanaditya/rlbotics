@@ -21,7 +21,6 @@ class Panda:
         self.num_joints = p.getNumJoints(self.robot_id)
         self.revolute_joint_indices, self.prismatic_joint_indices, self.fixed_joint_indices = [], [], []
         self.joint_lower_limits, self.joint_upper_limits, self.joint_ranges = [], [], []
-        self.gripper_lower_limits, self.gripper_upper_limits, self.gripper_ranges = [], [], []
         self.arm_velocity_limits, self.gripper_velocity_limits = [], []
 
         for joint_idx in range(self.num_joints):
