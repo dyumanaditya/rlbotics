@@ -33,11 +33,11 @@ class Panda:
             elif joint_type == p.JOINT_FIXED:
                 self.fixed_joint_indices.append(joint_idx)
 
-            self.joint_lower_limits.append(joint_info[8])
-            self.joint_upper_limits.append(joint_info[9])
-            self.joint_ranges.append(joint_info[9] - joint_info[8])
-
             if joint_type != p.JOINT_FIXED:
+                self.joint_lower_limits.append(joint_info[8])
+                self.joint_upper_limits.append(joint_info[9])
+                self.joint_ranges.append(joint_info[9] - joint_info[8])
+
                 if joint_idx not in self.gripper_joint_indices:
                     self.arm_velocity_limits.append(joint_info[11])
                 else:
