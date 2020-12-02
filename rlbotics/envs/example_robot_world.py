@@ -19,7 +19,7 @@ def draw_frame(pos, orn, line_length=0.1, replacement_ids=(-1, -1, -1)):
 
 class Panda:
     def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None):
-        #p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
+        p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
         self.physics_client = physics_client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
@@ -44,9 +44,10 @@ class Panda:
             elif joint_type == p.JOINT_FIXED:
                 self.fixed_joint_indices.append(joint_idx)
 
-            self.joint_lower_limits.append(joint_info[8])
-            self.joint_upper_limits.append(joint_info[9])
-            self.joint_ranges.append(joint_info[9] - joint_info[8])
+            if joint_type != p.JOINT_FIXED:
+                self.joint_lower_limits.append(joint_info[8])
+                self.joint_upper_limits.append(joint_info[9])
+                self.joint_ranges.append(joint_info[9] - joint_info[8])
 
             if joint_type != p.JOINT_FIXED:
                 if joint_idx not in self.gripper_joint_indices:
@@ -196,6 +197,13 @@ class Panda:
         num_timesteps = math.ceil(max_total_time / control_freq)
         delta_joint_positions = joint_positions_diff / num_timesteps
 
+        # for i in range(self.arm_num_dof):
+        #     p.setJointMotorControl2(self.robot_id, joint_indices[i], p.POSITION_CONTROL, maxVelocity=self.arm_velocity_limits[i],
+        #                             targetPosition=target_joint_positions[i], physicsClientId=self.physics_client)
+        # for i in range(num_timesteps):
+        #     p.stepSimulation()
+        #     time.sleep(control_freq)
+
         for t in range(1, num_timesteps+1):
             joint_positions = current_joint_positions + delta_joint_positions * t
             p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
@@ -208,11 +216,11 @@ class Panda:
             pos, orn = self.get_cartesian_pose('quaternion')
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
-        for i in range(50):
-            p.stepSimulation()
-            # Update end effector frame display
-            pos, orn = self.get_cartesian_pose('quaternion')
-            self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        # for i in range(50):
+        #     p.stepSimulation()
+        #     # Update end effector frame display
+        #     pos, orn = self.get_cartesian_pose('quaternion')
+        #     self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
     def open_gripper(self, width=0.08):
         width = min(width, 0.08)
@@ -269,7 +277,7 @@ class PickingEnv:
 def main():
     physics_client = p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    #p.setRealTimeSimulation(1)
+    p.setRealTimeSimulation(1)
     p.setGravity(0, 0, -0.98)
 
     # Create plane and cube
@@ -289,7 +297,6 @@ def main():
 
     # Open gripper
     panda.open_gripper()
-    #time.sleep(3)
     panda.close_gripper()
 
     # Get final image
@@ -297,9 +304,8 @@ def main():
     # env.get_image()
 
     # dummy to keep window open
-    while(1):
+    while True:
         time.sleep(0.01)
-    physics_client.disconnect()
 
 
 if __name__ == '__main__':
