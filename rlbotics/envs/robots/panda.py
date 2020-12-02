@@ -16,62 +16,81 @@ class Panda:
         self.robot_id = p.loadURDF('franka_panda/panda.urdf', base_pos, base_orn, useFixedBase=True, flags=flags,
                                    physicsClientId=self.physics_client)
 
-        # 7 Revolute, 2 Prismatic, 3 Fixed
-        self.num_dofs = 7
-        self.end_effector_idx = 11
+        # Get joint info
+        self.gripper_joint_indices = [9, 10]    # Set this manually if gripper is in built
         self.num_joints = p.getNumJoints(self.robot_id)
+        self.revolute_joint_indices, self.prismatic_joint_indices, self.fixed_joint_indices = [], [], []
+        self.joint_lower_limits, self.joint_upper_limits, self.joint_ranges = [], [], []
+        self.gripper_lower_limits, self.gripper_upper_limits, self.gripper_ranges = [], [], []
+        self.arm_velocity_limits, self.gripper_velocity_limits = [], []
 
-        # Initialize position and velocity limits
-        self.joint_lower_limits, self.joint_upper_limits, self.joint_range, self.velocity_limits = [], [], [], []
         for joint_idx in range(self.num_joints):
-            joint_info = p.getJointInfo(self.robot_id, joint_idx, physicsClientId=self.physics_client)
+            joint_info = p.getJointInfo(self.robot_id, joint_idx, self.physics_client)
+            joint_type = joint_info[2]
+            if joint_type == p.JOINT_REVOLUTE:
+                self.revolute_joint_indices.append(joint_idx)
+            elif joint_type == p.JOINT_PRISMATIC:
+                self.prismatic_joint_indices.append(joint_idx)
+            elif joint_type == p.JOINT_FIXED:
+                self.fixed_joint_indices.append(joint_idx)
+
             self.joint_lower_limits.append(joint_info[8])
             self.joint_upper_limits.append(joint_info[9])
-            self.joint_range.append(joint_info[9] - joint_info[8])
-            max_velocity = joint_info[11]
-            self.velocity_limits.append(np.inf if max_velocity == 0 else max_velocity)
+            self.joint_ranges.append(joint_info[9] - joint_info[8])
+
+            if joint_type != p.JOINT_FIXED:
+                if joint_idx not in self.gripper_joint_indices:
+                    self.arm_velocity_limits.append(joint_info[11])
+                else:
+                    self.gripper_velocity_limits.append(joint_info[11])
+
+        # 7 Revolute, 2 Prismatic, 3 Fixed
+        self.arm_num_dof = 7
+        self.gripper_num_dof = 2
+        self.end_effector_idx = 11
 
         # Initial pose
         if initial_joint_positions is not None:
             self.initial_joint_positions = initial_joint_positions
         else:
-            self.initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0, 0.02, 0.02]
+            self.initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0, 0.0, 0.0]
 
         # Add debugging frame on the end effector
-        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                                  physicsClientId=self.physics_client)[4:6]
+        pos, orn = self.get_cartesian_pose('quaternion')
         self.ee_ids = draw_frame(pos, orn)
 
     def reset(self):
-        joint_idx = 0
-        for i in range(self.num_joints):
-            joint_type = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)[2]
-            if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
-                p.resetJointState(self.robot_id, i, self.initial_joint_positions[joint_idx],
-                                  physicsClientId=self.physics_client)
-                joint_idx += 1
+        joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
+        joint_indices.sort()
+        for pos_idx, joint_idx in enumerate(joint_indices):
+            p.resetJointState(self.robot_id, joint_idx, self.initial_joint_positions[pos_idx], physicsClientId=self.physics_client)
 
-        pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                                  physicsClientId=self.physics_client)[4:6]
+        pos, orn = self.get_cartesian_pose('quaternion')
         self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
     def get_joint_limits(self):
         return self.joint_lower_limits, self.joint_upper_limits
 
-    def get_joint_positions(self):
-        return np.array([j[0] for j in p.getJointStates(self.robot_id, range(self.num_joints),
-                                                        physicsClientId=self.physics_client)])
+    def get_joint_positions(self, mode='arm'):
+        if mode == 'arm':
+            joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
+            joint_indices.sort()
+            for i in self.gripper_joint_indices:
+                joint_indices.remove(i)
+        elif mode == 'gripper':
+            joint_indices = self.gripper_joint_indices
 
-    def get_cartesian_pose(self, orientation_format="euler"):
+        return np.array([j[0] for j in p.getJointStates(self.robot_id, joint_indices, physicsClientId=self.physics_client)])
+
+    def get_cartesian_pose(self, orientation_format='euler'):
         state = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
                                physicsClientId=self.physics_client)
         pos = list(state[0])
-        if orientation_format == "euler":
+        if orientation_format == 'euler':
             orn = list(p.getEulerFromQuaternion(state[1], physicsClientId=self.physics_client))
         else:
             orn = list(state[1])
-        pose = pos + orn
-        return pose
+        return pos, orn
 
     def get_image(self, view_dist=0.5, width=224, height=224):
         # Get end-effector pose
@@ -138,61 +157,69 @@ class Panda:
 
         joint_positions = p.calculateInverseKinematics(self.robot_id, self.end_effector_idx, pos, orn,
                                                        self.joint_lower_limits, self.joint_upper_limits,
-                                                       self.joint_range, self.initial_joint_positions,
+                                                       self.joint_ranges, self.initial_joint_positions,
                                                        maxNumIterations=100, physicsClientId=self.physics_client)
-        target_joint_positions = np.zeros(self.num_joints)
         joint_idx = 0
+        target_joint_positions = []
         for i in range(self.num_joints):
-            info = p.getJointInfo(self.robot_id, i, physicsClientId=self.physics_client)
-            joint_type = info[2]
-            if joint_type == p.JOINT_REVOLUTE or joint_type == p.JOINT_PRISMATIC:
-                target_joint_positions[i] = joint_positions[joint_idx]
+            if i in self.fixed_joint_indices:
+                continue
+            if i in self.gripper_joint_indices:
                 joint_idx += 1
+            else:
+                target_joint_positions.append(joint_positions[joint_idx])
+                joint_idx += 1
+        target_joint_positions = np.array(target_joint_positions)
         self.set_joint_positions(target_joint_positions)
 
-    def set_joint_positions(self, target_joint_positions, control_freq=1./240):
-        joint_indices = list(range(self.num_joints))
-        current_joint_positions = self.get_joint_positions()
+    def set_joint_positions(self, target_joint_positions, control_freq=1./240.):
+        joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
+        joint_indices.sort()
+        for i in self.gripper_joint_indices:
+            joint_indices.remove(i)
+
+        current_joint_positions = self.get_joint_positions(mode='arm')
         joint_positions_diff = target_joint_positions - current_joint_positions
 
         # Compute time to complete motion
-        max_total_time = np.max(joint_positions_diff / self.velocity_limits)
+        max_total_time = np.max(joint_positions_diff / self.arm_velocity_limits)
         num_timesteps = math.ceil(max_total_time / control_freq)
         delta_joint_positions = joint_positions_diff / num_timesteps
 
-        for t in range(num_timesteps):
+        for t in range(1, num_timesteps+1):
             joint_positions = current_joint_positions + delta_joint_positions * t
             p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
                                         targetPositions=joint_positions, physicsClientId=self.physics_client)
 
-            # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                                      physicsClientId=self.physics_client)[4:6]
-            self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
-
             p.stepSimulation(self.physics_client)
             time.sleep(control_freq)
 
-    def open_gripper(self, width=0.8):
-        width = min(width, 0.8)
-        for i in [9, 10]:
-            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=10,
-                                    physicsClientId=self.physics_client)
-
             # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                                      physicsClientId=self.physics_client)[4:6]
+            pos, orn = self.get_cartesian_pose('quaternion')
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
+    def open_gripper(self, width=0.08):
+        width = min(width, 0.08)
+        target = [width/2, width/2]
+        joints = [9, 10]
+        for i in range(len(joints)):
+            p.setJointMotorControl2(self.robot_id, joints[i], p.POSITION_CONTROL, target[i],
+                                    maxVelocity=self.gripper_velocity_limits[i], physicsClientId=self.physics_client)
         time.sleep(1)
+
+        # Update end effector frame display
+        pos, orn = self.get_cartesian_pose('quaternion')
+        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
 
     def close_gripper(self, width=0.0):
         width = max(width, 0.0)
-        for i in [9, 10]:
-            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, width/2, force=10,
-                                    physicsClientId=self.physics_client)
-
-            # Update end effector frame display
-            pos, orn = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                                      physicsClientId=self.physics_client)[4:6]
-            self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        target = [width/2, width/2]
+        joints = [9, 10]
+        for i in range(len(joints)):
+            p.setJointMotorControl2(self.robot_id, joints[i], p.POSITION_CONTROL, target[i],
+                                    maxVelocity=self.gripper_velocity_limits[i], physicsClientId=self.physics_client)
         time.sleep(1)
+
+        # Update end effector frame display
+        pos, orn = self.get_cartesian_pose('quaternion')
+        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
