@@ -17,6 +17,7 @@ class Panda:
                                    physicsClientId=self.physics_client)
 
         # Get joint info
+        # NOTE: For custom grippers, gripper properties should be added to joint limits and ranges!!
         self.gripper_joint_indices = [9, 10]    # Set this manually if gripper is in built
         self.num_joints = p.getNumJoints(self.robot_id)
         self.revolute_joint_indices, self.prismatic_joint_indices, self.fixed_joint_indices = [], [], []
