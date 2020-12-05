@@ -75,8 +75,8 @@ class BinPickingWorld:
         if self.tray_2_id is not None:
             p.removeBody(self.tray_2_id)
 
-        self.tray_1_pos = [np.random.uniform(0.4, 0.9), np.random.uniform(0.3, 0.7), 0.94]
-        self.tray_2_pos = [np.random.uniform(0.4, 0.9), np.random.uniform(-0.3, -0.7), 0.94]
+        self.tray_1_pos = [self.np_random.uniform(0.4, 0.9), self.np_random.uniform(0.3, 0.7), 0.94]
+        self.tray_2_pos = [self.np_random.uniform(0.4, 0.9), self.np_random.uniform(-0.3, -0.7), 0.94]
 
         self.tray_1_id = p.loadURDF('tray/traybox.urdf', self.tray_1_pos)
         self.tray_2_id = p.loadURDF('tray/traybox.urdf', self.tray_2_pos)
@@ -98,18 +98,18 @@ class BinPickingWorld:
             time.sleep(0.1)
 
     def add_random_object(self):
-        object_num = np.random.randint(7)
+        object_num = self.np_random.randint(7)
         # object_num = 0
 
         object_scale = self.parts_data.loc[object_num, 'scale']
         object_mass = self.parts_data.loc[object_num, 'mass']
-        object_orientation = p.getQuaternionFromEuler([np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi), np.random.uniform(0, 2*np.pi)])
+        object_orientation = p.getQuaternionFromEuler([self.np_random.uniform(0, 2*np.pi), self.np_random.uniform(0, 2*np.pi), self.np_random.uniform(0, 2*np.pi)])
 
         object_visual = p.createVisualShape(
             p.GEOM_MESH,
             meshScale=[object_scale] * 3,
             fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'random_objects', str(object_num) + '.obj'),
-            rgbaColor=np.hstack((np.random.rand(3), 1))
+            rgbaColor=np.hstack((self.np_random.rand(3), 1))
         )
 
         object_collision = p.createCollisionShape(
@@ -119,7 +119,7 @@ class BinPickingWorld:
         )
 
         self.parts_id.append(p.createMultiBody(
-            basePosition=[np.random.uniform(self.tray_1_pos[0] - 0.1, self.tray_1_pos[0] + 0.1), np.random.uniform(self.tray_1_pos[1] - 0.1, self.tray_1_pos[1] + 0.1), 1.5],
+            basePosition=[self.np_random.uniform(self.tray_1_pos[0] - 0.1, self.tray_1_pos[0] + 0.1), self.np_random.uniform(self.tray_1_pos[1] - 0.1, self.tray_1_pos[1] + 0.1), 1.5],
             baseVisualShapeIndex=object_visual,
             baseCollisionShapeIndex=object_collision,
             baseOrientation=object_orientation,
