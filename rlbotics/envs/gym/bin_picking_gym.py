@@ -1,9 +1,7 @@
 import gym
-import math
 import numpy as np
 import pybullet as p
 from gym import spaces
-from gym.utils import seeding
 
 from rlbotics.envs.common.domain_randomizer import DomainRandomizer
 from rlbotics.envs.worlds.bin_picking_world import BinPickingWorld
@@ -13,35 +11,35 @@ class BinPickingGym(BinPickingWorld, gym.Env):
     metadata = {'render.modes': ['rgb', 'rgbd', 'rgbds'],
                 'video.frames_per_second': 50}    
 
-    def __init__(self, robot, render=False, obs_mode='rgb', domain_randomization=True, num_of_parts=5):
-        super().__init__(robot, render, num_of_parts)
+    def __init__(self, robot, gripper, render=False, obs_mode='rgb', domain_randomization=True, use_ee_cam=False, num_of_parts=5):
+        super().__init__(robot, gripper, render, use_ee_cam, num_of_parts)
         self.domain_randomization = domain_randomization
         self.obs_mode = obs_mode
         self.max_timesteps = 1000
         self.timestep = 0
         self.done = False
-
         self.num_of_parts = num_of_parts
         self.movement_penalty_constant = 10
 
         # Initialise environment spaces
-        self.action_space = spaces.Box(-1, 1, (self.arm.num_joints,), dtype=np.float32)
-        if self.obs_mode == 'rgb':
-            self.observation_space = spaces.Box(0, 255, shape=(2, 224, 224, 3), dtype=np.uint8)
-        elif self.obs_mode == 'rgbd':
-            self.observation_space = spaces.Box(0.01, 1000, shape=(2, 224, 224, 4), dtype=np.uint16)
-        elif self.obs_mode == 'rgbds':
-            self.observation_space = spaces.Box(0.01, 1000, shape=(2, 224, 224, 5), dtype=np.uint16)
+        if use_ee_cam:
+            if self.obs_mode == 'rgb':
+                self.observation_space = spaces.Box(0, 255, shape=(224, 224, 3), dtype=np.uint8)
+            elif self.obs_mode == 'rgbd':
+                self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 4), dtype=np.uint16)
+            elif self.obs_mode == 'rgbds':
+                self.observation_space = spaces.Box(0.01, 1000, shape=(224, 224, 5), dtype=np.uint16)
+        else:
+            if self.obs_mode == 'rgb':
+                self.observation_space = spaces.Box(0, 255, shape=(1, 224, 224, 3), dtype=np.uint8)
+            elif self.obs_mode == 'rgbd':
+                self.observation_space = spaces.Box(0.01, 1000, shape=(1, 224, 224, 4), dtype=np.uint16)
+            elif self.obs_mode == 'rgbds':
+                self.observation_space = spaces.Box(0.01, 1000, shape=(1, 224, 224, 5), dtype=np.uint16)
 
         # Initialise env
-        self.seed()
         self.domain_randomizer = DomainRandomizer(self.np_random)
-        # self.reset()
-
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
+        self.reset()
 
     def reset(self):
         self.done = False
@@ -49,17 +47,22 @@ class BinPickingGym(BinPickingWorld, gym.Env):
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
         self.reset_world()
-
-        # TODO: reset world
+        obs = self._get_obs()
+        return obs
 
     def step(self, action):
         self.timestep += 1
         action = np.clip(action, -1, 1).astype(np.float32)
 
         # Map to appropriate range according to joint joint_limits
-        joint_angles = self._map_linear(action)
-
+        joint_angles = self._map_action_to_joint_space(action)
         self.arm.set_joint_positions(joint_angles)
+
+        delta_joint_angles = joint_angles - self.arm.get_joint_positions(mode='arm')
+        rew = self._get_rew(delta_joint_angles)
+
+        new_obs = self._get_obs()
+        return new_obs, rew, self.done, {}
 
     def render(self, mode='rgb'):
         img = self.get_camera_img()
@@ -77,6 +80,43 @@ class BinPickingGym(BinPickingWorld, gym.Env):
 
     def close(self):
         p.disconnect()
+
+    def _get_obs(self):
+        img = self.render(mode=self.obs_mode)
+
+        if self.use_ee_cam:
+            if self.obs_mode == 'rgb':
+                rgb = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = rgb
+
+            elif self.obs_mode == 'rgbd':
+                rgb, dep = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = np.dstack((rgb, dep))
+
+            elif self.obs_mode == 'rgbds':
+                rgb, dep, seg = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = np.dstack((rgb, dep, seg))
+
+        else:
+            if self.obs_mode == 'rgb':
+                rgb = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = rgb
+
+            elif self.obs_mode == 'rgbd':
+                rgb, dep = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = np.dstack((rgb, dep))
+
+            elif self.obs_mode == 'rgbds':
+                rgb, dep, seg = img
+                rgb = self.domain_randomizer.randomize_lighting(rgb) if self.domain_randomization else rgb
+                img = np.dstack((rgb, dep, seg))
+
+        return img
 
     def get_camera_img(self):
         view_matrix = p.computeViewMatrix(
@@ -106,15 +146,16 @@ class BinPickingGym(BinPickingWorld, gym.Env):
 
         return rgb_img, depth_img, seg_img
 
-    def _map_linear(self, joint_angles):
+    def _map_action_to_joint_space(self, action):
+        joint_positions = np.zeros_like(action)
         for i in range(self.arm.num_joints):
-            val = joint_angles[i]
+            val = action[i]
             minimum = self.arm.joint_lower_limits[0]
             maximum = self.arm.joint_upper_limits[1]
-            joint_angles[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
-        return joint_angles
+            joint_positions[i] = (((val - (-1)) * (maximum - minimum)) / (1 - (-1))) + minimum
+        return joint_positions
 
-    def _compute_reward(self, action):
+    def _get_rew(self, action):
         # idxs of all overlapping objects with from tray and to tray including arm etc
         all_overlapping_objects_with_tray_1 = np.array(p.getOverlappingObjects(self.tray_1_min_AABB, self.from_tray_max_AABB))[:, 0]
         all_overlapping_objects_with_tray_2 = np.array(p.getOverlappingObjects(self.tray_2_min_AABB, self.to_tray_max_AABB))[:, 0]
