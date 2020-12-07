@@ -29,7 +29,9 @@ class KukaIiwa:
         for joint_idx in range(self.num_joints):
             joint_info = p.getJointInfo(self.robot_id, joint_idx, self.physics_client)
             joint_type = joint_info[2]
-            print(joint_idx, joint_type)
+
+            # print(joint_idx, joint_type)
+            
             if joint_type == p.JOINT_REVOLUTE:
                 self.revolute_joint_indices.append(joint_idx)
             elif joint_type == p.JOINT_PRISMATIC:
@@ -219,7 +221,6 @@ class KukaIiwa:
 
         p.setJointMotorControl2(self.robot_id, 10, p.POSITION_CONTROL, 0, force=10, physicsClientId=self.physics_client)
         p.setJointMotorControl2(self.robot_id, 13, p.POSITION_CONTROL, 0, force=10, physicsClientId=self.physics_client)
-
 
         # Update end effector frame display
         pos, orn = self.get_cartesian_pose('quaternion')
