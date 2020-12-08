@@ -37,3 +37,6 @@ To contribute to this package, it is recommended to follow this structure:
   - `compute_policy_loss`: Build policy loss function
   - `update_policy`: Update the policy
   - `update_value`: Update the value function
+
+TODO:
+Add documentation on the environments.
