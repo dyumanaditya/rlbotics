@@ -19,7 +19,7 @@ def draw_frame(pos, orn, line_length=0.1, replacement_ids=(-1, -1, -1)):
 
 class Panda:
     def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None):
-        p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
+        #p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
         self.physics_client = physics_client
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
@@ -209,12 +209,16 @@ class Panda:
             p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
                                         targetPositions=joint_positions, physicsClientId=self.physics_client)
 
-            p.stepSimulation(self.physics_client)
-            time.sleep(control_freq)
+            # p.stepSimulation(self.physics_client)
+            # time.sleep(control_freq)
 
             # Update end effector frame display
             pos, orn = self.get_cartesian_pose('quaternion')
             self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
+        for i in range(num_timesteps):
+            p.stepSimulation(self.physics_client)
+            time.sleep(control_freq)
 
         # for i in range(50):
         #     p.stepSimulation()
@@ -277,7 +281,7 @@ class PickingEnv:
 def main():
     physics_client = p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    p.setRealTimeSimulation(1)
+    #p.setRealTimeSimulation(1)
     p.setGravity(0, 0, -0.98)
 
     # Create plane and cube

@@ -46,7 +46,7 @@ pgui.configureDebugVisualizer(pgui.COV_ENABLE_RENDERING, 0)
 orn = [0, 0, 0, 1]
 ed0.createMultiBody([0, 0, 0], orn, pgui._client)
 pgui.setRealTimeSimulation(1)
-    pgui.configureDebugVisualizer(pgui.COV_ENABLE_RENDERING, 1)
+pgui.configureDebugVisualizer(pgui.COV_ENABLE_RENDERING, 1)
 
 while (pgui.isConnected()):
   pgui.getCameraImage(320, 200, renderer=pgui.ER_BULLET_HARDWARE_OPENGL)

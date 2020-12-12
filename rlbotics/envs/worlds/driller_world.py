@@ -6,8 +6,7 @@ import pybullet as p
 import pybullet_data
 from gym.utils import seeding
 
-from rlbotics.envs.robots.panda import Panda
-from rlbotics.envs.robots.kuka_iiwa import KukaIiwa
+from rlbotics.envs.common.robot_gripper_class_dict import robot_class_dict
 
 
 class DrillerWorld:
@@ -43,25 +42,11 @@ class DrillerWorld:
 		arm_base_pos = [-0.6, 0, 0.93]
 		arm_base_orn = p.getQuaternionFromEuler([0, 0, 0], physicsClientId=self.physics_client)
 
-		if robot == 'panda':
-			self.arm = Panda(self.physics_client, arm_base_pos, arm_base_orn)
-
-		elif robot == 'kuka_iiwa':
-			self.arm = KukaIiwa(self.physics_client, arm_base_pos, arm_base_orn)
-
-		elif robot == 'ur10':
-			if gripper == 'robotiq_2f_85':
-				pass 	# Load UR10 with this gripper. Same for others
-			elif gripper == 'robotiq_2f_140':
-				pass
-			elif gripper == 'robotiq_3f':
-				pass
-			else:
-				raise FileNotFoundError(f'{gripper} gripper does not exist')
-
-		# End of looking through all robots
-		else:
-			raise FileNotFoundError(f'{robot} robot does not exist')
+		# TODO: fix this bug
+		try:
+			self.arm = robot_class_dict[robot](self.physics_client, arm_base_pos, arm_base_orn, gripper_name=gripper)
+		except KeyError:
+			raise FileNotFoundError(f'{robot} or/and {gripper} is an invalid choice')
 
 	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)

@@ -1,210 +1,56 @@
 import time
-import math
-import numpy as np
 import pybullet as p
-import pybullet_data
+from math import radians
 
 from rlbotics.envs.common.utils import draw_frame
+from rlbotics.envs.robots.manipulator import Manipulator
 
 
-class Panda:
-    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None):
-        p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
-        self.physics_client = physics_client
-        p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
-        self.robot_id = p.loadURDF('franka_panda/panda.urdf', base_pos, base_orn, useFixedBase=True, flags=flags,
-                                   physicsClientId=self.physics_client)
+class Panda(Manipulator):
+    """
+    Class for Franka Emika Panda. Datasheet specs taken from:
+    https://s3-eu-central-1.amazonaws.com/franka-de-uploads/uploads/Datasheet-EN.pdf
+    Angle Units: degrees
+    """
+    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
+        robot_info = {}
+        dof = 7
+        robot_name = 'panda'
+        in_built_gripper = True
+        joint_indices = [0, 1, 2, 3, 4, 5, 6]
+        joint_lower_limits = [-166, -101, -166, -176, -166, -1, -166]
+        joint_upper_limits = [166, 101, 166, -4, 166, 215, 166]
+        joint_ranges = [ul - ll for ll, ul in zip(joint_lower_limits, joint_upper_limits)]
+        joint_velocity_limits = [150, 150, 150, 150, 180, 180, 180]
 
-        # Get joint info
-        # NOTE: For custom grippers, gripper properties should be added to joint limits and ranges!!
-        self.gripper_joint_indices = [9, 10]    # Set this manually if gripper is in built
-        self.num_joints = p.getNumJoints(self.robot_id)
-        self.revolute_joint_indices, self.prismatic_joint_indices, self.fixed_joint_indices = [], [], []
-        self.joint_lower_limits, self.joint_upper_limits, self.joint_ranges = [], [], []
-        self.arm_velocity_limits, self.gripper_velocity_limits = [], []
-
-        for joint_idx in range(self.num_joints):
-            joint_info = p.getJointInfo(self.robot_id, joint_idx, self.physics_client)
-            joint_type = joint_info[2]
-            if joint_type == p.JOINT_REVOLUTE:
-                self.revolute_joint_indices.append(joint_idx)
-            elif joint_type == p.JOINT_PRISMATIC:
-                self.prismatic_joint_indices.append(joint_idx)
-            elif joint_type == p.JOINT_FIXED:
-                self.fixed_joint_indices.append(joint_idx)
-
-            if joint_type != p.JOINT_FIXED:
-                self.joint_lower_limits.append(joint_info[8])
-                self.joint_upper_limits.append(joint_info[9])
-                self.joint_ranges.append(joint_info[9] - joint_info[8])
-
-                if joint_idx not in self.gripper_joint_indices:
-                    self.arm_velocity_limits.append(joint_info[11])
-                else:
-                    self.gripper_velocity_limits.append(joint_info[11])
-
-        # 7 Revolute, 2 Prismatic, 3 Fixed
-        self.arm_num_dof = 7
-        self.gripper_num_dof = 2
-        self.end_effector_idx = 11
+        # Convert all degree specs to radians
+        joint_lower_limits = list(map(radians, joint_lower_limits))
+        joint_upper_limits = list(map(radians, joint_upper_limits))
+        joint_ranges = list(map(radians, joint_ranges))
+        joint_velocity_limits = list(map(radians, joint_velocity_limits))
 
         # Initial pose
-        if initial_joint_positions is not None:
-            self.initial_joint_positions = initial_joint_positions
-        else:
-            self.initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0, 0.0, 0.0]
+        if initial_joint_positions is None:
+            initial_joint_positions = [0.0, 0.3, 0.0, -1.2, 0.0, 2.0, 0.0]
 
-        # Add debugging frame on the end effector
-        pos, orn = self.get_cartesian_pose('quaternion')
-        self.ee_ids = draw_frame(pos, orn)
+        robot_info['dof'] = dof
+        robot_info['robot_name'] = robot_name
+        robot_info['in_built_gripper'] = in_built_gripper
+        robot_info['joint_indices'] = joint_indices
+        robot_info['joint_lower_limits'] = joint_lower_limits
+        robot_info['joint_upper_limits'] = joint_upper_limits
+        robot_info['joint_ranges'] = joint_ranges
+        robot_info['joint_velocity_limits'] = joint_velocity_limits
+        robot_info['initial_pose'] = initial_joint_positions
 
-    def reset(self):
-        joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
-        joint_indices.sort()
-        for pos_idx, joint_idx in enumerate(joint_indices):
-            p.resetJointState(self.robot_id, joint_idx, self.initial_joint_positions[pos_idx], physicsClientId=self.physics_client)
-
-        pos, orn = self.get_cartesian_pose('quaternion')
-        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
-
-    def get_joint_limits(self):
-        return self.joint_lower_limits, self.joint_upper_limits
-
-    def get_joint_positions(self, mode='arm'):
-        if mode == 'arm':
-            joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
-            joint_indices.sort()
-            for i in self.gripper_joint_indices:
-                joint_indices.remove(i)
-        elif mode == 'gripper':
-            joint_indices = self.gripper_joint_indices
-
-        return np.array([j[0] for j in p.getJointStates(self.robot_id, joint_indices, physicsClientId=self.physics_client)])
-
-    def get_cartesian_pose(self, orientation_format='euler'):
-        state = p.getLinkState(self.robot_id, self.end_effector_idx, computeForwardKinematics=True,
-                               physicsClientId=self.physics_client)
-        pos = list(state[0])
-        if orientation_format == 'euler':
-            orn = list(p.getEulerFromQuaternion(state[1], physicsClientId=self.physics_client))
-        else:
-            orn = list(state[1])
-        return pos, orn
-
-    def get_image(self, view_dist=0.5, width=224, height=224):
-        # Get end-effector pose
-        _, _, _, _, w_pos, w_orn = p.getLinkState(self.robot_id, self.end_effector_idx,
-                                                  computeForwardKinematics=True,
-                                                  physicsClientId=self.physics_client)
-        # Camera frame w.r.t end-effector
-        cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client)
-        cam_pos = [-0.02, 0.0, 0.0]
-
-        # Compute camera frame from end effector frame
-        pos, orn = p.multiplyTransforms(w_pos, w_orn, cam_pos, cam_orn, physicsClientId=self.physics_client)
-
-        # Get camera frame rotation matrix from quaternion
-        rot_mat = p.getMatrixFromQuaternion(orn, physicsClientId=self.physics_client)
-        rot_mat = np.array(rot_mat).reshape(3, 3)
-
-        # Initial camera view direction and up direction
-        init_view_vec = [0, 0, 1]
-        init_up_vec = [0, 1, 0]
-
-        # Transform vectors based on the camera frame
-        view_vec = rot_mat.dot(init_view_vec)
-        up_vec = rot_mat.dot(init_up_vec)
-
-        view_matrix = p.computeViewMatrix(
-            cameraEyePosition=pos,
-            cameraTargetPosition=pos + view_dist * view_vec,
-            cameraUpVector=up_vec,
-            physicsClientId=self.physics_client
-        )
-
-        # Camera parameters and projection matrix
-        fov, aspect, near_plane, far_plane = 70, 1.0, 0.01, 100
-        projection_matrix = p.computeProjectionMatrixFOV(
-            fov=fov,
-            aspect=aspect,
-            nearVal=near_plane,
-            farVal=far_plane,
-            physicsClientId=self.physics_client
-        )
-
-        # Extract camera image
-        w, h, rgba_img, depth_img, seg_img = p.getCameraImage(
-            width=width,
-            height=height,
-            viewMatrix=view_matrix,
-            projectionMatrix=projection_matrix,
-            physicsClientId=self.physics_client
-        )
-        rgb_img = rgba_img[:, :, :3]
-        return rgb_img, depth_img, seg_img
-
-    def set_cartesian_pose(self, pose):
-        pos = pose[:3]
-        roll, pitch, yaw = list(map(lambda x: x % (2*np.pi), pose[3:]))
-
-        # Map RPY : -pi < RPY <= pi
-        eul_orn = [-(2*np.pi - roll) if roll > np.pi else roll,
-                   -(2*np.pi - pitch) if pitch > np.pi else pitch,
-                   -(2*np.pi - yaw) if yaw > np.pi else yaw]
-
-        orn = p.getQuaternionFromEuler(eul_orn, physicsClientId=self.physics_client)
-
-        joint_positions = p.calculateInverseKinematics(self.robot_id, self.end_effector_idx, pos, orn,
-                                                       self.joint_lower_limits, self.joint_upper_limits,
-                                                       self.joint_ranges, self.initial_joint_positions,
-                                                       maxNumIterations=100, physicsClientId=self.physics_client)
-        joint_idx = 0
-        target_joint_positions = []
-        for i in range(self.num_joints):
-            if i in self.fixed_joint_indices:
-                continue
-            if i in self.gripper_joint_indices:
-                joint_idx += 1
-            else:
-                target_joint_positions.append(joint_positions[joint_idx])
-                joint_idx += 1
-        target_joint_positions = np.array(target_joint_positions)
-        self.set_joint_positions(target_joint_positions)
-
-    def set_joint_positions(self, target_joint_positions, control_freq=1./240.):
-        joint_indices = self.revolute_joint_indices + self.prismatic_joint_indices
-        joint_indices.sort()
-        for i in self.gripper_joint_indices:
-            joint_indices.remove(i)
-
-        current_joint_positions = self.get_joint_positions(mode='arm')
-        joint_positions_diff = target_joint_positions - current_joint_positions
-
-        # Compute time to complete motion
-        max_total_time = np.max(joint_positions_diff / self.arm_velocity_limits)
-        num_timesteps = math.ceil(max_total_time / control_freq)
-        delta_joint_positions = joint_positions_diff / num_timesteps
-
-        for t in range(1, num_timesteps+1):
-            joint_positions = current_joint_positions + delta_joint_positions * t
-            p.setJointMotorControlArray(self.robot_id, joint_indices, p.POSITION_CONTROL,
-                                        targetPositions=joint_positions, physicsClientId=self.physics_client)
-
-            p.stepSimulation(self.physics_client)
-            time.sleep(control_freq)
-
-            # Update end effector frame display
-            pos, orn = self.get_cartesian_pose('quaternion')
-            self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+        super().__init__(physics_client, robot_info=robot_info, base_pos=base_pos, base_orn=base_orn, gripper_name='panda_gripper')
 
     def open_gripper(self, width=0.08):
         width = min(width, 0.08)
         target = [width/2, width/2]
-        joints = [9, 10]
-        for i in range(len(joints)):
-            p.setJointMotorControl2(self.robot_id, joints[i], p.POSITION_CONTROL, target[i],
-                                    maxVelocity=self.gripper_velocity_limits[i], physicsClientId=self.physics_client)
+        for i in range(self.gripper_dof):
+            p.setJointMotorControl2(self.robot_id, self.gripper_joint_indices[i], p.POSITION_CONTROL, target[i],
+                                    maxVelocity=self.gripper_joint_velocity_limits[i], physicsClientId=self.physics_client)
         time.sleep(1)
 
         # Update end effector frame display
@@ -214,10 +60,9 @@ class Panda:
     def close_gripper(self, width=0.0):
         width = max(width, 0.0)
         target = [width/2, width/2]
-        joints = [9, 10]
-        for i in range(len(joints)):
-            p.setJointMotorControl2(self.robot_id, joints[i], p.POSITION_CONTROL, target[i],
-                                    maxVelocity=self.gripper_velocity_limits[i], physicsClientId=self.physics_client)
+        for i in range(self.gripper_dof):
+            p.setJointMotorControl2(self.robot_id, self.gripper_joint_indices[i], p.POSITION_CONTROL, target[i],
+                                    maxVelocity=self.gripper_joint_velocity_limits[i], physicsClientId=self.physics_client)
         time.sleep(1)
 
         # Update end effector frame display

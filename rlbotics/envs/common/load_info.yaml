@@ -1,0 +1,126 @@
+# PYBULLET ROBOTS
+panda:
+  location: pybullet_data
+  relative_path: franka_panda/panda.urdf
+
+kuka_iiwa:
+  location: pybullet_data
+  relative_path: kuka_iiwa/model_free_base.urdf
+
+# UNIVERSAL ROBOTS
+ur10:
+  location: local
+  relative_path: robots/universal_robots/ur10/ur10.urdf
+
+ur5:
+  location: local
+  relative_path: robots/universal_robots/ur5/ur5.urdf
+
+ur3:
+  location: local
+  relative_path: robots/universal_robots/ur3/ur3.urdf
+
+# FANUC
+fanuc_cr7ia:
+  location: local
+  relative_path: robots/fanuc/cr7ia/cr7ia.urdf
+
+fanuc_cr7ial:
+  location: local
+  relative_path: robots/fanuc/cr7ia/cr7ial.urdf
+
+fanuc_cr35ia:
+  location: local
+  relative_path: robots/fanuc/cr35ia/cr35ia.urdf
+
+fanuc_lrmate200i:
+  location: local
+  relative_path: robots/fanuc/lrmate200i/lrmate200i.urdf
+
+fanuc_lrmate200ib:
+  location: local
+  relative_path: robots/fanuc/lrmate200ib/lrmate200ib.urdf
+
+fanuc_lrmate200ib3l:
+  location: local
+  relative_path: robots/fanuc/lrmate200ib/lrmate200ib3l.urdf
+
+fanuc_lrmate200ic:
+  location: local
+  relative_path: robots/fanuc/lrmate200ic/lrmate200ic.urdf
+
+fanuc_lrmate200ic5f:
+  location: local
+  relative_path: robots/fanuc/lrmate200ic/lrmate200ic5f.urdf
+
+fanuc_lrmate200ic5h:
+  location: local
+  relative_path: robots/fanuc/lrmate200ic/lrmate200ic5h.urdf
+
+fanuc_lrmate200ic5hs:
+  location: local
+  relative_path: robots/fanuc/lrmate200ic/lrmate200ic5hs.urdf
+
+fanuc_lrmate200ic5l:
+  location: local
+  relative_path: robots/fanuc/lrmate200ic/lrmate200ic5l.urdf
+
+fanuc_m6ib:
+  location: local
+  relative_path: robots/fanuc/m6ib/m6ib.urdf
+
+fanuc_m6ib6s:
+  location: local
+  relative_path: robots/fanuc/m6ib/m6ib6s.urdf
+
+fanuc_m10ia:
+  location: local
+  relative_path: robots/fanuc/m10ia/m10ia.urdf
+
+fanuc_m10ia7l:
+  location: local
+  relative_path: robots/fanuc/m10ia/m10ia7l.urdf
+
+fanuc_m16ib:
+  location: local
+  relative_path: robots/fanuc/m16ib/m16ib20.urdf
+
+fanuc_m20ia:
+  location: local
+  relative_path: robots/fanuc/m20ia/m20ia.urdf
+
+fanuc_m20ia10l:
+  location: local
+  relative_path: robots/fanuc/m20ia/m20ia10l.urdf
+
+fanuc_m20ib:
+  location: local
+  relative_path: robots/fanuc/m20ib/m20ib25.urdf
+
+fanuc_m430ia2f:
+  location: local
+  relative_path: robots/fanuc/m430ia/m430ia2f.urdf
+
+fanuc_m430ia2p:
+  location: local
+  relative_path: robots/fanuc/m430ia/m430ia2p.urdf
+
+fanuc_m710ic45m:
+  location: local
+  relative_path: robots/fanuc/m710ic/m710ic45m.urdf
+
+fanuc_m710ic50:
+  location: local
+  relative_path: robots/fanuc/m710ic/m710ic50.urdf
+
+fanuc_m900ia:
+  location: local
+  relative_path: robots/fanuc/m900ia/m900ia260l.urdf
+
+fanuc_m900ib:
+  location: local
+  relative_path: robots/fanuc/m900ib/m900ib700.urdf
+
+fanuc_r1000ia:
+  location: local
+  relative_path: robots/fanuc/r1000ia/r1000ia80f.urdf
