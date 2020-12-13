@@ -44,27 +44,3 @@ class Panda(Manipulator):
         robot_info['initial_pose'] = initial_joint_positions
 
         super().__init__(physics_client, robot_info=robot_info, base_pos=base_pos, base_orn=base_orn, gripper_name='panda_gripper')
-
-    def open_gripper(self, width=0.08):
-        width = min(width, 0.08)
-        target = [width/2, width/2]
-        for i in range(self.gripper_dof):
-            p.setJointMotorControl2(self.robot_id, self.gripper_joint_indices[i], p.POSITION_CONTROL, target[i],
-                                    maxVelocity=self.gripper_joint_velocity_limits[i], physicsClientId=self.physics_client)
-        time.sleep(1)
-
-        # Update end effector frame display
-        pos, orn = self.get_cartesian_pose('quaternion')
-        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
-
-    def close_gripper(self, width=0.0):
-        width = max(width, 0.0)
-        target = [width/2, width/2]
-        for i in range(self.gripper_dof):
-            p.setJointMotorControl2(self.robot_id, self.gripper_joint_indices[i], p.POSITION_CONTROL, target[i],
-                                    maxVelocity=self.gripper_joint_velocity_limits[i], physicsClientId=self.physics_client)
-        time.sleep(1)
-
-        # Update end effector frame display
-        pos, orn = self.get_cartesian_pose('quaternion')
-        self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)

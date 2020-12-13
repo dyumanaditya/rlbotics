@@ -33,16 +33,16 @@ class Manipulator:
 		self.robot_initial_joint_positions = robot_info['initial_pose']
 
 		# Create gripper object and expand into attributes
-		gripper = gripper_class_dict[gripper_name]()
-		self.gripper_dof = gripper.gripper_info['dof']
+		self.gripper = gripper_class_dict[gripper_name]()
+		self.gripper_dof = self.gripper.gripper_info['dof']
 		self.gripper_name = gripper_name
-		self.ee_idx = gripper.gripper_info['ee_idx']
-		self.gripper_joint_indices = gripper.gripper_info['joint_indices']
-		self.gripper_joint_lower_limits = gripper.gripper_info['joint_lower_limits']
-		self.gripper_joint_upper_limits = gripper.gripper_info['joint_upper_limits']
-		self.gripper_joint_ranges = gripper.gripper_info['joint_ranges']
-		self.gripper_joint_velocity_limits = gripper.gripper_info['joint_velocity_limits']
-		self.gripper_initial_joint_positions = gripper.gripper_info['initial_pose']
+		self.ee_idx = self.gripper.gripper_info['ee_idx']
+		self.gripper_joint_indices = self.gripper.gripper_info['joint_indices']
+		self.gripper_joint_lower_limits = self.gripper.gripper_info['joint_lower_limits']
+		self.gripper_joint_upper_limits = self.gripper.gripper_info['joint_upper_limits']
+		self.gripper_joint_ranges = self.gripper.gripper_info['joint_ranges']
+		self.gripper_joint_velocity_limits = self.gripper.gripper_info['joint_velocity_limits']
+		self.gripper_initial_joint_positions = self.gripper.gripper_info['initial_pose']
 
 		self.initial_joint_positions = self.robot_initial_joint_positions + self.gripper_initial_joint_positions
 
@@ -306,3 +306,21 @@ class Manipulator:
 			# Update end effector frame display
 			pos, orn = self.get_cartesian_pose('quaternion')
 			self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
+	def open_gripper(self, width=0.08):
+		self.gripper.open_gripper(self.robot_id, self.gripper_joint_indices, self.gripper_joint_velocity_limits,
+								  self.physics_client, width)
+		time.sleep(1)
+
+		# Update end effector frame display
+		pos, orn = self.get_cartesian_pose('quaternion')
+		self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
+
+	def close_gripper(self, width=0.0):
+		self.gripper.open_gripper(self.robot_id, self.gripper_joint_indices, self.gripper_joint_velocity_limits,
+								  self.physics_client, width)
+		time.sleep(1)
+
+		# Update end effector frame display
+		pos, orn = self.get_cartesian_pose('quaternion')
+		self.ee_ids = draw_frame(pos, orn, replacement_ids=self.ee_ids)
