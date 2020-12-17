@@ -6,7 +6,7 @@ import pybullet as p
 import pybullet_data
 from gym.utils import seeding
 
-from rlbotics.envs.common.robot_gripper_class_dict import robot_class_dict
+from rlbotics.envs.common.robot_class_dict import robot_class_dict
 
 
 class DrillerWorld:

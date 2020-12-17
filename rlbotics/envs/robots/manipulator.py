@@ -7,7 +7,7 @@ import pybullet as p
 import pybullet_data
 
 from rlbotics.envs.common.utils import draw_frame
-# from rlbotics.envs.common.robot_gripper_class_dict import gripper_class_dict
+from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
 
 
 class Manipulator:
@@ -20,6 +20,7 @@ class Manipulator:
 
 		# Load YAML info
 		yaml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'robot_data.yaml')
+		print(__file__)
 		with open(yaml_file, 'r') as stream:
 			robot_data = yaml.safe_load(stream)
 
@@ -68,7 +69,7 @@ class Manipulator:
 		self.robot_joint_velocity_limits = robot_joint_info['joint_velocity_limits']
 
 		# Create gripper object and expand into attributes
-		from rlbotics.envs.common.robot_gripper_class_dict import gripper_class_dict
+		# from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
 		self.gripper = gripper_class_dict[gripper_name]()
 		self.gripper_name = gripper_name
 		self.ee_idx = self.gripper.ee_idx
@@ -87,6 +88,12 @@ class Manipulator:
 		# Add debugging frame on the end effector
 		pos, orn = self.get_cartesian_pose('quaternion')
 		self.ee_ids = draw_frame(pos, orn)
+
+		# Set up camera info
+		self.cam_pos  = [-0.02, 0.0, 0.0]
+		self.cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client)
+		self.init_view_vec = [0, 0, 1]
+		self.init_up_vec = [0, 1, 0]
 
 	def _get_data_from_urdf(self):
 		temp_client = p.connect(p.DIRECT)
@@ -164,24 +171,17 @@ class Manipulator:
 		_, _, _, _, w_pos, w_orn = p.getLinkState(self.robot_id, self.ee_idx,
 												  computeForwardKinematics=True,
 												  physicsClientId=self.physics_client)
-		# Camera frame w.r.t end-effector
-		cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client)
-		cam_pos = [-0.02, 0.0, 0.0]
 
 		# Compute camera frame from end effector frame
-		pos, orn = p.multiplyTransforms(w_pos, w_orn, cam_pos, cam_orn, physicsClientId=self.physics_client)
+		pos, orn = p.multiplyTransforms(w_pos, w_orn, self.cam_pos, self.cam_orn, physicsClientId=self.physics_client)
 
 		# Get camera frame rotation matrix from quaternion
 		rot_mat = p.getMatrixFromQuaternion(orn, physicsClientId=self.physics_client)
 		rot_mat = np.array(rot_mat).reshape(3, 3)
 
-		# Initial camera view direction and up direction
-		init_view_vec = [0, 0, 1]
-		init_up_vec = [0, 1, 0]
-
 		# Transform vectors based on the camera frame
-		view_vec = rot_mat.dot(init_view_vec)
-		up_vec = rot_mat.dot(init_up_vec)
+		view_vec = rot_mat.dot(self.init_view_vec)
+		up_vec = rot_mat.dot(self.init_up_vec)
 
 		view_matrix = p.computeViewMatrix(
 			cameraEyePosition=pos,
