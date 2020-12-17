@@ -10,11 +10,8 @@ class Cr7ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Cr7ial(Manipulator):
@@ -25,11 +22,8 @@ class Cr7ial(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Cr35ia(Manipulator):
@@ -40,11 +34,8 @@ class Cr35ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200i(Manipulator):
@@ -55,11 +46,8 @@ class Lrmate200i(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ib(Manipulator):
@@ -70,11 +58,8 @@ class Lrmate200ib(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ib3l(Manipulator):
@@ -85,11 +70,8 @@ class Lrmate200ib3l(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ic(Manipulator):
@@ -100,11 +82,8 @@ class Lrmate200ic(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ic5f(Manipulator):
@@ -115,11 +94,8 @@ class Lrmate200ic5f(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ic5h(Manipulator):
@@ -130,11 +106,8 @@ class Lrmate200ic5h(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ic5hs(Manipulator):
@@ -145,11 +118,8 @@ class Lrmate200ic5hs(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class Lrmate200ic5l(Manipulator):
@@ -160,11 +130,8 @@ class Lrmate200ic5l(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M6ib(Manipulator):
@@ -175,11 +142,8 @@ class M6ib(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M6ib6s(Manipulator):
@@ -190,11 +154,8 @@ class M6ib6s(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M10ia(Manipulator):
@@ -205,11 +166,8 @@ class M10ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M10ia7l(Manipulator):
@@ -220,11 +178,8 @@ class M10ia7l(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M16ib(Manipulator):
@@ -235,11 +190,8 @@ class M16ib(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M20ia(Manipulator):
@@ -250,11 +202,8 @@ class M20ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M20ia10l(Manipulator):
@@ -265,11 +214,8 @@ class M20ia10l(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M20ib(Manipulator):
@@ -280,11 +226,8 @@ class M20ib(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M430ia2f(Manipulator):
@@ -295,11 +238,8 @@ class M430ia2f(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M430ia2p(Manipulator):
@@ -310,11 +250,8 @@ class M430ia2p(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M710ic45m(Manipulator):
@@ -325,11 +262,8 @@ class M710ic45m(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M710ic50(Manipulator):
@@ -340,11 +274,8 @@ class M710ic50(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M900ia(Manipulator):
@@ -355,11 +286,8 @@ class M900ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class M900ib(Manipulator):
@@ -370,11 +298,8 @@ class M900ib(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
 
 
 class R1000ia(Manipulator):
@@ -385,8 +310,5 @@ class R1000ia(Manipulator):
 		if initial_joint_positions is None:
 			initial_joint_positions = []
 
-		initial_position_info = {'base_pos': base_pos, 'base_orn': base_orn,
-								 'initial_joint_positions': initial_joint_positions}
-
-		super().__init__(physics_client, robot_name=robot_name, initial_position_info=initial_position_info,
-						 gripper_name=gripper_name)
+		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn, 'initial_joint_positions': initial_joint_positions}
+		super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)

@@ -11,12 +11,12 @@ from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
 
 
 class Manipulator:
-	def __init__(self, physics_client, robot_name, initial_position_info, gripper_name):
+	def __init__(self, physics_client, robot_name, initial_pose, gripper_name):
 		p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		self.physics_client = physics_client
-		self.robot_initial_joint_positions = initial_position_info['initial_joint_positions']
-		base_pos, base_orn = initial_position_info['base_pos'], initial_position_info['base_orn']
+		self.robot_initial_joint_positions = initial_pose['initial_joint_positions']
+		base_pos, base_orn = initial_pose['base_pos'], initial_pose['base_orn']
 
 		# Load YAML info
 		yaml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'robot_data.yaml')
