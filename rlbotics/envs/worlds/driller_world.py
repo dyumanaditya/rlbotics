@@ -42,7 +42,6 @@ class DrillerWorld:
 		arm_base_pos = [-0.6, 0, 0.93]
 		arm_base_orn = p.getQuaternionFromEuler([0, 0, 0], physicsClientId=self.physics_client)
 
-		# TODO: fix this bug
 		try:
 			self.arm = robot_class_dict[robot](self.physics_client, arm_base_pos, arm_base_orn, gripper_name=gripper)
 		except KeyError:
@@ -76,6 +75,7 @@ class DrillerWorld:
 		self.arm.close_gripper()
 		target_pose = [pos[0]-0.2, pos[1], pos[2]+0.8, 0, np.pi, 0]
 		self.arm.set_cartesian_pose(target_pose)
+		time.sleep(0.2)
 
 	def generate_plane(self):
 		# Min Max constraints for drilling on plane

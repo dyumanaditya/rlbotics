@@ -40,11 +40,6 @@ def get_info(company, subfolder, name, where='pybullet', angle_format='degrees')
 		joint_ranges.append(joint_info[9] - joint_info[8])
 		joint_velocity_limits.append(joint_info[11])
 
-	joint_lower_limits = list(map(round, joint_lower_limits))
-	joint_upper_limits = list(map(round, joint_upper_limits))
-	joint_ranges = list(map(round, joint_ranges))
-	joint_velocity_limits = list(map(round, joint_velocity_limits))
-
 	print('===================================================')
 	print('fixed_joints:', fixed_joint_indices)
 	print('revolute_joints:', revolute_joint_indices)
@@ -57,10 +52,10 @@ def get_info(company, subfolder, name, where='pybullet', angle_format='degrees')
 		joint_ranges = list(map(math.degrees, joint_ranges))
 		joint_velocity_limits = list(map(math.degrees, joint_velocity_limits))
 
-	joint_lower_limits = list(map(round, joint_lower_limits))
-	joint_upper_limits = list(map(round, joint_upper_limits))
-	joint_ranges = list(map(round, joint_ranges))
-	joint_velocity_limits = list(map(round, joint_velocity_limits))
+		joint_lower_limits = list(map(round, joint_lower_limits))
+		joint_upper_limits = list(map(round, joint_upper_limits))
+		joint_ranges = list(map(round, joint_ranges))
+		joint_velocity_limits = list(map(round, joint_velocity_limits))
 
 	print('lower_lims:', joint_lower_limits)
 	print('upper_lims:', joint_upper_limits)
@@ -69,6 +64,6 @@ def get_info(company, subfolder, name, where='pybullet', angle_format='degrees')
 	print('===================================================')
 
 
-get_info('franka_panda', '', 'panda')
+get_info('fanuc', 'cr35ia', 'cr35ia', where='robots', angle_format='degrees')
 
 

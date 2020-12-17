@@ -7,178 +7,127 @@ import pybullet as p
 import pybullet_data
 
 from rlbotics.envs.common.utils import draw_frame
-from rlbotics.envs.common.robot_gripper_class_dict import gripper_class_dict
+# from rlbotics.envs.common.robot_gripper_class_dict import gripper_class_dict
 
 
 class Manipulator:
-	def __init__(self, physics_client, robot_info, base_pos, base_orn, gripper_name):
+	def __init__(self, physics_client, robot_name, initial_position_info, gripper_name):
 		p.setRealTimeSimulation(1)      # SEE ABOUT THIS LATER. This is needed to complete motion
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
 		self.physics_client = physics_client
+		self.robot_initial_joint_positions = initial_position_info['initial_joint_positions']
+		base_pos, base_orn = initial_position_info['base_pos'], initial_position_info['base_orn']
 
 		# Load YAML info
-		yaml_file = os.path.join('..', 'common', 'load_info.yaml')
+		yaml_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'robot_data.yaml')
 		with open(yaml_file, 'r') as stream:
-			load_info = yaml.safe_load(stream)
+			robot_data = yaml.safe_load(stream)
 
-		# Expand robot_info into attributes
-		self.robot_dof = robot_info['dof']
-		self.robot_name = robot_info['robot_name']
-		self.in_built_gripper = robot_info['in_built_gripper']
-		self.robot_joint_indices = robot_info['joint_indices']
-		self.robot_joint_lower_limits = robot_info['joint_lower_limits']
-		self.robot_joint_upper_limits = robot_info['joint_upper_limits']
-		self.robot_joint_ranges = robot_info['joint_ranges']
-		self.robot_joint_velocity_limits = robot_info['joint_velocity_limits']
-		self.robot_initial_joint_positions = robot_info['initial_pose']
-
-		# Create gripper object and expand into attributes
-		self.gripper = gripper_class_dict[gripper_name]()
-		self.gripper_dof = self.gripper.gripper_info['dof']
-		self.gripper_name = gripper_name
-		self.ee_idx = self.gripper.gripper_info['ee_idx']
-		self.gripper_joint_indices = self.gripper.gripper_info['joint_indices']
-		self.gripper_joint_lower_limits = self.gripper.gripper_info['joint_lower_limits']
-		self.gripper_joint_upper_limits = self.gripper.gripper_info['joint_upper_limits']
-		self.gripper_joint_ranges = self.gripper.gripper_info['joint_ranges']
-		self.gripper_joint_velocity_limits = self.gripper.gripper_info['joint_velocity_limits']
-		self.gripper_initial_joint_positions = self.gripper.gripper_info['initial_pose']
-
-		self.initial_joint_positions = self.robot_initial_joint_positions + self.gripper_initial_joint_positions
+		robot_joint_info = robot_data[robot_name]['joint_info']
+		gripper_joint_info = robot_data[gripper_name]['joint_info']
+		self.in_built_gripper = robot_data[robot_name]['in_built_gripper']
+		self.robot_dof = robot_joint_info['dof']
+		self.gripper_dof = gripper_joint_info['dof']
 
 		# Combine gripper and robot if gripper is not in built
 		if self.in_built_gripper:
-			if load_info[self.robot_name]['location'] == 'local':
-				self.robot_path = os.path.join('..', 'models', load_info[self.robot_name]['relative_path'])
-			elif load_info[self.robot_name]['location'] == 'pybullet_data':
-				self.robot_path = load_info[self.robot_name]['relative_path']
+			if robot_data[robot_name]['location'] == 'local':
+				self.robot_path = os.path.join('..', 'models', robot_data[robot_name]['relative_path'])
+			elif robot_data[robot_name]['location'] == 'pybullet_data':
+				self.robot_path = robot_data[robot_name]['relative_path']
 
 		else:
 			# TODO: Combine URDFs
-			if load_info[self.gripper_name]['location'] == 'local':
-				self.gripper_path = os.path.join('..', 'models', load_info[self.gripper_name]['relative_path'])
-			elif load_info[self.gripper_name]['location'] == 'pybullet_data':
-				self.gripper_path = load_info[self.gripper_name]['relative_path']
+			if robot_data[gripper_name]['location'] == 'local':
+				self.gripper_path = os.path.join('..', 'models', robot_data[gripper_name]['relative_path'])
+			elif robot_data[gripper_name]['location'] == 'pybullet_data':
+				self.gripper_path = robot_data[gripper_name]['relative_path']
 			# Combine urdfs and return combined urdfs path: robot_path
 			pass
 
+		# Check if robot data is provided in YAML file. Otherwise get data from urdf
+		robot_data_urdf, gripper_data_urdf = self._get_data_from_urdf()
+		for key, value in robot_joint_info.items():
+			if key == 'dof':
+				continue
+			if value is None:
+				robot_joint_info[key] = robot_data_urdf[key]
+
+		for key, value in gripper_joint_info.items():
+			if key == 'dof':
+				continue
+			if value is None:
+				gripper_joint_info[key] = gripper_data_urdf[key]
+
+		# Expand robot_info into attributes
+		self.robot_name = robot_name
+		self.robot_joint_indices = robot_data_urdf['joint_indices']
+		self.robot_joint_lower_limits = robot_joint_info['joint_lower_limits']
+		self.robot_joint_upper_limits = robot_joint_info['joint_upper_limits']
+		self.robot_joint_ranges = robot_joint_info['joint_ranges']
+		self.robot_joint_velocity_limits = robot_joint_info['joint_velocity_limits']
+
+		# Create gripper object and expand into attributes
+		from rlbotics.envs.common.robot_gripper_class_dict import gripper_class_dict
+		self.gripper = gripper_class_dict[gripper_name]()
+		self.gripper_name = gripper_name
+		self.ee_idx = self.gripper.ee_idx
+		self.gripper_joint_indices = gripper_data_urdf['joint_indices']
+		self.gripper_joint_lower_limits = gripper_joint_info['joint_lower_limits']
+		self.gripper_joint_upper_limits = gripper_joint_info['joint_upper_limits']
+		self.gripper_joint_ranges = gripper_joint_info['joint_ranges']
+		self.gripper_joint_velocity_limits = gripper_joint_info['joint_velocity_limits']
+		self.gripper_initial_joint_positions = self.gripper.initial_joint_positions
+
+		self.initial_joint_positions = self.robot_initial_joint_positions + self.gripper_initial_joint_positions
+
 		# Load robot
 		self.robot_id = p.loadURDF(self.robot_path, base_pos, base_orn, useFixedBase=True, physicsClientId=self.physics_client)
-
-		# Check attributes to fill in any missed out information
-		self._check_attributes()
 
 		# Add debugging frame on the end effector
 		pos, orn = self.get_cartesian_pose('quaternion')
 		self.ee_ids = draw_frame(pos, orn)
 
-	def _check_attributes(self):
+	def _get_data_from_urdf(self):
 		temp_client = p.connect(p.DIRECT)
+		robot_id = p.loadURDF(self.robot_path, physicsClientId=temp_client)
 
-		# Sync gripper info with robot info: gripper indices come after robot indices
-		if not self.in_built_gripper:
-			robot_id = p.loadURDF(self.robot_path, physicsClientId=temp_client)
-			gripper_idx_offset = p.getNumJoints(robot_id)
+		robot_data = {
+			'joint_indices': [],
+			'joint_lower_limits': [],
+			'joint_upper_limits': [],
+			'joint_ranges': [],
+			'joint_velocity_limits': []
+		}
 
-			# Verify robot joint specs
-			if self.robot_joint_indices is None:
-				self.robot_joint_indices = self._get_joint_indices(robot_id, temp_client)
-			if self.robot_dof is None:
-				self.robot_dof = len(self.robot_joint_indices)
-			if self.robot_joint_lower_limits is None:
-				self.robot_joint_lower_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[0]
-			if self.robot_joint_upper_limits is None:
-				self.robot_joint_upper_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[1]
-			if self.robot_joint_ranges is None:
-				self.robot_joint_ranges = self._get_joint_ranges_from_urdf(robot_id, temp_client)
-			if self.robot_joint_velocity_limits is None:
-				self.robot_joint_velocity_limits = self._get_joint_velocity_limits_from_urdf(robot_id, temp_client)
+		gripper_data = {
+			'joint_indices': [],
+			'joint_lower_limits': [],
+			'joint_upper_limits': [],
+			'joint_ranges': [],
+			'joint_velocity_limits': []
+		}
 
-			p.removeBody(robot_id, temp_client)
-			gripper_id = p.loadURDF(self.gripper_path, physicsClientId=temp_client)
+		for idx in range(p.getNumJoints(robot_id, temp_client)):
+			joint_info = p.getJointInfo(robot_id, idx, temp_client)
+			joint_type = joint_info[2]
+			if joint_type != p.JOINT_FIXED:
+				if len(robot_data['joint_indices']) < self.robot_dof:
+					robot_data['joint_indices'].append(idx)
+					robot_data['joint_lower_limits'].append(joint_info[8])
+					robot_data['joint_upper_limits'].append(joint_info[9])
+					robot_data['joint_ranges'].append(joint_info[9] - joint_info[8])
+					robot_data['joint_velocity_limits'].append(joint_info[11])
+				else:
+					gripper_data['joint_indices'].append(idx)
+					gripper_data['joint_lower_limits'].append(joint_info[8])
+					gripper_data['joint_upper_limits'].append(joint_info[9])
+					gripper_data['joint_ranges'].append(joint_info[9] - joint_info[8])
+					gripper_data['joint_velocity_limits'].append(joint_info[11])
 
-			# Verify gripper joint specs
-			if self.gripper_joint_indices is None:
-				self.gripper_joint_indices = self._get_joint_indices(gripper_id, temp_client)
-			self.gripper_joint_indices = list(map(lambda x: x+gripper_idx_offset, self.gripper_joint_indices))
-			if self.gripper_dof is None:
-				self.gripper_dof = len(self.gripper_joint_indices)
-			if self.gripper_joint_lower_limits is None:
-				self.gripper_joint_lower_limits = self._get_joint_limits_from_urdf(gripper_id, temp_client)[0]
-			if self.gripper_joint_upper_limits is None:
-				self.gripper_joint_upper_limits = self._get_joint_limits_from_urdf(gripper_id, temp_client)[1]
-			if self.gripper_joint_ranges is None:
-				self.gripper_joint_ranges = self._get_joint_ranges_from_urdf(gripper_id, temp_client)
-			if self.gripper_joint_velocity_limits is None:
-				self.gripper_joint_velocity_limits = self._get_joint_velocity_limits_from_urdf(gripper_id, temp_client)
-
-			p.removeBody(gripper_id, temp_client)
-
-		else:
-			robot_id = p.loadURDF(self.robot_path, physicsClientId=temp_client)
-
-			# Verify robot joint specs
-			if self.robot_joint_indices is None:
-				self.robot_joint_indices = self._get_joint_indices(robot_id, temp_client)[:self.robot_dof]
-			if self.robot_joint_lower_limits is None:
-				self.robot_joint_lower_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[0][:self.robot_dof]
-			if self.robot_joint_upper_limits is None:
-				self.robot_joint_upper_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[1][:self.robot_dof]
-			if self.robot_joint_ranges is None:
-				self.robot_joint_ranges = self._get_joint_ranges_from_urdf(robot_id, temp_client)[:self.robot_dof]
-			if self.robot_joint_velocity_limits is None:
-				self.robot_joint_velocity_limits = self._get_joint_velocity_limits_from_urdf(robot_id, temp_client)[:self.robot_dof]
-
-			# Verify gripper joint specs
-			if self.gripper_joint_indices is None:
-				self.gripper_joint_indices = self._get_joint_indices(robot_id, temp_client)[self.robot_dof:]
-			if self.gripper_joint_lower_limits is None:
-				self.gripper_joint_lower_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[0][self.robot_dof:]
-			if self.gripper_joint_upper_limits is None:
-				self.gripper_joint_upper_limits = self._get_joint_limits_from_urdf(robot_id, temp_client)[1][self.robot_dof:]
-			if self.gripper_joint_ranges is None:
-				self.gripper_joint_ranges = self._get_joint_ranges_from_urdf(robot_id, temp_client)[self.robot_dof:]
-			if self.gripper_joint_velocity_limits is None:
-				self.gripper_joint_velocity_limits = self._get_joint_velocity_limits_from_urdf(robot_id, temp_client)[self.robot_dof:]
-
-			p.removeBody(robot_id, temp_client)
+		p.removeBody(robot_id, temp_client)
 		p.disconnect(temp_client)
-
-	def _get_joint_indices(self, id, physics_client):
-		indices = []
-		for idx in range(p.getNumJoints(id, physics_client)):
-			joint_type = p.getJointInfo(id, idx, physics_client)[2]
-			if joint_type == p.JOINT_FIXED:
-				continue
-			else:
-				indices.append(idx)
-		return indices
-
-	def _get_joint_limits_from_urdf(self, id, physics_client):
-		lower_limits, upper_limits = [], []
-		for idx in range(p.getNumJoints(id, physics_client)):
-			joint_info = p.getJointInfo(id, idx, physics_client)
-			joint_type = joint_info[2]
-			if joint_type != p.JOINT_FIXED:
-				lower_limits.append(joint_info[8])
-				upper_limits.append(joint_info[9])
-		return lower_limits, upper_limits
-
-	def _get_joint_ranges_from_urdf(self, id, physics_client):
-		lower_limits, upper_limits = self._get_joint_limits_from_urdf(id, physics_client)
-		joint_ranges = []
-		for i, j in zip(lower_limits, upper_limits):
-			joint_ranges.append(j-i)
-		return joint_ranges
-
-	def _get_joint_velocity_limits_from_urdf(self, id, physics_client):
-		velocity_limits = []
-		for idx in range(p.getNumJoints(id, physics_client)):
-			joint_info = p.getJointInfo(id, idx, physics_client)
-			joint_type = joint_info[2]
-			if joint_type != p.JOINT_FIXED:
-				velocity_limits.append(joint_info[11])
-		return velocity_limits
+		return robot_data, gripper_data
 
 	def reset(self):
 		joint_indices = self.robot_joint_indices + self.gripper_joint_indices
