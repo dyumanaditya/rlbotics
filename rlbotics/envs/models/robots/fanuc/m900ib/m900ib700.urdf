@@ -11,7 +11,7 @@
       <geometry>
         <mesh filename="meshes/visual/base_link.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_grey">
         <color rgba="0.34 0.35 0.36 1.0"/>
       </material>
     </visual>
@@ -28,7 +28,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_1.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -45,7 +45,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_2.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -62,7 +62,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_3.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -79,7 +79,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_4.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -96,7 +96,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_5.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -113,7 +113,7 @@
       <geometry>
         <mesh filename="meshes/visual/link_6.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_black">
         <color rgba="0.15 0.15 0.15 1.0"/>
       </material>
     </visual>
@@ -173,7 +173,7 @@
       <geometry>
         <mesh filename="meshes/visual/counterweight.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -190,7 +190,7 @@
       <geometry>
         <mesh filename="meshes/visual/bar.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -221,7 +221,7 @@
       <geometry>
         <mesh filename="meshes/visual/balancer.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -238,7 +238,7 @@
       <geometry>
         <mesh filename="meshes/visual/piston.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -255,7 +255,7 @@
       <geometry>
         <mesh filename="meshes/visual/balancer.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>
@@ -272,7 +272,7 @@
       <geometry>
         <mesh filename="meshes/visual/piston.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_yellow">
         <color rgba="0.96 0.76 0.13 1.0"/>
       </material>
     </visual>

@@ -11,7 +11,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/base_link.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_gray24">
         <color rgba="0.23921568627450981 0.23921568627450981 0.23921568627450981 1.0"/>
       </material>
     </visual>
@@ -28,7 +28,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_1.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_green">
         <color rgba="0.0 0.6078431372549019 0.27450980392156865 1.0"/>
       </material>
     </visual>
@@ -45,7 +45,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_2.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_green">
         <color rgba="0.0 0.6078431372549019 0.27450980392156865 1.0"/>
       </material>
     </visual>
@@ -62,7 +62,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_3.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_green">
         <color rgba="0.0 0.6078431372549019 0.27450980392156865 1.0"/>
       </material>
     </visual>
@@ -79,7 +79,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_4.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_green">
         <color rgba="0.0 0.6078431372549019 0.27450980392156865 1.0"/>
       </material>
     </visual>
@@ -96,7 +96,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_5.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_green">
         <color rgba="0.0 0.6078431372549019 0.27450980392156865 1.0"/>
       </material>
     </visual>
@@ -113,7 +113,7 @@
       <geometry>
         <mesh filename="meshes/cr7ia/visual/link_6.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_gray24">
         <color rgba="0.23921568627450981 0.23921568627450981 0.23921568627450981 1.0"/>
       </material>
     </visual>

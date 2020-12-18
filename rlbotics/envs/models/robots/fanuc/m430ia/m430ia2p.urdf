@@ -11,7 +11,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/base_link.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -28,7 +28,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_1.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -45,7 +45,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_2.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -62,7 +62,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_3.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -79,7 +79,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_4.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -96,7 +96,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_5.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
@@ -113,7 +113,7 @@
       <geometry>
         <mesh filename="meshes/m430ia2p/visual/link_6.stl"/>
       </geometry>
-      <material name="">
+      <material name="material_fanuc_E6E6E6">
         <color rgba="0.9019607843137255 0.9019607843137255 0.9019607843137255 1.0"/>
       </material>
     </visual>
