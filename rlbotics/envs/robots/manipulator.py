@@ -118,19 +118,23 @@ class Manipulator:
 		for idx in range(p.getNumJoints(robot_id, temp_client)):
 			joint_info = p.getJointInfo(robot_id, idx, temp_client)
 			joint_type = joint_info[2]
-			if joint_type != p.JOINT_FIXED:
-				if len(robot_data['joint_indices']) < self.robot_dof:
-					robot_data['joint_indices'].append(idx)
-					robot_data['joint_lower_limits'].append(joint_info[8])
-					robot_data['joint_upper_limits'].append(joint_info[9])
-					robot_data['joint_ranges'].append(joint_info[9] - joint_info[8])
-					robot_data['joint_velocity_limits'].append(joint_info[11])
-				else:
-					gripper_data['joint_indices'].append(idx)
-					gripper_data['joint_lower_limits'].append(joint_info[8])
-					gripper_data['joint_upper_limits'].append(joint_info[9])
-					gripper_data['joint_ranges'].append(joint_info[9] - joint_info[8])
-					gripper_data['joint_velocity_limits'].append(joint_info[11])
+			joint_lower_limit = joint_info[8]
+			joint_upper_limit = joint_info[9]
+			joint_velocity_limit = joint_info[11]
+			if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
+				continue
+			if len(robot_data['joint_indices']) < self.robot_dof:
+				robot_data['joint_indices'].append(idx)
+				robot_data['joint_lower_limits'].append(joint_lower_limit)
+				robot_data['joint_upper_limits'].append(joint_upper_limit)
+				robot_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
+				robot_data['joint_velocity_limits'].append(joint_velocity_limit)
+			else:
+				gripper_data['joint_indices'].append(idx)
+				gripper_data['joint_lower_limits'].append(joint_lower_limit)
+				gripper_data['joint_upper_limits'].append(joint_upper_limit)
+				gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
+				gripper_data['joint_velocity_limits'].append(joint_velocity_limit)
 
 		p.removeBody(robot_id, temp_client)
 		p.disconnect(temp_client)

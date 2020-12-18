@@ -64,6 +64,6 @@ def get_info(company, subfolder, name, where='pybullet', angle_format='degrees')
 	print('===================================================')
 
 
-get_info('fanuc', 'cr35ia', 'cr35ia', where='robots', angle_format='degrees')
+get_info('fanuc', 'r1000ia', 'r1000ia80f', where='robots', angle_format='degrees')
 
 

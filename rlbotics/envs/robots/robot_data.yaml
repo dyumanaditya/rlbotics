@@ -81,9 +81,10 @@ fanuc_cr35ia:
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
-    joint_velocity_limits: null
+    joint_velocity_limits: [4.36, 4.36, 4.36, 4.36, 4.36, 4.36]
 
 fanuc_lrmate200i:
+  # https://www.robots.com/robots/fanuc-lr-mate-200i
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/lrmate200i/lrmate200i.urdf
@@ -95,6 +96,7 @@ fanuc_lrmate200i:
     joint_velocity_limits: null
 
 fanuc_lrmate200ib:
+  # https://www.robots.com/robots/fanuc-lr-mate-200ib
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/lrmate200ib/lrmate200ib.urdf
@@ -117,6 +119,7 @@ fanuc_lrmate200ib3l:
     joint_velocity_limits: null
 
 fanuc_lrmate200ic:
+  # https://www.robots.com/robots/fanuc-lr-mate-200ic
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/lrmate200ic/lrmate200ic.urdf
@@ -132,7 +135,7 @@ fanuc_lrmate200ic5f:
   location: local
   relative_path: robots/fanuc/lrmate200ic/lrmate200ic5f.urdf
   joint_info:
-    dof: 6
+    dof: 5
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
@@ -143,7 +146,7 @@ fanuc_lrmate200ic5h:
   location: local
   relative_path: robots/fanuc/lrmate200ic/lrmate200ic5h.urdf
   joint_info:
-    dof: 6
+    dof: 5
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
@@ -154,7 +157,7 @@ fanuc_lrmate200ic5hs:
   location: local
   relative_path: robots/fanuc/lrmate200ic/lrmate200ic5hs.urdf
   joint_info:
-    dof: 6
+    dof: 5
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
@@ -264,7 +267,7 @@ fanuc_m430ia2f:
   location: local
   relative_path: robots/fanuc/m430ia/m430ia2f.urdf
   joint_info:
-    dof: 6
+    dof: 5
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
