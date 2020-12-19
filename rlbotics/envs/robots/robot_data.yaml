@@ -218,7 +218,7 @@ fanuc_m10ia7l:
     joint_ranges: null
     joint_velocity_limits: null
 
-fanuc_m16ib:
+fanuc_m16ib20:
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/m16ib/m16ib20.urdf
@@ -251,7 +251,7 @@ fanuc_m20ia10l:
     joint_ranges: null
     joint_velocity_limits: null
 
-fanuc_m20ib:
+fanuc_m20ib25:
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/m20ib/m20ib25.urdf
@@ -306,7 +306,7 @@ fanuc_m710ic50:
     joint_ranges: null
     joint_velocity_limits: null
 
-fanuc_m900ia:
+fanuc_m900ia260l:
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/m900ia/m900ia260l.urdf
@@ -317,7 +317,7 @@ fanuc_m900ia:
     joint_ranges: null
     joint_velocity_limits: null
 
-fanuc_m900ib:
+fanuc_m900ib700:
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/m900ib/m900ib700.urdf
@@ -328,7 +328,7 @@ fanuc_m900ib:
     joint_ranges: null
     joint_velocity_limits: null
 
-fanuc_r1000ia:
+fanuc_r1000ia80f:
   in_built_gripper: False
   location: local
   relative_path: robots/fanuc/r1000ia/r1000ia80f.urdf
