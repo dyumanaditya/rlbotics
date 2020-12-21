@@ -29,19 +29,43 @@ panda:
 kuka_iiwa:
   location: pybullet_data
   relative_path: kuka_iiwa/model_free_base.urdf
+  joint_info:
+    dof: 7
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
 
 # UNIVERSAL ROBOTS
 ur10:
   location: local
   relative_path: robots/universal_robots/ur10/ur10.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
 
 ur5:
   location: local
   relative_path: robots/universal_robots/ur5/ur5.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
 
 ur3:
   location: local
   relative_path: robots/universal_robots/ur3/ur3.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
 
 # FANUC
 fanuc_cr7ia:
