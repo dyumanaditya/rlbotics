@@ -5,6 +5,8 @@ import time
 import numpy as np
 import pybullet as p
 import pybullet_data
+from pybullet_utils import bullet_client as bc
+from pybullet_utils import urdfEditor as ed
 
 from rlbotics.envs.common.utils import draw_frame
 from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
@@ -26,28 +28,46 @@ class Manipulator:
 
 		robot_joint_info = robot_data[robot_name]['joint_info']
 		gripper_joint_info = robot_data[gripper_name]['joint_info']
-		self.in_built_gripper = robot_data[robot_name]['in_built_gripper']
+
+		in_built_gripper = robot_data[robot_name]['in_built_gripper']
+
 		self.robot_dof = robot_joint_info['dof']
 		self.gripper_dof = gripper_joint_info['dof']
 
+		self.robot_name = robot_name
+		self.gripper_name = gripper_name
+
+		# Create gripper object and expand into attributes
+		# from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
+		self.gripper = gripper_class_dict[gripper_name]()
+
 		# Combine gripper and robot if gripper is not in built
-		if self.in_built_gripper:
+		if in_built_gripper:
 			if robot_data[robot_name]['location'] == 'local':
-				self.robot_path = os.path.join('..', 'models', robot_data[robot_name]['relative_path'])
+				self.robot_path = os.path.join('rlbotics', 'envs', 'models', robot_data[robot_name]['relative_path'])
 			elif robot_data[robot_name]['location'] == 'pybullet_data':
 				self.robot_path = robot_data[robot_name]['relative_path']
 
-		else:
-			# TODO: Combine URDFs
-			if robot_data[gripper_name]['location'] == 'local':
-				self.gripper_path = os.path.join('..', 'models', robot_data[gripper_name]['relative_path'])
-			elif robot_data[gripper_name]['location'] == 'pybullet_data':
-				self.gripper_path = robot_data[gripper_name]['relative_path']
-			# Combine urdfs and return combined urdfs path: robot_path
-			pass
+			# Check if robot data is provided in YAML file. Otherwise get data from urdf
+			robot_data_urdf, gripper_data_urdf = self._get_data_from_urdf(self.robot_path)
 
-		# Check if robot data is provided in YAML file. Otherwise get data from urdf
-		robot_data_urdf, gripper_data_urdf = self._get_data_from_urdf()
+		else:
+			if robot_data[robot_name]['location'] == 'local':
+				arm_path = os.path.join('rlbotics', 'envs', 'models', robot_data[robot_name]['relative_path'])
+			elif robot_data[robot_name]['location'] == 'pybullet_data':
+				arm_path = robot_data[robot_name]['relative_path']
+				
+			if robot_data[gripper_name]['location'] == 'local':
+				gripper_path = os.path.join('rlbotics', 'envs', 'models', robot_data[gripper_name]['relative_path'])
+			elif robot_data[gripper_name]['location'] == 'pybullet_data':
+				gripper_path = robot_data[gripper_name]['relative_path']
+
+			# self._join_gripper(arm_path, gripper_path, 8)
+			self.robot_path = os.path.join('rlbotics', 'envs', 'models', 'combined', '{}_{}.urdf'.format(self.robot_name, self.gripper_name))
+
+			# Check if robot data is provided in YAML file. Otherwise get data from urdf
+			robot_data_urdf, gripper_data_urdf = self._get_data_from_urdf(arm_path, gripper_path)
+
 		for key, value in robot_joint_info.items():
 			if key == 'dof':
 				continue
@@ -68,9 +88,6 @@ class Manipulator:
 		self.robot_joint_ranges = robot_joint_info['joint_ranges']
 		self.robot_joint_velocity_limits = robot_joint_info['joint_velocity_limits']
 
-		# Create gripper object and expand into attributes
-		# from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
-		self.gripper = gripper_class_dict[gripper_name]()
 		self.gripper_name = gripper_name
 		self.ee_idx = self.gripper.ee_idx
 		self.gripper_joint_indices = gripper_data_urdf['joint_indices']
@@ -95,9 +112,29 @@ class Manipulator:
 		self.init_view_vec = [0, 0, 1]
 		self.init_up_vec = [0, 1, 0]
 
-	def _get_data_from_urdf(self):
+	def _join_gripper(self, arm_path, gripper_path, arm_ee_idx):
+		p0 = bc.BulletClient(connection_mode=p.DIRECT)
+		p1 = bc.BulletClient(connection_mode=p.DIRECT)
+
+		arm_id = p1.loadURDF(arm_path, flags=p0.URDF_USE_IMPLICIT_CYLINDER)
+		gripper_id = p0.loadURDF(gripper_path)     
+
+		ed0 = ed.UrdfEditor()
+		ed0.initializeFromBulletBody(arm_id, p1._client)
+		ed1 = ed.UrdfEditor()
+		ed1.initializeFromBulletBody(gripper_id, p0._client)
+
+		parentLinkIndex = arm_ee_idx
+
+		newjoint = ed0.joinUrdf(ed1, parentLinkIndex, self.gripper.jointPivotXYZInParent, self.gripper.jointPivotRPYInParent,
+								self.gripper.jointPivotXYZInChild, self.gripper.jointPivotRPYInChild, p0._client, p1._client)
+		newjoint.joint_type = p0.JOINT_FIXED
+
+		ed0.saveUrdf("rlbotics/envs/models/combined/{}_{}.urdf".format(self.robot_name, self.gripper_name))
+
+
+	def _get_data_from_urdf(self, arm_path, gripper_path=None):
 		temp_client = p.connect(p.DIRECT)
-		robot_id = p.loadURDF(self.robot_path, physicsClientId=temp_client)
 
 		robot_data = {
 			'joint_indices': [],
@@ -115,28 +152,68 @@ class Manipulator:
 			'joint_velocity_limits': []
 		}
 
-		for idx in range(p.getNumJoints(robot_id, temp_client)):
-			joint_info = p.getJointInfo(robot_id, idx, temp_client)
-			joint_type = joint_info[2]
-			joint_lower_limit = joint_info[8]
-			joint_upper_limit = joint_info[9]
-			joint_velocity_limit = joint_info[11]
-			if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
-				continue
-			if len(robot_data['joint_indices']) < self.robot_dof:
+		if gripper_path == None:
+			robot_id = p.loadURDF(arm_path, physicsClientId=temp_client)
+
+			for idx in range(p.getNumJoints(robot_id, temp_client)):
+				joint_info = p.getJointInfo(robot_id, idx, temp_client)
+				joint_type = joint_info[2]
+				joint_lower_limit = joint_info[8]
+				joint_upper_limit = joint_info[9]
+				joint_velocity_limit = joint_info[11]
+				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
+					continue
+				if len(robot_data['joint_indices']) < self.robot_dof:
+					robot_data['joint_indices'].append(idx)
+					robot_data['joint_lower_limits'].append(joint_lower_limit)
+					robot_data['joint_upper_limits'].append(joint_upper_limit)
+					robot_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
+					robot_data['joint_velocity_limits'].append(joint_velocity_limit)
+				else:
+					gripper_data['joint_indices'].append(idx)
+					gripper_data['joint_lower_limits'].append(joint_lower_limit)
+					gripper_data['joint_upper_limits'].append(joint_upper_limit)
+					gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
+					gripper_data['joint_velocity_limits'].append(joint_velocity_limit)
+
+			p.removeBody(robot_id, temp_client)
+
+		else:
+			robot_id = p.loadURDF(arm_path, physicsClientId=temp_client)
+			gripper_id = p.loadURDF(gripper_path, physicsClientId=temp_client)
+
+			for idx in range(p.getNumJoints(robot_id, temp_client)):
+				joint_info = p.getJointInfo(robot_id, idx, temp_client)
+				joint_type = joint_info[2]
+				joint_lower_limit = joint_info[8]
+				joint_upper_limit = joint_info[9]
+				joint_velocity_limit = joint_info[11]
+				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
+					continue
 				robot_data['joint_indices'].append(idx)
 				robot_data['joint_lower_limits'].append(joint_lower_limit)
 				robot_data['joint_upper_limits'].append(joint_upper_limit)
 				robot_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 				robot_data['joint_velocity_limits'].append(joint_velocity_limit)
-			else:
-				gripper_data['joint_indices'].append(idx)
+
+			for idx in range(p.getNumJoints(gripper_id, temp_client)):
+				joint_info = p.getJointInfo(gripper_id, idx, temp_client) # offsetting idx to account for combined urdf
+				joint_type = joint_info[2]
+				joint_lower_limit = joint_info[8]
+				joint_upper_limit = joint_info[9]
+				joint_velocity_limit = joint_info[11]
+				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
+					continue
+
+				gripper_data['joint_indices'].append(idx + p.getNumJoints(robot_id, temp_client))
 				gripper_data['joint_lower_limits'].append(joint_lower_limit)
 				gripper_data['joint_upper_limits'].append(joint_upper_limit)
 				gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 				gripper_data['joint_velocity_limits'].append(joint_velocity_limit)
 
-		p.removeBody(robot_id, temp_client)
+			p.removeBody(robot_id, temp_client)
+			p.removeBody(gripper_id, temp_client)
+
 		p.disconnect(temp_client)
 		return robot_data, gripper_data
 

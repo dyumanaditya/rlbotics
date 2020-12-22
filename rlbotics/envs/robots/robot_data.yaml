@@ -12,6 +12,16 @@ panda_gripper:
     joint_ranges: null
     joint_velocity_limits: null
 
+robotiq_2f_85:
+  location: local
+  relative_path: grippers/robotiq/robotiq_2f_85/robotiq_2f_85.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
 # PYBULLET ROBOTS
 panda:
   #  Datasheet specs taken from:
@@ -28,6 +38,7 @@ panda:
 
 # KUKA ROBOTS
 iiwa:
+  in_built_gripper: False
   location: pybullet_data
   relative_path: kuka_iiwa/model_free_base.urdf
   joint_info:
@@ -39,6 +50,7 @@ iiwa:
 
 # UNIVERSAL ROBOTS
 ur10:
+  in_built_gripper: False
   location: local
   relative_path: robots/universal_robots/ur10/ur10.urdf
   joint_info:

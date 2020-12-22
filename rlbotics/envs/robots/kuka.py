@@ -12,4 +12,4 @@ class Iiwa(Manipulator):
         initial_pose = {'base_pos': base_pos, 'base_orn': base_orn,
                         'initial_joint_positions': initial_joint_positions}
 
-        super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name='panda_gripper')
+        super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)

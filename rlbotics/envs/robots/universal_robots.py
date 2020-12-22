@@ -8,7 +8,7 @@ class UR10(Manipulator):
 
         # Initial pose
         if initial_joint_positions is None:
-            initial_joint_positions = [-0.8, 0.8, 0, np.pi/2, 0, 0]
+            initial_joint_positions = [0, -1.4, 1.8, 0, np.pi/2, 0]
 
         initial_pose = {'base_pos': base_pos, 'base_orn': base_orn,
                         'initial_joint_positions': initial_joint_positions}
