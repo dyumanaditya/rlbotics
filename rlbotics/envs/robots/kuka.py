@@ -3,11 +3,7 @@ from rlbotics.envs.robots.manipulator import Manipulator
 
 class KukaIiwa(Manipulator):
     def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
-<<<<<<< HEAD
-        robot_name = 'iiwa'
-=======
         robot_name = 'kuka_iiwa'
->>>>>>> fea491029796e4989e102a2926d7fc1fdec0d9c2
 
         # Initial pose
         if initial_joint_positions is None:
