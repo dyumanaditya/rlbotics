@@ -5,7 +5,7 @@ import pybullet_data
 
 
 robot_paths = os.path.abspath(os.path.join('models', 'robots'))
-gripper_paths = os.path.abspath(os.path.join('models', 'grippers'))
+gripper_paths = os.path.abspath(os.path.join('models', 'robots/grippers'))
 
 p.connect(p.DIRECT)
 
