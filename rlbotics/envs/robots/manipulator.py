@@ -62,8 +62,9 @@ class Manipulator:
 			elif robot_data[gripper_name]['location'] == 'pybullet_data':
 				gripper_path = robot_data[gripper_name]['relative_path']
 
-			# self._join_gripper(arm_path, gripper_path, 8)
+			self._join_gripper(arm_path, gripper_path, 8)
 			self.robot_path = os.path.join('rlbotics', 'envs', 'models', 'combined', '{}_{}.urdf'.format(self.robot_name, self.gripper_name))
+			self._replace_revolute_with_continuous()
 
 			# Check if robot data is provided in YAML file. Otherwise get data from urdf
 			robot_data_urdf, gripper_data_urdf = self._get_data_from_urdf(arm_path, gripper_path)
@@ -132,6 +133,15 @@ class Manipulator:
 
 		ed0.saveUrdf("rlbotics/envs/models/combined/{}_{}.urdf".format(self.robot_name, self.gripper_name))
 
+	def _replace_revolute_with_continuous(self):
+		urdf_file = open(self.robot_path, "rt")
+		data = urdf_file.read()
+		data = data.replace('revolute', 'continuous')
+		urdf_file.close()
+
+		urdf_file = open(self.robot_path, "wt")
+		urdf_file.write(data)
+		urdf_file.close()
 
 	def _get_data_from_urdf(self, arm_path, gripper_path=None):
 		temp_client = p.connect(p.DIRECT)
