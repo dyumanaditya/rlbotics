@@ -26,7 +26,8 @@ panda:
     joint_ranges: [5.8, 3.52, 5.8, 3.0, 5.8, 3.77, 5.8]
     joint_velocity_limits: [2.62, 2.62, 2.62, 2.62, 3.14, 3.14, 3.14]
 
-kuka_iiwa:
+# KUKA ROBOTS
+iiwa:
   location: pybullet_data
   relative_path: kuka_iiwa/model_free_base.urdf
   joint_info:
