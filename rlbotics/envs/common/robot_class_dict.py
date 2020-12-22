@@ -1,7 +1,7 @@
 # IMPORT ALL ROBOT CLASSES:
 from rlbotics.envs.robots.panda import Panda
-from rlbotics.envs.robots.kuka_iiwa import KukaIiwa
-from rlbotics.envs.robots.ur10 import UR10
+from rlbotics.envs.robots.kuka import KukaIiwa
+from rlbotics.envs.robots.universal_robots import UR10
 from rlbotics.envs.robots.fanuc import Cr7ia, Cr7ial, Cr35ia, Lrmate200i, Lrmate200ib, Lrmate200ib3l, Lrmate200ic, \
 	Lrmate200ic5f, Lrmate200ic5h, Lrmate200ic5hs, Lrmate200ic5l, M6ib, M6ib6s, M10ia, M10ia7l, M16ib, M20ia, M20ia10l, \
 	M20ib, M430ia2f, M430ia2p, M710ic45m, M710ic50, M900ia, M900ib, R1000ia
