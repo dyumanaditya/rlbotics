@@ -61,6 +61,7 @@ ur10:
     joint_velocity_limits: null
 
 ur5:
+  in_built_gripper: False
   location: local
   relative_path: robots/universal_robots/ur5/ur5.urdf
   joint_info:
@@ -71,6 +72,7 @@ ur5:
     joint_velocity_limits: null
 
 ur3:
+  in_built_gripper: False
   location: local
   relative_path: robots/universal_robots/ur3/ur3.urdf
   joint_info:

@@ -82,15 +82,13 @@ class Manipulator:
 				gripper_joint_info[key] = gripper_data_urdf[key]
 
 		# Expand robot_info into attributes
-		self.robot_name = robot_name
 		self.robot_joint_indices = robot_data_urdf['joint_indices']
 		self.robot_joint_lower_limits = robot_joint_info['joint_lower_limits']
 		self.robot_joint_upper_limits = robot_joint_info['joint_upper_limits']
 		self.robot_joint_ranges = robot_joint_info['joint_ranges']
 		self.robot_joint_velocity_limits = robot_joint_info['joint_velocity_limits']
 
-		self.gripper_name = gripper_name
-		self.ee_idx = self.gripper.ee_idx
+		self.ee_idx = gripper_data_urdf['ee_idx']
 		self.gripper_joint_indices = gripper_data_urdf['joint_indices']
 		self.gripper_joint_lower_limits = gripper_joint_info['joint_lower_limits']
 		self.gripper_joint_upper_limits = gripper_joint_info['joint_upper_limits']
@@ -155,6 +153,7 @@ class Manipulator:
 		}
 
 		gripper_data = {
+			'ee_idx': self.gripper.ee_idx,
 			'joint_indices': [],
 			'joint_lower_limits': [],
 			'joint_upper_limits': [],
@@ -192,6 +191,8 @@ class Manipulator:
 			robot_id = p.loadURDF(arm_path, physicsClientId=temp_client)
 			gripper_id = p.loadURDF(gripper_path, physicsClientId=temp_client)
 
+			gripper_data['ee_idx'] += p.getNumJoints(robot_id, temp_client) - 1
+
 			for idx in range(p.getNumJoints(robot_id, temp_client)):
 				joint_info = p.getJointInfo(robot_id, idx, temp_client)
 				joint_type = joint_info[2]
@@ -207,7 +208,7 @@ class Manipulator:
 				robot_data['joint_velocity_limits'].append(joint_velocity_limit)
 
 			for idx in range(p.getNumJoints(gripper_id, temp_client)):
-				joint_info = p.getJointInfo(gripper_id, idx, temp_client) # offsetting idx to account for combined urdf
+				joint_info = p.getJointInfo(gripper_id, idx, temp_client) 
 				joint_type = joint_info[2]
 				joint_lower_limit = joint_info[8]
 				joint_upper_limit = joint_info[9]
@@ -215,7 +216,7 @@ class Manipulator:
 				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
 					continue
 
-				gripper_data['joint_indices'].append(idx + p.getNumJoints(robot_id, temp_client))
+				gripper_data['joint_indices'].append(idx + p.getNumJoints(robot_id, temp_client)) # offsetting idx to account for combined urdf
 				gripper_data['joint_lower_limits'].append(joint_lower_limit)
 				gripper_data['joint_upper_limits'].append(joint_upper_limit)
 				gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
