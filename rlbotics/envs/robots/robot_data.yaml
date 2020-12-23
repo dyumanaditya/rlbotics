@@ -37,7 +37,7 @@ panda:
     joint_velocity_limits: [2.62, 2.62, 2.62, 2.62, 3.14, 3.14, 3.14]
 
 # KUKA ROBOTS
-iiwa:
+kuka_iiwa:
   in_built_gripper: False
   location: pybullet_data
   relative_path: kuka_iiwa/model_free_base.urdf
