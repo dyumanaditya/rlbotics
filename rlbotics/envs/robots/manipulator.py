@@ -15,7 +15,7 @@ class Manipulator:
 	"""
 	Manipulator base class for all robots. NOTE: robot = arm + gripper
 	"""
-	def __init__(self, physics_client, robot_name, initial_pose, gripper_name):
+	def __init__(self, physics_client, robot_name, initial_pose, gripper_name, arm_ee_link):
 		"""
 		:param physics_client: Current physics server
 		:param robot_name: Name of arm/robot
@@ -80,6 +80,14 @@ class Manipulator:
 			if value is None:
 				gripper_joint_info[key] = gripper_data_urdf[key]
 
+		# Add extra pieces of data from urdf to joint_info dict
+		arm_joint_info['joint_friction'] = arm_data_urdf['joint_friction']
+		arm_joint_info['joint_damping'] = arm_data_urdf['joint_damping']
+		arm_joint_info['joint_max_force'] = arm_data_urdf['joint_max_force']
+		gripper_joint_info['joint_friction'] = gripper_data_urdf['joint_friction']
+		gripper_joint_info['joint_damping'] = gripper_data_urdf['joint_damping']
+		gripper_joint_info['joint_max_force'] = gripper_data_urdf['joint_max_force']
+
 		# Expand robot_info into attributes
 		self.arm_joint_indices = arm_data_urdf['joint_indices']
 		self.arm_joint_lower_limits = arm_joint_info['joint_lower_limits']
@@ -102,13 +110,17 @@ class Manipulator:
 			self.robot_path = arm_path
 		else:
 			arm_info = {
-				'arm_name': self.robot_name,
-				'arm_path': arm_path,
+				'name': self.robot_name,
+				'path': arm_path,
+				'dof': self.arm_dof,
+				'ee_link': arm_ee_link,
+				'joint_info': arm_joint_info
 			}
 
 			gripper_info = {
-				'gripper_name': self.gripper_name,
-				'gripper_path': gripper_path,
+				'name': self.gripper_name,
+				'path': gripper_path,
+				'joint_info': gripper_joint_info,
 				'jointPivotXYZInParent': self.gripper.jointPivotXYZInParent,
 				'jointPivotRPYInParent': self.gripper.jointPivotRPYInParent,
 				'jointPivotXYZInChild': self.gripper.jointPivotXYZInChild,
@@ -137,7 +149,10 @@ class Manipulator:
 			'joint_lower_limits': [],
 			'joint_upper_limits': [],
 			'joint_ranges': [],
-			'joint_velocity_limits': []
+			'joint_velocity_limits': [],
+			'joint_friction': [],
+			'joint_damping': [],
+			'joint_max_force': []
 		}
 
 		gripper_data = {
@@ -146,7 +161,10 @@ class Manipulator:
 			'joint_lower_limits': [],
 			'joint_upper_limits': [],
 			'joint_ranges': [],
-			'joint_velocity_limits': []
+			'joint_velocity_limits': [],
+			'joint_friction': [],
+			'joint_damping': [],
+			'joint_max_force': []
 		}
 
 		if gripper_path is None:
@@ -158,6 +176,9 @@ class Manipulator:
 				joint_lower_limit = joint_info[8]
 				joint_upper_limit = joint_info[9]
 				joint_velocity_limit = joint_info[11]
+				joint_friction = joint_info[7]
+				joint_damping = joint_info[6]
+				joint_max_force = joint_info[10]
 				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
 					continue
 				if len(arm_data['joint_indices']) < self.arm_dof:
@@ -166,12 +187,18 @@ class Manipulator:
 					arm_data['joint_upper_limits'].append(joint_upper_limit)
 					arm_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 					arm_data['joint_velocity_limits'].append(joint_velocity_limit)
+					arm_data['joint_friction'].append(joint_friction)
+					arm_data['joint_damping'].append(joint_damping)
+					arm_data['joint_max_force'].append(joint_max_force)
 				else:
 					gripper_data['joint_indices'].append(idx)
 					gripper_data['joint_lower_limits'].append(joint_lower_limit)
 					gripper_data['joint_upper_limits'].append(joint_upper_limit)
 					gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 					gripper_data['joint_velocity_limits'].append(joint_velocity_limit)
+					gripper_data['joint_friction'].append(joint_friction)
+					gripper_data['joint_damping'].append(joint_damping)
+					gripper_data['joint_max_force'].append(joint_max_force)
 
 			p.removeBody(robot_id, temp_client)
 
@@ -188,6 +215,9 @@ class Manipulator:
 				joint_lower_limit = joint_info[8]
 				joint_upper_limit = joint_info[9]
 				joint_velocity_limit = joint_info[11]
+				joint_friction = joint_info[7]
+				joint_damping = joint_info[6]
+				joint_max_force = joint_info[10]
 				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
 					continue
 				arm_data['joint_indices'].append(idx)
@@ -195,6 +225,9 @@ class Manipulator:
 				arm_data['joint_upper_limits'].append(joint_upper_limit)
 				arm_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 				arm_data['joint_velocity_limits'].append(joint_velocity_limit)
+				arm_data['joint_friction'].append(joint_friction)
+				arm_data['joint_damping'].append(joint_damping)
+				arm_data['joint_max_force'].append(joint_max_force)
 
 			for idx in range(p.getNumJoints(gripper_id, temp_client)):
 				joint_info = p.getJointInfo(gripper_id, idx, temp_client) 
@@ -202,6 +235,9 @@ class Manipulator:
 				joint_lower_limit = joint_info[8]
 				joint_upper_limit = joint_info[9]
 				joint_velocity_limit = joint_info[11]
+				joint_friction = joint_info[7]
+				joint_damping = joint_info[6]
+				joint_max_force = joint_info[10]
 				if joint_type == p.JOINT_FIXED or joint_velocity_limit == 0:
 					continue
 				gripper_data['joint_indices'].append(idx + p.getNumJoints(arm_id, temp_client)) # Offset idx to account for combined urdf
@@ -209,6 +245,9 @@ class Manipulator:
 				gripper_data['joint_upper_limits'].append(joint_upper_limit)
 				gripper_data['joint_ranges'].append(joint_upper_limit - joint_lower_limit)
 				gripper_data['joint_velocity_limits'].append(joint_velocity_limit)
+				gripper_data['joint_friction'].append(joint_friction)
+				gripper_data['joint_damping'].append(joint_damping)
+				gripper_data['joint_max_force'].append(joint_max_force)
 
 			p.removeBody(arm_id, temp_client)
 			p.removeBody(gripper_id, temp_client)

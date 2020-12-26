@@ -4,6 +4,7 @@ from rlbotics.envs.robots.manipulator import Manipulator
 class KukaIiwa(Manipulator):
     def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
         robot_name = 'kuka_iiwa'
+        ee_link = None # Have to change this
 
         # Initial pose
         if initial_joint_positions is None:
@@ -12,4 +13,5 @@ class KukaIiwa(Manipulator):
         initial_pose = {'base_pos': base_pos, 'base_orn': base_orn,
                         'initial_joint_positions': initial_joint_positions}
 
-        super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name)
+        super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name,
+                         arm_ee_link=ee_link)
