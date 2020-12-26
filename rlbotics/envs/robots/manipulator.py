@@ -21,6 +21,7 @@ class Manipulator:
 		:param robot_name: Name of arm/robot
 		:param initial_pose: Initial pose of arm only
 		:param gripper_name: Name of gripper
+		:param arm_ee_link: Index of arm link for end-effector
 		"""
 		p.setRealTimeSimulation(1, physics_client)      # SEE ABOUT THIS LATER. This is needed to complete motion
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
