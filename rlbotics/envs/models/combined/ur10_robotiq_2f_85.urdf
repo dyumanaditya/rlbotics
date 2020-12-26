@@ -16,7 +16,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/base.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/base.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_0_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -25,7 +25,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/base.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/base.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -38,7 +38,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/shoulder.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/shoulder.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_1_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -47,7 +47,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/shoulder.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/shoulder.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -60,7 +60,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/upperarm.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/upperarm.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_2_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -69,7 +69,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/upperarm.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/upperarm.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -82,7 +82,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/forearm.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/forearm.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_3_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -91,7 +91,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/forearm.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/forearm.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -104,7 +104,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/wrist1.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist1.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_4_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -113,7 +113,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/wrist1.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/wrist1.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -126,7 +126,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/wrist2.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist2.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_5_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -135,7 +135,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/wrist2.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/wrist2.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -148,7 +148,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/visual/wrist3.dae" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist3.dae" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 			<material name="mat_6_0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
@@ -157,7 +157,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\robots/universal_robots/ur10/meshes/collision/wrist3.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/collision/wrist3.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -206,7 +206,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_base_link.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_base_link.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_-1_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -215,7 +215,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_base_link.stl" scale="1.00000 1.00000 1.00000"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_base_link.stl" scale="1.00000 1.00000 1.00000"/>
 			</geometry>
 		</collision>
 	</link>
@@ -228,7 +228,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_0_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -237,7 +237,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -250,7 +250,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_1_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -259,7 +259,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -272,7 +272,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_2_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -281,7 +281,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -316,7 +316,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_4_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -325,7 +325,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -338,7 +338,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_5_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -347,7 +347,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -360,7 +360,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_6_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -369,7 +369,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -382,7 +382,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_7_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -391,7 +391,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
@@ -426,7 +426,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 			<material name="mat_9_0">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
@@ -435,7 +435,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
 			<geometry>
-				<mesh filename="rlbotics\envs\models\grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
+				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/collision/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100"/>
 			</geometry>
 		</collision>
 	</link>
