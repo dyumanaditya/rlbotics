@@ -1,3 +1,4 @@
+import os
 import gym
 import numpy as np
 import pybullet as p
@@ -42,15 +43,17 @@ class DrillerGym(DrillerWorld, gym.Env):
 		self.reset()
 
 	def reset(self):
+		self.reset_world()
 		self.done = False
 		self.timestep = 0
 		p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
-		# Randomize physics constraints and drill color
+		# Randomize physics constraints, plane texture and drill color
+		texture_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'textures')
 		self.domain_randomizer.randomize_physics_constraints(self.drill_id)
 		self.domain_randomizer.randomize_color(self.drill_id)
+		self.domain_randomizer.randomize_texture(texture_path, self.plane)
 
-		self.reset_world()
 		obs = self._get_obs()
 		return obs
 
