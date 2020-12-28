@@ -57,6 +57,7 @@ def combine_urdf(arm_info, gripper_info):
 	# Fix urdf:
 	# -- Add <limit effort="x" lower="y" upper="z" velocity="v"/> for each non-fixed joint. (effort=max_force)
 	# -- Correct line: <dynamics damping="1.0" friction="0.0001"/> and insert correct values.
+	# -- Fix colors after combination.
 	combined_urdf = ET.parse(robot_path)
 
 	root = combined_urdf.getroot()
@@ -94,6 +95,9 @@ def combine_urdf(arm_info, gripper_info):
 				if child.tag == 'dynamics':
 					child.attrib['damping'] = damping
 					child.attrib['friction'] = friction
+	# Fix colors in urdf
+	for i, material in enumerate(root.iter('material')):
+		material.attrib['name'] = str(i)
 
 	combined_urdf.write(robot_path)
 	return robot_path

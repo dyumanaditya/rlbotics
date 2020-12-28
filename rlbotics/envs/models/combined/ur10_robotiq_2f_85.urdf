@@ -17,7 +17,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/base.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_0_0">
+			<material name="0">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -39,7 +39,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/shoulder.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_1_0">
+			<material name="1">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -61,7 +61,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/upperarm.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_2_0">
+			<material name="2">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -83,7 +83,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/forearm.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_3_0">
+			<material name="3">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -105,7 +105,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist1.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_4_0">
+			<material name="4">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -127,7 +127,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist2.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_5_0">
+			<material name="5">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -149,7 +149,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/robots/universal_robots/ur10/meshes/visual/wrist3.dae" scale="1.00000 1.00000 1.00000" />
 			</geometry>
-			<material name="mat_6_0">
+			<material name="6">
 				<color rgba="0.70000 0.70000 0.70000 1.00000" />
 			</material>
 		</visual>
@@ -171,7 +171,7 @@
 			<geometry>
 				<box size="0.01000 0.01000 0.01000" />
 			</geometry>
-			<material name="mat_7_0">
+			<material name="7">
 				<color rgba="1.00000 1.00000 1.00000 1.00000" />
 			</material>
 		</visual>
@@ -207,7 +207,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_base_link.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_-1_0">
+			<material name="8">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -229,7 +229,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_0_0">
+			<material name="9">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -251,7 +251,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_1_0">
+			<material name="10">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -273,7 +273,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_2_0">
+			<material name="11">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -295,7 +295,7 @@
 			<geometry>
 				<box size="0.02200 0.00635 0.03750" />
 			</geometry>
-			<material name="mat_3_0">
+			<material name="12">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -317,7 +317,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_4_0">
+			<material name="13">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -339,7 +339,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_knuckle.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_5_0">
+			<material name="14">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -361,7 +361,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_outer_finger.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_6_0">
+			<material name="15">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -383,7 +383,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_finger.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_7_0">
+			<material name="16">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -405,7 +405,7 @@
 			<geometry>
 				<box size="0.02200 0.00635 0.03750" />
 			</geometry>
-			<material name="mat_8_0">
+			<material name="17">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
@@ -427,7 +427,7 @@
 			<geometry>
 				<mesh filename="rlbotics/envs/models/grippers/robotiq/robotiq_2f_85/meshes/visual/robotiq_arg2f_85_inner_knuckle.dae" scale="0.00100 0.00100 0.00100" />
 			</geometry>
-			<material name="mat_9_0">
+			<material name="18">
 				<color rgba="0.10000 0.10000 0.10000 1.00000" />
 			</material>
 		</visual>
