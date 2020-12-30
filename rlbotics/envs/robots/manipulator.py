@@ -7,8 +7,8 @@ import pybullet as p
 import pybullet_data
 
 from rlbotics.envs.common.utils import draw_frame
+from rlbotics.envs.robots.utils import combine_urdf
 from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
-from rlbotics.envs.robots.combine_urdf.combine_urdf import combine_urdf
 
 
 class Manipulator:

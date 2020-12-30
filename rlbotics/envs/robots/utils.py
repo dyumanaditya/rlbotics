@@ -48,7 +48,7 @@ def combine_urdf(arm_info, gripper_info):
 	parentLinkIndex = arm_link_idx
 
 	new_joint = ed0.joinUrdf(ed1, parentLinkIndex, jointPivotXYZInParent, jointPivotRPYInParent,
-							jointPivotXYZInChild, jointPivotRPYInChild, p0._client, p1._client)
+							 jointPivotXYZInChild, jointPivotRPYInChild, p0._client, p1._client)
 	new_joint.joint_type = p0.JOINT_FIXED
 
 	robot_path = f'rlbotics/envs/models/combined/{arm_name}_{gripper_name}.urdf'
