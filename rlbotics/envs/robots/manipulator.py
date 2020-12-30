@@ -15,13 +15,14 @@ class Manipulator:
 	"""
 	Manipulator base class for all robots. NOTE: robot = arm + gripper
 	"""
-	def __init__(self, physics_client, robot_name, initial_pose, gripper_name, arm_ee_link):
+	def __init__(self, physics_client, robot_name, initial_pose, gripper_name, arm_ee_link, cam_info):
 		"""
 		:param physics_client: Current physics server
 		:param robot_name: Name of arm/robot
 		:param initial_pose: Initial pose of arm only
 		:param gripper_name: Name of gripper
 		:param arm_ee_link: Index of arm link for end-effector
+		:param cam_info: Information about the placement of the camera
 		"""
 		p.setRealTimeSimulation(1, physics_client)      # SEE ABOUT THIS LATER. This is needed to complete motion
 		p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -137,10 +138,15 @@ class Manipulator:
 		self.ee_ids = draw_frame(pos, orn)
 
 		# Set up camera info
-		self.cam_pos  = [-0.02, 0.0, 0.0]
-		self.cam_orn = p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client)
-		self.init_view_vec = [0, 0, 1]
-		self.init_up_vec = [0, 1, 0]
+		if cam_info is None:
+			self.cam_info = {
+				'fov': 70, 'aspect': 1.0, 'near_plane': 0.01, 'far_plane': 100,
+				'view_dist': 0.5, 'width': 224, 'height': 224,
+				'pos': [-0.02, 0.0, 0.0], 'orn': p.getQuaternionFromEuler([0.0, 0.0, -np.pi/2], physicsClientId=self.physics_client),
+				'init_view_vec': [0, 0, 1], 'init_up_vec': [0, 1, 0]
+			}
+		else:
+			self.cam_info = cam_info
 
 	def _get_data_from_urdf(self, arm_path, gripper_path=None):
 		temp_client = p.connect(p.DIRECT)
@@ -286,22 +292,27 @@ class Manipulator:
 			orn = list(state[1])
 		return pos, orn
 
-	def get_image(self, view_dist=0.5, width=224, height=224):
+	def get_image(self):
+		height, width, view_dist = self.cam_info['height'], self.cam_info['width'], self.cam_info['view_dist']
+		fov, aspect, near_plane, far_plane = self.cam_info['fov'], self.cam_info['aspect'], self.cam_info['near_plane'], self.cam_info['far_plane']
+		cam_pos, cam_orn = self.cam_info['pos'], self.cam_info['orn']
+		init_view_vec, init_up_vec = self.cam_info['init_view_vec'], self.cam_info['init_up_vec']
+
 		# Get end-effector pose
 		_, _, _, _, w_pos, w_orn = p.getLinkState(self.robot_id, self.ee_idx,
 												  computeForwardKinematics=True,
 												  physicsClientId=self.physics_client)
 
 		# Compute camera frame from end effector frame
-		pos, orn = p.multiplyTransforms(w_pos, w_orn, self.cam_pos, self.cam_orn, physicsClientId=self.physics_client)
+		pos, orn = p.multiplyTransforms(w_pos, w_orn, cam_pos, cam_orn, physicsClientId=self.physics_client)
 
 		# Get camera frame rotation matrix from quaternion
 		rot_mat = p.getMatrixFromQuaternion(orn, physicsClientId=self.physics_client)
 		rot_mat = np.array(rot_mat).reshape(3, 3)
 
 		# Transform vectors based on the camera frame
-		view_vec = rot_mat.dot(self.init_view_vec)
-		up_vec = rot_mat.dot(self.init_up_vec)
+		view_vec = rot_mat.dot(init_view_vec)
+		up_vec = rot_mat.dot(init_up_vec)
 
 		view_matrix = p.computeViewMatrix(
 			cameraEyePosition=pos,
@@ -311,7 +322,6 @@ class Manipulator:
 		)
 
 		# Camera parameters and projection matrix
-		fov, aspect, near_plane, far_plane = 70, 1.0, 0.01, 100
 		projection_matrix = p.computeProjectionMatrixFOV(
 			fov=fov,
 			aspect=aspect,

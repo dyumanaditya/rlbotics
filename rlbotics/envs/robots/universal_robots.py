@@ -3,7 +3,7 @@ import numpy as np
 
 
 class UR10(Manipulator):
-    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
+    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None, cam_info=None):
         robot_name = 'ur10'
         ee_link = 8
 
@@ -15,11 +15,11 @@ class UR10(Manipulator):
                         'initial_joint_positions': initial_joint_positions}
 
         super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name,
-                         arm_ee_link=ee_link)
+                         arm_ee_link=ee_link, cam_info=cam_info)
 
 
 class UR5(Manipulator):
-    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
+    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None, cam_info=None):
         robot_name = 'ur5'
         ee_link = 8
 
@@ -31,11 +31,11 @@ class UR5(Manipulator):
                         'initial_joint_positions': initial_joint_positions}
 
         super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name,
-                         arm_ee_link=ee_link)
+                         arm_ee_link=ee_link, cam_info=cam_info)
 
 
 class UR3(Manipulator):
-    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None):
+    def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None, cam_info=None):
         robot_name = 'ur3'
         ee_link = 8
 
@@ -47,4 +47,4 @@ class UR3(Manipulator):
                         'initial_joint_positions': initial_joint_positions}
 
         super().__init__(physics_client, robot_name=robot_name, initial_pose=initial_pose, gripper_name=gripper_name,
-                         arm_ee_link=ee_link)
+                         arm_ee_link=ee_link, cam_info=cam_info)
