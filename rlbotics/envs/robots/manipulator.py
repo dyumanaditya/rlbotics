@@ -18,7 +18,7 @@ class Manipulator:
 	def __init__(self, physics_client, robot_name, initial_pose, gripper_name, arm_ee_link, cam_info):
 		"""
 		:param physics_client: Current physics server
-		:param robot_name: Name of arm/robot
+		:param robot_name: Name of arm/robot. Same as URDF file name
 		:param initial_pose: Initial pose of arm only
 		:param gripper_name: Name of gripper
 		:param arm_ee_link: Index of arm link for end-effector
