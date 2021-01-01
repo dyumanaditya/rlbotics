@@ -158,6 +158,51 @@ kuka_kr210l150:
     joint_ranges: null
     joint_velocity_limits: null
 
+# ABB ROBOTS
+abb_irb2400:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/abb/irb2400/irb2400.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+abb_irb4400l_30_243:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/abb/irb4400/irb4400l_30_243.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+abb_irb5400:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/abb/irb5400/irb5400.urdf
+  joint_info:
+    dof: 7
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+abb_irb6640:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/abb/irb6600/irb6640.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
 # UNIVERSAL ROBOTS
 ur10:
   in_built_gripper: False

@@ -1,6 +1,7 @@
 # IMPORT ALL ROBOT CLASSES:
 from rlbotics.envs.robots.panda import Panda
 from rlbotics.envs.robots.universal_robots import UR10, UR5, UR3
+from rlbotics.envs.robots.abb import Irb2400, Irb4400, Irb5400, Irb6600
 from rlbotics.envs.robots.kuka import Iiwa7, Iiwa14, Kr3, Kr5, Kr6r700, Kr6r900, Kr10, Kr16, Kr120, Kr150, Kr210
 from rlbotics.envs.robots.fanuc import Cr7ia, Cr7ial, Cr35ia, Lrmate200i, Lrmate200ib, Lrmate200ib3l, Lrmate200ic, \
 	Lrmate200ic5f, Lrmate200ic5h, Lrmate200ic5hs, Lrmate200ic5l, M6ib, M6ib6s, M10ia, M10ia7l, M16ib, M20ia, M20ia10l, \
@@ -15,6 +16,12 @@ robot_class_dict = {
 	'ur10': UR10,
 	'ur5': UR5,
 	'ur3': UR3,
+
+	# ABB
+	'abb_irb2400': Irb2400,
+	'abb_irb4400': Irb4400,
+	'abb_irb5400': Irb5400,
+	'abb_irb6600': Irb6600,
 
 	# Kuka
 	'kuka_iiwa7': Iiwa7,
