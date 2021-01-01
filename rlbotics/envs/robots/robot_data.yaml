@@ -37,12 +37,122 @@ panda:
     joint_velocity_limits: [2.62, 2.62, 2.62, 2.62, 3.14, 3.14, 3.14]
 
 # KUKA ROBOTS
-kuka_iiwa:
+kuka_iiwa7:
   in_built_gripper: False
-  location: pybullet_data
-  relative_path: kuka_iiwa/model_free_base.urdf
+  location: local
+  relative_path: robots/kuka/iiwa/iiwa7.urdf
   joint_info:
     dof: 7
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_iiwa14:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/iiwa/iiwa14.urdf
+  joint_info:
+    dof: 7
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr3r540:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr3/kuka_kr3r540.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr5_arc:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr5/kuka_kr5_arc.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr6r700sixx:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr6/kuka_kr6r700sixx.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr6r900sixx:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr6/kuka_kr6r700sixx.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr10r1100sixx:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr10/kr10r1100sixx.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr16_2:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr16/kr16_2.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr120r2500pro:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr120/kr120r2500pro.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr150_2:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr150/kr150_2.urdf
+  joint_info:
+    dof: 6
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+kuka_kr210l150:
+  in_built_gripper: False
+  location: local
+  relative_path: robots/kuka/kr210/kr210l150.urdf
+  joint_info:
+    dof: 6
     joint_lower_limits: null
     joint_upper_limits: null
     joint_ranges: null
