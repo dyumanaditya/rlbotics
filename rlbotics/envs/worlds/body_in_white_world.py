@@ -20,18 +20,17 @@ class BodyInWhiteWorld:
         self.plane_id = p.loadURDF('plane.urdf', physicsClientId=self.physics_client)
 
 
-
     def reset_world(self):
-        object_orientation = p.getQuaternionFromEuler([0,0,np.pi/2])
+        body_in_white_orientation = p.getQuaternionFromEuler([0,0,np.pi/2])
 
-        object_visual = p.createVisualShape(
+        body_in_white_visual = p.createVisualShape(
             p.GEOM_MESH,
             meshScale=[0.001] * 3,
             fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'body_in_white', 'car1.obj'),
             rgbaColor=[0.5, 0.5, 0.5]
         )
 
-        object_collision = p.createCollisionShape(
+        body_in_white_collision = p.createCollisionShape(
             p.GEOM_MESH,
             meshScale=[0.001] * 3,
             fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'body_in_white', 'car1.obj'),
@@ -39,14 +38,12 @@ class BodyInWhiteWorld:
 
         self.body_in_white = p.createMultiBody(
             basePosition=[0,0,0],
-            baseVisualShapeIndex=object_visual,
-            baseCollisionShapeIndex=object_collision,
-            baseOrientation=object_orientation,
+            baseVisualShapeIndex=body_in_white_visual,
+            baseCollisionShapeIndex=body_in_white_collision,
+            baseOrientation=body_in_white_orientation,
             baseMass=1000,
             baseInertialFramePosition=[1, 0, 0]
         )
-
-        print("finished loading car")
 
         self.robot1 = Panda(self.physics_client, [-1.5,-0,0], [0,0,0,1], gripper_name=self.gripper)
         self.robot2 = Panda(self.physics_client, [1.5,-0,0], [0,0,1,0], gripper_name=self.gripper)
