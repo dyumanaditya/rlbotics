@@ -8,7 +8,7 @@ import pybullet_data
 
 from rlbotics.envs.common.utils import draw_frame
 from rlbotics.envs.robots.utils import combine_urdf
-from rlbotics.envs.common.gripper_class_dict import gripper_class_dict
+from rlbotics.envs.common.end_effector_class_dict import end_effector_class_dict
 
 
 class Manipulator:
@@ -46,7 +46,7 @@ class Manipulator:
 		self.gripper_name = gripper_name
 
 		# Create gripper object
-		self.gripper = gripper_class_dict[gripper_name]()
+		self.gripper = end_effector_class_dict[gripper_name]()
 
 		# Get arm and gripper paths
 		if self.in_built_gripper:
