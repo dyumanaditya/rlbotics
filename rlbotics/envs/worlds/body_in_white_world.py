@@ -19,7 +19,7 @@ class BodyInWhiteWorld:
 
 
     def reset_world(self):
-        rail_orientation = p.getQuaternionFromEuler([0,0,0])
+        rail_orientation = p.getQuaternionFromEuler([np.pi/2,0,0])
         body_in_white_orientation = p.getQuaternionFromEuler([0,0,np.pi/2])
 
         rail_visual = p.createVisualShape(
@@ -49,7 +49,15 @@ class BodyInWhiteWorld:
         )
 
         self.rail_1 = p.createMultiBody(
-            basePosition=[0,0,0],
+            basePosition=[0.5,0,0],
+            baseVisualShapeIndex=rail_visual,
+            baseCollisionShapeIndex=rail_collision,
+            baseOrientation=rail_orientation,
+            baseMass=1000
+        )
+
+        self.rail_2 = p.createMultiBody(
+            basePosition=[-0.5,0,0],
             baseVisualShapeIndex=rail_visual,
             baseCollisionShapeIndex=rail_collision,
             baseOrientation=rail_orientation,
@@ -57,7 +65,7 @@ class BodyInWhiteWorld:
         )
 
         self.body_in_white = p.createMultiBody(
-            basePosition=[0,0,0],
+            basePosition=[0,0,0.18],
             baseVisualShapeIndex=body_in_white_visual,
             baseCollisionShapeIndex=body_in_white_collision,
             baseOrientation=body_in_white_orientation,
