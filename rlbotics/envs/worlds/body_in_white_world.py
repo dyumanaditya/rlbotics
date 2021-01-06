@@ -1,6 +1,6 @@
 from rlbotics.envs.robots.universal_robots import UR10, UR5, UR3
 from rlbotics.envs.robots.panda import Panda
-from rlbotics.envs.robots.kuka import KukaIiwa
+from rlbotics.envs.robots.kuka import Iiwa7
 
 import pybullet as p
 import pybullet_data
