@@ -21,7 +21,7 @@ class BinPickingWorld:
         # Load Robot and other objects
         table_orientation = p.getQuaternionFromEuler([0, 0, np.pi/2])
 
-        self.plan_id = p.loadURDF('plane.urdf', physicsClientId=self.physics_client)
+        self.plane_id = p.loadURDF('plane.urdf', physicsClientId=self.physics_client)
 
         self.table_id = p.loadURDF('table/table.urdf', [0.5, 0, 0], table_orientation, globalScaling=1.5, useFixedBase=True,
                                     physicsClientId=self.physics_client)
