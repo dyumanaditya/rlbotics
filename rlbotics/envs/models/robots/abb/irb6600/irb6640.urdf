@@ -18,8 +18,8 @@
       <geometry>
         <mesh filename="meshes/irb6640/visual/base_link.stl"/>
       </geometry>
-      <material name="orange">
-        <color rgba="1 0.43 0 1"/>
+      <material name="material_abb_black">
+        <color rgba="0.196078431 0.188235294 0.188235294 1"/>
       </material>
     </visual>
   </link>
@@ -34,7 +34,9 @@
       <geometry>
         <mesh filename="meshes/irb6640/visual/link_1.stl"/>
       </geometry>
-      <material name="orange"/>
+      <material name="orange">
+        <color rgba="1 0.43 0 1"/>
+      </material>
     </visual>
   </link>
   <link name="link_2">
@@ -90,7 +92,9 @@
       <geometry>
         <mesh filename="meshes/irb6640/visual/link_5.stl"/>
       </geometry>
-      <material name="orange"/>
+      <material name="grey">
+        <color rgba="0.75294 0.75294 0.75294 1" />
+      </material>
     </visual>
   </link>
   <link name="link_6">
@@ -104,7 +108,9 @@
       <geometry>
         <mesh filename="meshes/irb6640/visual/link_6.stl"/>
       </geometry>
-      <material name="orange"/>
+      <material name="grey">
+        <color rgba="0.75294 0.75294 0.75294 1" />
+      </material>
     </visual>
   </link>
   <link name="tool0"/>
@@ -134,7 +140,9 @@
       <geometry>
         <mesh filename="meshes/irb6640/visual/piston.stl"/>
       </geometry>
-      <material name="orange"/>
+      <material name="grey">
+        <color rgba="0.75294 0.75294 0.75294 1" />
+      </material>
     </visual>
   </link>
   <!-- end of link list -->

@@ -12,6 +12,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/base_link.dae"/>
       </geometry>
+      <material name="0">
+        <color rgba="0.054901961 0.145098039 0.2 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -27,6 +30,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_1.dae"/>
       </geometry>
+      <material name="1">
+        <color rgba="0.9490196 0.3607843 0.09803922 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -42,6 +48,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_2.dae"/>
       </geometry>
+      <material name="2">
+        <color rgba="0.9490196 0.3607843 0.09803922 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -57,6 +66,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_3.dae"/>
       </geometry>
+      <material name="3">
+        <color rgba="0.9490196 0.3607843 0.09803922 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -72,6 +84,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_4.dae"/>
       </geometry>
+      <material name="4">
+        <color rgba="0.9490196 0.3607843 0.09803922 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -87,6 +102,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_5.dae"/>
       </geometry>
+      <material name="5">
+        <color rgba="0.9490196 0.3607843 0.09803922 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -102,6 +120,9 @@
       <geometry>
         <mesh filename="meshes/kr150_2/visual/link_6.dae"/>
       </geometry>
+      <material name="6">
+        <color rgba="0.75294 0.75294 0.75294 1" />
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
