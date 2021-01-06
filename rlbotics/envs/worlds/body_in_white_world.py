@@ -1,6 +1,4 @@
-from rlbotics.envs.robots.universal_robots import UR10, UR5, UR3
 from rlbotics.envs.robots.panda import Panda
-from rlbotics.envs.robots.kuka import KukaIiwa
 
 import pybullet as p
 import pybullet_data
@@ -21,7 +19,21 @@ class BodyInWhiteWorld:
 
 
     def reset_world(self):
+        rail_orientation = p.getQuaternionFromEuler([0,0,0])
         body_in_white_orientation = p.getQuaternionFromEuler([0,0,np.pi/2])
+
+        rail_visual = p.createVisualShape(
+            p.GEOM_MESH,
+            meshScale=[0.001] * 3,
+            fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'body_in_white', 'rail.obj'),
+            rgbaColor=[0.5, 0.5, 0.5]
+        )
+
+        rail_collision = p.createCollisionShape(
+            p.GEOM_MESH,
+            meshScale=[0.001] * 3,
+            fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'body_in_white', 'rail.obj'),
+        )
 
         body_in_white_visual = p.createVisualShape(
             p.GEOM_MESH,
@@ -34,6 +46,14 @@ class BodyInWhiteWorld:
             p.GEOM_MESH,
             meshScale=[0.001] * 3,
             fileName=os.path.join(os.path.dirname(self.path), 'models', 'misc', 'body_in_white', 'car1.obj'),
+        )
+
+        self.rail_1 = p.createMultiBody(
+            basePosition=[0,0,0],
+            baseVisualShapeIndex=rail_visual,
+            baseCollisionShapeIndex=rail_collision,
+            baseOrientation=rail_orientation,
+            baseMass=1000
         )
 
         self.body_in_white = p.createMultiBody(
