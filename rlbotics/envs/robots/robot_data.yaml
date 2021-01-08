@@ -24,7 +24,17 @@ robotiq_2f_85:
 
 welding_torch:
   location: local
-  relative_path: end_effectors/welding_torches/welding_torch/welding_torch.urdf
+  relative_path: end_effectors/welding/welding_torch/welding_torch.urdf
+  joint_info:
+    dof: 0
+    joint_lower_limits: null
+    joint_upper_limits: null
+    joint_ranges: null
+    joint_velocity_limits: null
+
+spot_welding_gun:
+  location: local
+  relative_path: end_effectors/welding/spot_welding_gun/spot_welding_gun.urdf
   joint_info:
     dof: 0
     joint_lower_limits: null

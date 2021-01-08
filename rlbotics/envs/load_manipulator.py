@@ -13,7 +13,7 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 p.loadURDF('plane.urdf')
 #p.setGravity(0, 0, -9.8)
 
-robot1 = Kr210(physics_client, [0,0,0], [0,0,0,1], gripper_name='welding_torch')
+robot1 = Kr210(physics_client, [0,0,0], [0,0,0,1], gripper_name='spot_welding_gun')
 # robot2 = UR5(physics_client, [0,1,0], [0,0,0,1], gripper_name='robotiq_2f_85')
 # # robot3 = KukaIiwa(physics_client, [0,0.5,0], [0,0,0,1], gripper_name='robotiq_2f_85')
 # robot4 = Panda(physics_client, [0,0,0], [0,0,0,1])
