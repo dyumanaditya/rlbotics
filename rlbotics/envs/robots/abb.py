@@ -36,7 +36,7 @@ class Irb4400(Manipulator):
 class Irb5400(Manipulator):
 	def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None, cam_info=None):
 		robot_name = 'abb_irb5400'
-		ee_link = 6
+		ee_link = 7
 
 		# Initial pose
 		if initial_joint_positions is None:
@@ -52,11 +52,11 @@ class Irb5400(Manipulator):
 class Irb6600(Manipulator):
 	def __init__(self, physics_client, base_pos, base_orn, initial_joint_positions=None, gripper_name=None, cam_info=None):
 		robot_name = 'abb_irb6640'
-		ee_link = 5
+		ee_link = 6
 
 		# Initial pose
 		if initial_joint_positions is None:
-			initial_joint_positions = [0.0, 0.0, -0.2, 0.0, 0.0, 0.0]
+			initial_joint_positions = [0.0, 0.0, 0, 0.0, 0.0, 0.0]
 
 		initial_pose = {'base_pos': base_pos, 'base_orn': base_orn,
 						'initial_joint_positions': initial_joint_positions}
