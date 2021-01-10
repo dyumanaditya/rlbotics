@@ -16,14 +16,8 @@ class BodyInWhiteWorld:
         p.setGravity(0, 0, -9.8)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-        self.plane_id = p.loadURDF('plane.urdf', physicsClientId=self.physics_client)
-        # self.plane_id = p.loadURDF(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'world_plane', 'plane.urdf'), physicsClientId=self.physics_client)
-        floor_texture = p.loadTexture(os.path.join(os.path.dirname(self.path), 'models', 'textures', '19.jpg'))
-
-        p.changeVisualShape(self.plane_id, -1, rgbaColor=[0.4,0.4,0.4,1])
-
-        # p.resetBasePositionAndOrientation(self.plane_id, [-0.1,0,0], p.getQuaternionFromEuler([np.pi/2,0,0]))
-
+        self.plane_id = p.loadURDF(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'world_plane', 'plane.urdf'), physicsClientId=self.physics_client)
+        p.resetBasePositionAndOrientation(self.plane_id, [0,0,-0.05], p.getQuaternionFromEuler([0,0,0]))
 
     def reset_world(self):
         rail_orientation = p.getQuaternionFromEuler([np.pi/2,0,0])
@@ -91,7 +85,7 @@ class BodyInWhiteWorld:
         p.resetBasePositionAndOrientation(self.rail_2, [-0.5,0,0], rail_orientation, physicsClientId=self.physics_client)
 
 
-world = BodyInWhiteWorld('Irb6600', 'robotiq_2f_85', render=True)
+world = BodyInWhiteWorld('Irb6600', 'spot_welding_gun', render=True)
 
 world.reset_world()
 

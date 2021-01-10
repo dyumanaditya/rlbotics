@@ -8,7 +8,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/base_link.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/base_link.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="0">
 				<color rgba="0.19608 0.18824 0.18824 1.00000" />
@@ -17,7 +17,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/base_link.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/base_link.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -30,7 +30,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_1.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_1.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="1">
 				<color rgba="1.00000 0.43000 0.00000 1.00000" />
@@ -39,7 +39,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_1.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_1.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -52,7 +52,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_2.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_2.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="2">
 				<color rgba="1.00000 0.43000 0.00000 1.00000" />
@@ -61,7 +61,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_2.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_2.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -74,7 +74,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_3.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_3.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="3">
 				<color rgba="1.00000 0.43000 0.00000 1.00000" />
@@ -83,7 +83,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_3.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_3.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -96,7 +96,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_4.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_4.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="4">
 				<color rgba="1.00000 0.43000 0.00000 1.00000" />
@@ -105,7 +105,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_4.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_4.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -118,7 +118,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_5.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_5.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="5">
 				<color rgba="0.75294 0.75294 0.75294 1.00000" />
@@ -127,7 +127,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_5.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_5.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -140,7 +140,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/link_6.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/link_6.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="6">
 				<color rgba="0.75294 0.75294 0.75294 1.00000" />
@@ -149,7 +149,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/link_6.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/link_6.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -169,7 +169,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/cylinder.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/cylinder.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="7">
 				<color rgba="1.00000 0.43000 0.00000 1.00000" />
@@ -178,7 +178,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/cylinder.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/cylinder.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -191,7 +191,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/visual/piston.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/visual/piston.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 			<material name="8">
 				<color rgba="0.75294 0.75294 0.75294 1.00000" />
@@ -200,7 +200,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/robots/abb/irb6600/meshes/irb6640/collision/piston.stl" scale="1.00000 1.00000 1.00000" />
+				<mesh filename="rlbotics\envs\models\robots/abb/irb6600/meshes/irb6640/collision/piston.stl" scale="1.00000 1.00000 1.00000" />
 			</geometry>
 		</collision>
 	</link>
@@ -220,7 +220,7 @@
 		<visual>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.39949 0.00000 0.14487" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/end_effectors/welding/spot_welding_gun/meshes/stl/RFC-22-G01 v2.stl" scale="0.00116 0.00116 0.00116" />
+				<mesh filename="rlbotics\envs\models\end_effectors/welding/spot_welding_gun/meshes/stl/RFC-22-G01 v2.stl" scale="0.00116 0.00116 0.00116" />
 			</geometry>
 			<material name="9">
 				<color rgba="0.67059 0.67059 0.67059 1.00000" />
@@ -229,7 +229,7 @@
 		<collision>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.39946 -0.00043 0.14496" />
 			<geometry>
-				<mesh filename="rlbotics/envs/models/end_effectors/welding/spot_welding_gun/meshes/stl/RFC-22-G01 v2.001.stl" scale="0.78991 0.78991 0.78991" />
+				<mesh filename="rlbotics\envs\models\end_effectors/welding/spot_welding_gun/meshes/stl/RFC-22-G01 v2.001.stl" scale="0.78991 0.78991 0.78991" />
 			</geometry>
 		</collision>
 	</link>
