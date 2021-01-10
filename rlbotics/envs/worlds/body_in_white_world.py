@@ -11,12 +11,18 @@ class BodyInWhiteWorld:
     def __init__(self, robot, gripper, render, use_ee_cam=False):
         self.use_ee_cam = use_ee_cam
         self.gripper = gripper
-        self.physics_client = p.connect(p.GUI) if render else p.connect(p.DIRECT)
+        self.physics_client = p.connect(p.GUI, options='--background_color_red=0.3 --background_color_green=0.3 --background_color_blue=0.3') if render else p.connect(p.DIRECT)
         self.path = os.path.abspath(os.path.dirname(__file__))
         p.setGravity(0, 0, -9.8)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
         self.plane_id = p.loadURDF('plane.urdf', physicsClientId=self.physics_client)
+        # self.plane_id = p.loadURDF(os.path.join(os.path.dirname(self.path), 'models', 'misc', 'world_plane', 'plane.urdf'), physicsClientId=self.physics_client)
+        floor_texture = p.loadTexture(os.path.join(os.path.dirname(self.path), 'models', 'textures', '19.jpg'))
+
+        p.changeVisualShape(self.plane_id, -1, rgbaColor=[0.4,0.4,0.4,1])
+
+        # p.resetBasePositionAndOrientation(self.plane_id, [-0.1,0,0], p.getQuaternionFromEuler([np.pi/2,0,0]))
 
 
     def reset_world(self):
@@ -54,7 +60,8 @@ class BodyInWhiteWorld:
             baseVisualShapeIndex=rail_visual,
             baseCollisionShapeIndex=rail_collision,
             baseOrientation=rail_orientation,
-            baseMass=1000
+            baseMass=1000,
+            physicsClientId=self.physics_client
         )
 
         self.rail_2 = p.createMultiBody(
@@ -62,7 +69,8 @@ class BodyInWhiteWorld:
             baseVisualShapeIndex=rail_visual,
             baseCollisionShapeIndex=rail_collision,
             baseOrientation=rail_orientation,
-            baseMass=1000
+            baseMass=1000,
+            physicsClientId=self.physics_client
         )
 
         self.body_in_white = p.createMultiBody(
@@ -71,26 +79,19 @@ class BodyInWhiteWorld:
             baseCollisionShapeIndex=body_in_white_collision,
             baseOrientation=body_in_white_orientation,
             baseMass=1000,
-            baseInertialFramePosition=[1, 0, 0]
+            baseInertialFramePosition=[1, 0, 0],
+            physicsClientId=self.physics_client
         )
 
-        self.robot1 = Irb5400(self.physics_client, [-2.5,-0,0], [0,0,0,1], gripper_name=self.gripper)
-        self.robot2 = Irb5400(self.physics_client, [2.5,-0,0], [0,0,1,0], gripper_name=self.gripper)
-        # self.robot3 = Irb5400(self.physics_client, [-2.5,1.5,0], [0,0,0,1], gripper_name=self.gripper)
-        # self.robot4 = Irb5400(self.physics_client, [2.5,1.5,0], [0,0,1,0], gripper_name=self.gripper)
-        self.robot5 = Irb6600(self.physics_client, [-2.5,3,0], [0,0,0,1], gripper_name=self.gripper)
-        self.robot6 = Irb6600(self.physics_client, [2.5,3,0], [0,0,1,0], gripper_name=self.gripper)
+        self.robot1 = Irb6600(self.physics_client, [-2.5,-0,0], [0,0,0,1], gripper_name=self.gripper)
 
         # self.robot1.reset()
-        # self.robot2.reset()
-        # # self.robot3.reset()
-        # # self.robot4.reset()
-        # self.robot5.reset()
-        # self.robot6.reset()
+
+        p.resetBasePositionAndOrientation(self.rail_1, [0.5,0,0], rail_orientation, physicsClientId=self.physics_client)
+        p.resetBasePositionAndOrientation(self.rail_2, [-0.5,0,0], rail_orientation, physicsClientId=self.physics_client)
 
 
-
-world = BodyInWhiteWorld('UR10', 'robotiq_2f_85', render=True)
+world = BodyInWhiteWorld('Irb6600', 'robotiq_2f_85', render=True)
 
 world.reset_world()
 
