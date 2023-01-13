@@ -1,4 +1,4 @@
-# Reinforcement Learning Toolbox for Robotics
+# Reinforcement Learning Toolbox
 
 Toolbox with highly optimized implementations of deep reinforcement learning algorithms for robotics using Pytorch and Python.
 
@@ -7,6 +7,16 @@ In this project, two colleagues and I develop a toolbox with state of the art re
 ## About The Project
 ### Toolbox Structure
 All the algorithms are in the `rlbotics` directory. Each algorithm specified above has an individual directory.
+
+### List of Algorithms
+1. Deep Q Network (DQN)
+2. Double Deep Q Network (DDQN)
+3. Deep Deterministic Policy Gradient (DDPG)
+4. Twin Delayed Deep Deterministic Policy Gradient (TD3)
+5. Vanilla Policy Gradient (VPG)
+6. Soft Actor Critic (SAC)
+7. Trust Region Policy Optimization (TRPO)
+8. Proximal Policy Optimization (PPO)
 
 ### Common
 The directory `common` contains common modular classes to easily build new algorithms.
@@ -62,13 +72,13 @@ git clone https://github.com/dyumanaditya/rlbotics
 ```
 
 ## Usage
-To run the an algorithm on a perticular environment, open a terminal and navigate to the folder you just cloned and run the following command:
+To run the an algorithm on a particular environment, open a terminal and navigate to the folder you just cloned and run the following command:
 ```
 python3 -m rlbotics.algo.main
 ```
 Where `algo` can be replaced by the algorithm you wish to use. You can also pass in arguments, or modify the `hyperparameters.py` file contained in each algorithm folder to change the environment and other hyperparameters related to the algorithm.
 
-Once the algorithm is running you can deploy a tensorboard session ot track the progress.
+Once the algorithm is running you can deploy a tensorboard session to track the progress.
 
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
