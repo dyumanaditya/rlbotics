@@ -81,7 +81,7 @@ Where `algo` can be replaced by the algorithm you wish to use. You can also pass
 Once the algorithm is running you can deploy a tensorboard session to track the progress.
 
 ## License
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+Distributed under the BSD-3-Clause License. See [LICENSE](LICENSE) for more information.
 
 ## Contact
 Dyuman Aditya - dyuman.aditya@gmail.com
