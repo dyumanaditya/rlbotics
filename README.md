@@ -1,4 +1,4 @@
-### Reinforcement Learning Toolbox for Robotics
+# Reinforcement Learning Toolbox for Robotics
 
 Toolbox with highly optimized implementations of deep reinforcement learning algorithms for robotics using Pytorch and Python.
 
@@ -56,14 +56,9 @@ To contribute to this package, it is recommended to follow this structure:
 ### Installation
 To install the RLBotics toolbox, install the required librarires and clone this repository using the following commands:
 
-```
-pip install torch
-pip install numpy
-pip install pandas
-pip install tensorboard
-pip install seaborn
-pip install gym
-git clone https://github.com/kousheekc/Reinforcement-Learning-Toolbox-for-Robotics.git
+```bash
+pip install -r requirements.txt
+git clone https://github.com/dyumanaditya/rlbotics
 ```
 
 ## Usage
