@@ -1,4 +1,4 @@
-# Reinforcement Learning Toolbox
+# Reinforcement Learning Toolbox for Robotics
 
 Toolbox with highly optimized implementations of deep reinforcement learning algorithms for robotics using Pytorch and Python.
 
